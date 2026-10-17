@@ -1683,9 +1683,10 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
     const metadata=parsed._smeBackupMetadata;
     if(metadata&&metadata.appId==='servicios-mecanicos-enzo'&&metadata.formatVersion>=2){
      if(!Array.isArray(metadata.users)||!metadata.ownerId)throw new Error('El respaldo no incluye una cuenta propietaria recuperable.');
-     const users=metadata.users.filter(u=>u&&typeof u==='object'&&u.id&&u.username&&u.salt&&u.hash&&u.active!==false);
+     const users=metadata.users.filter(u=>u&&typeof u==='object'&&u.id&&u.username&&u.salt&&u.hash);
      const owners=users.filter(u=>String(u.id)===String(metadata.ownerId)&&(u.isPrimary===true||u.role==='admin'));
      if(owners.length!==1)throw new Error('El respaldo no identifica una única cuenta propietaria. No se modificó nada.');
+     if(owners[0].active===false)throw new Error('La cuenta propietaria del respaldo está deshabilitada. No se modificó nada.');
      if(users.filter(u=>u.isPrimary===true||u.role==='admin'||u.role==='owner'||u.role==='propietario').length!==1)throw new Error('El respaldo debe contener una única cuenta dueña. No se modificó nada.');
      const beforeDb=db,oldUsers=localStorage.getItem(SME_USERS_KEY),oldOwner=localStorage.getItem(SME_OWNER_ID_KEY);
      try{
