@@ -513,7 +513,7 @@ function taskPage(){
   smePushHistory(t,'creada','',t.estado,'Asignada a '+smeUserLabel(responsible));db.tareas.push(t);
   if(!(await save())){db=JSON.parse(before);smeFormError(form,'No se pudo guardar. Los campos siguen en pantalla; corregí o reintentá.');return}
   taskPage();
-  }catch(error){console.error('Error al crear tarea:',error);smeFormError(form,'Ocurrió un error al crear la tarea. Los datos siguen en pantalla; revisá los campos e intentá nuevamente.')}
+  }catch(error){console.error('Error al crear tarea:',error);smeFormError(form,'Ocurrió un error al crear la tarea: '+String(error?.message||error||'error sin detalle')+'. Los datos siguen en pantalla; revisá los campos e intentá nuevamente.')}
   finally{if(submitBtn&&document.body.contains(submitBtn)){submitBtn.disabled=false;submitBtn.textContent='Crear tarea'}}
  });
  app.querySelectorAll('[data-task-action]').forEach(btn=>btn.addEventListener('click',async()=>{
@@ -1384,9 +1384,8 @@ function smeCan(key,action='view'){
 }
 function smeCanBackup(action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
- // Confirmar el rol desde el registro de usuarios local, además del objeto de sesión.
  const storedUser=smeUsers.find(u=>String(u.id)===String(smeCurrentUser.id));
- const isPrimary=!!(smeCurrentUser.isPrimary||storedUser?.isPrimary||smePrimarySessionUser?.isPrimary);
+ const isPrimary=!!(smeCurrentUser.isPrimary||smeCurrentUser.role==='admin'||storedUser?.isPrimary||storedUser?.role==='admin'||smePrimarySessionUser?.isPrimary);
  if(isPrimary)return true;
  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.backup;
  return action==='edit'?level==='edit':level==='view'||level==='edit'||level===true;
