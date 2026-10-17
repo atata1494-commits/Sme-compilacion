@@ -1070,8 +1070,13 @@ function displayValues(key,o){
  return fields.filter(x=>x[1]!==undefined&&x[1]!==''&&x[1]!==null);
 }
 document.addEventListener('click',async e=>{const go=e.target.closest('[data-go]');if(go){if(!smeCan(go.dataset.go,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(go.dataset.go);return}const nav=e.target.closest('nav button');if(nav){if(!smeCan(nav.dataset.page,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(nav.dataset.page);return}if(e.target.closest('#restoreBtn')){const fileInput=document.getElementById('restoreFile');if(fileInput){smeBeginFilePicker();fileInput.click()}}});
+function smeCreatePortableBackup(){
+ const owner=smeOwnerAccount();
+ const users=Array.isArray(smeUsers)?JSON.parse(JSON.stringify(smeUsers)):[];
+ return {...db,_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2,exportedAt:new Date().toISOString(),ownerId:String(owner?.id||''),users}};
+}
 function canonicalJSON(value){if(Array.isArray(value))return '['+value.map(canonicalJSON).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalJSON(value[k])).join(',')+'}';return JSON.stringify(value)}
-app.addEventListener('click',async e=>{const backupButton=e.target.closest('#backup');if(!backupButton)return;e.preventDefault();e.stopPropagation();backupButton.disabled=true;const originalLabel=backupButton.textContent;backupButton.textContent='Guardando respaldo…';try{const json=JSON.stringify(db,null,2);if(storage?.isNative){const result=await SmeBackup.saveJsonBackup({filename:'respaldo-servicios-enzo.json',data:json});if(result?.cancelled){alert('No se guardó el respaldo.');return;}alert('Respaldo guardado correctamente.\n\nArchivo: '+(result?.filename||'respaldo-servicios-enzo.json'));}else{const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo-servicios-enzo.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(error){console.error('Error al exportar respaldo:',error);alert('No se pudo guardar el respaldo en Documentos. Detalle: '+String(error?.message||error));}finally{backupButton.disabled=false;backupButton.textContent=originalLabel}});
+app.addEventListener('click',async e=>{const backupButton=e.target.closest('#backup');if(!backupButton)return;e.preventDefault();e.stopPropagation();backupButton.disabled=true;const originalLabel=backupButton.textContent;backupButton.textContent='Guardando respaldo…';try{const json=JSON.stringify(smeCreatePortableBackup(),null,2);if(storage?.isNative){const result=await SmeBackup.saveJsonBackup({filename:'respaldo-servicios-enzo.json',data:json});if(result?.cancelled){alert('No se guardó el respaldo.');return;}alert('Respaldo guardado correctamente.\n\nArchivo: '+(result?.filename||'respaldo-servicios-enzo.json'));}else{const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo-servicios-enzo.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(error){console.error('Error al exportar respaldo:',error);alert('No se pudo guardar el respaldo en Documentos. Detalle: '+String(error?.message||error));}finally{backupButton.disabled=false;backupButton.textContent=originalLabel}});
 document.addEventListener('change',e=>{if(e.target.id==='restoreFile'){const f=e.target.files[0];if(!f)return;const input=e.target;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('El archivo no contiene un respaldo válido.');const keys=Object.keys(emptyDB());for(const k of keys)if(data[k]!==undefined&&!Array.isArray(data[k]))throw new Error('La lista '+k+' del respaldo no es válida.');const incoming={...emptyDB(),...data};for(const k of keys)if(!Array.isArray(incoming[k]))incoming[k]=[];let added=0,identical=0;const merged={...db};for(const k of keys){const current=new Map();for(const record of db[k]){if(!record||record.id===undefined||record.id===null||String(record.id).trim()==='')throw new Error('Hay un registro sin ID en los datos actuales ('+k+'). No se modificó nada.');const id=String(record.id);if(current.has(id))throw new Error('Hay IDs duplicados en los datos actuales ('+k+'): '+id+'. No se modificó nada.');current.set(id,record)}const seenIncoming=new Set();for(const record of incoming[k]){if(!record||typeof record!=='object'||Array.isArray(record)||record.id===undefined||record.id===null||String(record.id).trim()==='')throw new Error('El respaldo contiene un registro sin ID en '+k+'. No se modificó nada.');const id=String(record.id);if(seenIncoming.has(id))throw new Error('El respaldo contiene IDs duplicados en '+k+': '+id+'. No se modificó nada.');seenIncoming.add(id);if(current.has(id)){if(canonicalJSON(current.get(id))!==canonicalJSON(record))throw new Error('Conflicto en '+k+' con ID '+id+'. Por seguridad no se importó ningún registro. Conservá ambos respaldos para revisar ese caso.');identical++;}else{current.set(id,record);added++;}}merged[k]=Array.from(current.values())}if(added===0){alert('No hay registros nuevos para agregar. Los datos actuales no cambiaron. Coincidencias idénticas: '+identical+'.');return}if(!await smeStyledConfirm('Importación segura','Vista previa de importación segura:\n\nRegistros nuevos que se agregarán: '+added+'\nRegistros idénticos que se omitirán: '+identical+'\n\nNo se borrarán ni reemplazarán registros actuales. Si el guardado falla, se conservará el estado anterior. ¿Continuar?'))return;const previous=db;db=merged;if(!(await save())){db=previous;return}render();alert('Importación segura completada. Registros agregados: '+added+'. Coincidencias idénticas omitidas: '+identical+'. Conservá el archivo de respaldo original hasta verificar todos los datos.')}catch(err){alert('No se importó ningún dato. '+String(err?.message||'Verificá que el archivo sea un respaldo válido de Servicios Mecánicos Enzo.'))}finally{input.value=''}};reader.readAsText(f)}});
 app.addEventListener('click',async e=>{
  const button=e.target.closest('#restoreDatabaseBtn');
@@ -1646,7 +1651,52 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
  '<div class="auth-error" role="alert">'+esc(errorText)+'</div><button type="submit">'+(firstSetup?'Crear administrador':migration?'Actualizar y entrar':selectedLoginUser?'Entrar al taller':'Ingresar')+'</button></form>'+
  (canBiometricLogin?'<button type="button" id="smeBiometricLogin" class="sme-biometric-login">Entrar con huella digital</button>':'')+
   (selectedLoginUser&&smeForcePasswordForNextLogin?'<p class="sme-biometric-note">Para cambiar de cuenta, la contraseña es obligatoria; la huella queda desactivada en este paso.</p>':'')+
-  (selectedLoginUser?'':'<p style="font-size:12px;opacity:.8">Acceso local de prueba. Los usuarios y permisos todavía no cifran la base SQLite ni se sincronizan entre dispositivos.</p>')+'</section>';
+  (selectedLoginUser?'':'<p style="font-size:12px;opacity:.8">Acceso local de prueba. Los usuarios y permisos todavía no cifran la base SQLite ni se sincronizan entre dispositivos.</p>')+(firstSetup?'<section class="sme-owner-recovery"><p><strong>¿Ya tenés un respaldo?</strong></p><p>Podés recuperar la cuenta dueña y los datos desde un respaldo SME reciente. Los respaldos antiguos solo contienen datos del taller.</p><button type="button" id="smeRecoverOwnerButton" class="secondary">Recuperar desde respaldo</button><input id="smeOwnerRecoveryFile" type="file" accept="application/json" hidden></section>':'')+'</section>';
+ const recoveryButton=smeAuthOverlay.querySelector('#smeRecoverOwnerButton');
+ const recoveryInput=smeAuthOverlay.querySelector('#smeOwnerRecoveryFile');
+ if(firstSetup&&recoveryButton&&recoveryInput){
+  recoveryButton.addEventListener('click',()=>recoveryInput.click());
+  recoveryInput.addEventListener('change',async()=>{
+   const file=recoveryInput.files&&recoveryInput.files[0];if(!file)return;
+   recoveryButton.disabled=true;recoveryButton.textContent='Verificando respaldo…';
+   try{
+    const parsed=JSON.parse(await file.text());
+    if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('El archivo no es un respaldo SME válido.');
+    const keys=Object.keys(emptyDB());
+    for(const key of keys)if(parsed[key]!==undefined&&!Array.isArray(parsed[key]))throw new Error('La sección '+key+' no es válida.');
+    const incoming={...emptyDB(),...parsed};
+    for(const key of keys)if(!Array.isArray(incoming[key]))incoming[key]=[];
+    const serialized=smeValidateBackupSnapshot(incoming);
+    const metadata=parsed._smeBackupMetadata;
+    if(metadata&&metadata.appId==='servicios-mecanicos-enzo'&&metadata.formatVersion>=2){
+     if(!Array.isArray(metadata.users)||!metadata.ownerId)throw new Error('El respaldo no incluye una cuenta propietaria recuperable.');
+     const users=metadata.users.filter(u=>u&&typeof u==='object'&&u.id&&u.username&&u.salt&&u.hash&&u.active!==false);
+     const owners=users.filter(u=>String(u.id)===String(metadata.ownerId)&&(u.isPrimary===true||u.role==='admin'));
+     if(owners.length!==1)throw new Error('El respaldo no identifica una única cuenta propietaria. No se modificó nada.');
+     if(users.filter(u=>u.isPrimary===true||u.role==='owner'||u.role==='propietario').length>1)throw new Error('El respaldo contiene más de una cuenta marcada como dueña. No se modificó nada.');
+     const beforeDb=db,oldUsers=localStorage.getItem(SME_USERS_KEY),oldOwner=localStorage.getItem(SME_OWNER_ID_KEY);
+     try{
+      await storage.save(JSON.parse(serialized));
+      localStorage.setItem(SME_USERS_KEY,JSON.stringify(users));
+      localStorage.setItem(SME_OWNER_ID_KEY,String(owners[0].id));
+      db=JSON.parse(serialized);smeUsers=users;smeSelectedLoginUsername=owners[0].username;
+      smeAuthScreen('login','Cuenta propietaria recuperada desde el respaldo. Ingresá tu contraseña habitual para continuar.');
+     }catch(error){
+      db=beforeDb;try{await storage.save(beforeDb)}catch(_){}
+      try{if(oldUsers===null)localStorage.removeItem(SME_USERS_KEY);else localStorage.setItem(SME_USERS_KEY,oldUsers);if(oldOwner===null)localStorage.removeItem(SME_OWNER_ID_KEY);else localStorage.setItem(SME_OWNER_ID_KEY,oldOwner)}catch(_){}
+      throw error;
+     }
+    }else{
+     const hasCurrentData=Object.values(db).some(list=>Array.isArray(list)&&list.length);
+     if(hasCurrentData)throw new Error('Esta instalación ya contiene datos. Para evitar sobrescribirlos, creá el acceso dueño y después usá Gestión → Importar respaldo JSON.');
+     const previous=db;db=JSON.parse(serialized);
+     if(!(await save())){db=previous;return}
+     await smeShowMessage('Datos recuperados','Se recuperaron los datos del taller. Este respaldo antiguo no contiene la cuenta ni la contraseña del propietario. Para entrar en esta instalación, completá el acceso administrador una sola vez; luego los nuevos respaldos podrán recuperar también esa cuenta.');
+    }
+   }catch(error){console.error('Error recuperando respaldo inicial SME:',error);await smeShowMessage('No se pudo recuperar',String(error?.message||error||'El archivo no es válido.'),'error')}
+   finally{if(recoveryInput)recoveryInput.value='';if(recoveryButton&&document.body.contains(recoveryButton)){recoveryButton.disabled=false;recoveryButton.textContent='Recuperar desde respaldo'}}
+  });
+ }
  const form=smeAuthOverlay.querySelector('#smeAuthForm');
  const submitButton=form&&form.querySelector('button[type="submit"]');
   if(submitButton)submitButton.dataset.smeIdleLabel=submitButton.textContent;
