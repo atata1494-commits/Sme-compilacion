@@ -235,6 +235,29 @@ function smeResetNavigation(){
  exitBackPressedAt=0;
  smeHideBackExitPrompt();
 }
+const SME_RESUME_PAGE_KEY='sme_resume_page_v1';
+const SME_FORM_DRAFT_PREFIX='sme_form_draft_v1:';
+function smeRememberCurrentPage(){try{if(smeAuthenticated&&page&&page!=='inicio')localStorage.setItem(SME_RESUME_PAGE_KEY,page)}catch(error){console.warn('No se pudo recordar la pantalla SME:',error)}}
+function smeGetResumePage(){
+ try{const saved=localStorage.getItem(SME_RESUME_PAGE_KEY);return saved&&smeCan(saved,'view')?saved:'inicio'}catch(_){return 'inicio'}
+}
+function smeDraftKey(form){return SME_FORM_DRAFT_PREFIX+page+':'+(form.id||form.getAttribute('data-draft-key')||'form')}
+function smeSaveFormDraft(form){
+ if(!form||!form.querySelector('input,select,textarea')||form.closest('#smeAuthOverlay'))return;
+ try{const values={};for(const el of form.elements){if(!el.name||el.type==='password'||el.type==='file'||el.type==='submit'||el.type==='button')continue;if(el.type==='checkbox'||el.type==='radio')values[el.name+'::'+(el.value||'on')]=el.checked;else values[el.name]=el.value}
+ localStorage.setItem(smeDraftKey(form),JSON.stringify({savedAt:Date.now(),values}));
+ }catch(error){console.warn('No se pudo guardar el borrador del formulario:',error)}
+}
+function smeRestoreFormDrafts(){
+ const forms=[...document.querySelectorAll('#app form')];
+ forms.forEach(form=>{try{const raw=localStorage.getItem(smeDraftKey(form));if(!raw)return;const draft=JSON.parse(raw);if(!draft||!draft.values)return;
+ for(const el of form.elements){if(!el.name||el.type==='password'||el.type==='file'||el.type==='submit'||el.type==='button')continue;if(el.type==='checkbox'||el.type==='radio'){const k=el.name+'::'+(el.value||'on');if(Object.prototype.hasOwnProperty.call(draft.values,k))el.checked=!!draft.values[k]}else if(Object.prototype.hasOwnProperty.call(draft.values,el.name))el.value=draft.values[el.name]}
+ const note=document.createElement('p');note.className='muted sme-draft-note';note.textContent='Borrador recuperado automáticamente. Revisá los datos antes de guardar.';form.prepend(note);
+ }catch(error){console.warn('No se pudo recuperar un borrador SME:',error)}})
+}
+document.addEventListener('input',e=>{const form=e.target?.closest?.('#app form');if(form)smeSaveFormDraft(form)},true);
+document.addEventListener('change',e=>{const form=e.target?.closest?.('#app form');if(form)smeSaveFormDraft(form)},true);
+document.addEventListener('submit',e=>{const form=e.target;if(form?.matches?.('#app form')){try{localStorage.removeItem(smeDraftKey(form))}catch(_){}}},true);
 function smeNavigateTo(nextPage){
  if(nextPage==='inicio'){
   smeResetNavigation();
@@ -651,6 +674,7 @@ function gastoPage(){
 }
 
 function render(){
+ smeRememberCurrentPage();
  if(page!=='inicio'&&page!=='mas'&&!smeCan(page,'view')){page='inicio';pageHistory.length=0;}
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||(['agenda','caja','cuentas','presupuestos','recepciones','diagnosticos','usuarios','asistencias','terceros','tareas','avisos','gastos'].includes(page)&&b.dataset.page==='mas')));
  if(page==='inicio'){renderDashboard()}
@@ -671,6 +695,7 @@ function render(){
  else if(page==='gastos') gastoPage();
  else if(page==='mas'){app.innerHTML='<h2 class="section-title">Gestión</h2><p class="muted">Herramientas organizadas por tema. Vas directamente a cada función según tus permisos.</p><section class="more-group"><h3 class="more-section-title">Operación del taller</h3><p class="more-section-subtitle">Ingreso e inspección técnica de los vehículos.</p><div class="cards">'+tile('🚘','Recepción','Ingreso e inspección inicial','recepciones')+tile('🧰','Diagnóstico técnico','Inspección por sistemas','diagnosticos')+'</div></section><section class="more-group"><h3 class="more-section-title">Administración</h3><p class="more-section-subtitle">Presupuestos, movimientos, turnos y respaldos.</p><div class="cards">'+tile('🧾','Presupuestos','Cotizaciones','presupuestos')+tile('▤','Caja','Ingresos y egresos','caja')+tile('📅','Agenda','Turnos y recordatorios','agenda')+tile('↔','Cuentas corrientes y deudas','Lo que te deben y lo que debés','cuentas')+tile('👥','Usuarios y permisos','Administrar cuentas y accesos','usuarios')+tile('🕒','Control horario','Entradas, salidas y alertas','asistencias')+tile('🧰','Terceros y trabajos externos','Proveedores, permanencia y costos','terceros')+'</div></section><section class="more-group"><h3 class="more-section-title">Coordinación interna</h3><p class="more-section-subtitle">Organizá el trabajo, comunicá problemas y registrá gastos que requieren autorización.</p><div class="cards">'+tile('☑','Tareas del equipo','Asignación, avances y pendientes','tareas')+tile('⚑','Avisos internos','Faltantes, roturas y necesidades','avisos')+tile('▤','Autorizaciones de gastos','Solicitudes, aprobación y rendición','gastos')+'</div></section><div class="panel"><strong>Respaldo local</strong><p class="muted">Exportá una copia de los datos y guardala en un lugar seguro. La importación JSON agrega registros nuevos; no borra ni reemplaza los existentes. Si detecta identificadores en conflicto, se detiene sin importar nada.</p><div class="quick"><button id="backup">Exportar respaldo</button><button class="secondary" id="restoreBtn">Importar respaldo JSON</button>'+(storage?.isNative?'<button class="secondary" id="restoreDatabaseBtn">Restaurar copia completa (.db)</button>':'')+'</div><input id="restoreFile" type="file" accept="application/json" hidden><p class="muted">La restauración completa valida la integridad de SQLite, las tablas, los registros y la huella de los adjuntos. Antes de sustituir la base, conserva una copia interna de seguridad de la base actual.</p></div></section>'}
  smeApplyPermissions();
+ smeRestoreFormDrafts();
 }
 function fieldHTML(key,name,label,type,value){
  const v=value??'';
@@ -1514,6 +1539,7 @@ function smeLockSession(message){
  // cerrar solo el cuadro visual. No registrar omisión ni avance: al volver a
  // iniciar sesión se debe mostrar de nuevo el paso pendiente.
  if(typeof smeCloseInfoDialog==='function')smeCloseInfoDialog();
+ smeRememberCurrentPage();
  const lockedUser=smeCurrentUser;
  if(lockedUser&&lockedUser.username){
   localStorage.setItem(SME_LAST_ACCOUNT_KEY,lockedUser.username);
@@ -1693,7 +1719,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
    smeAuthenticated=true;
    if(smeCurrentUser){localStorage.setItem(SME_LAST_ACCOUNT_KEY,smeCurrentUser.username);smeRequirePasswordForSwitch(false)}
    smeAuthOverlay.remove();smeAuthOverlay=null;
-   page='inicio';
+   page=smeGetResumePage();
    smeUpdateSessionBar();
    render();
    smeResetIdleTimer();
