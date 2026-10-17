@@ -1,0 +1,27 @@
+{
+  "name": "servicios-mecanicos-enzo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Aplicación de gestión para Servicios Mecánicos Enzo",
+  "scripts": {
+    "build": "vite build",
+    "test": "python -m unittest discover -s tests -p \"test_*.py\" -v",
+    "cap:sync": "npm run build && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/share": "^8.0.0",
+    "@capgo/capacitor-printer": "^8.1.7",
+    "@aparajita/capacitor-biometric-auth": "^10.0.0",
+    "@capacitor/app": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "vite": "^7.3.1",
+    "typescript": "^5.9.3"
+  }
+}
