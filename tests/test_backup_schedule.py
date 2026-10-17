@@ -64,6 +64,7 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("if(smeFilePickerPending)return;", SOURCE)
         self.assertIn("smeFinishFilePicker();if(!smeCanBackup('edit'))", SOURCE)
         self.assertIn("if(!smeAuthenticated||smeFilePickerPending)return;", SOURCE)
+        self.assertIn("if(document.visibilityState==='visible'&&smeAuthenticated&&smeFilePickerPending)", SOURCE)
 
     def test_full_sqlite_restore_is_native_validated_and_reversible(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
