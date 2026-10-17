@@ -1,0 +1,38 @@
+"""Regresión estática para el botón Atrás en Android."""
+from pathlib import Path
+import json
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+INDEX = ROOT / "index.html"
+PACKAGE = ROOT / "package.json"
+
+
+class AndroidBackNavigationTests(unittest.TestCase):
+    def test_capacitor_app_plugin_is_declared_and_imported(self):
+        index = INDEX.read_text(encoding="utf-8")
+        package = json.loads(PACKAGE.read_text(encoding="utf-8"))
+        self.assertIn("@capacitor/app", package["dependencies"])
+        self.assertIn("import { App as CapacitorApp } from '@capacitor/app';", index)
+
+    def test_back_button_returns_to_previous_page(self):
+        index = INDEX.read_text(encoding="utf-8")
+        self.assertIn("CapacitorApp.addListener('backButton'", index)
+        self.assertIn("pageHistory.push(page)", index)
+        self.assertIn("const candidate=pageHistory.pop()", index)
+        self.assertIn("smeHandleHardwareBack", index)
+
+    def test_home_requires_a_second_back_press_to_exit(self):
+        index = INDEX.read_text(encoding="utf-8")
+        self.assertIn("Presioná Atrás otra vez para salir", index)
+        self.assertIn("now-exitBackPressedAt<=2200", index)
+        self.assertIn("await CapacitorApp.exitApp()", index)
+
+    def test_standard_android_workflow_applies_sme_branding(self):
+        workflow = (ROOT / ".github" / "workflows" / "android-apk-validation.yml").read_text(encoding="utf-8")
+        self.assertIn("node scripts/generate-android-icons.mjs", workflow)
+        self.assertIn("node scripts/configure-android-splash.mjs", workflow)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
