@@ -75,6 +75,15 @@ nav .nav-symbol{display:flex;align-items:center;justify-content:center;height:30
 input,select,textarea{width:100%;font:inherit;border:1px solid #687775;border-radius:9px;padding:12px;background:#29383a;margin-top:5px;color:#eee4d1;color-scheme:dark}
 input::placeholder,textarea::placeholder{color:#b4bdb8}
 input:focus,select:focus,textarea:focus{border-color:#c6a16a;background:#2d3e40}
+/* Teclado móvil: reservar espacio y mantener visible el campo enfocado. */
+html{scroll-padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+body.sme-keyboard-open nav{display:none}
+body.sme-keyboard-open main{padding-bottom:calc(48vh + 28px + env(safe-area-inset-bottom))}
+input,select,textarea,button{scroll-margin-top:18px;scroll-margin-bottom:24px}
+form [data-form-error]:empty{display:none}
+form [data-form-error]:not(:empty){display:block;padding:9px 10px;border:1px solid #a86b60;border-radius:8px;background:#3b2825}
+button:disabled{opacity:.65;cursor:wait}
+
 select option{background:#29383a;color:#eee4d1}
 input[type=checkbox]{-webkit-appearance:auto!important;appearance:auto!important;color-scheme:dark!important;accent-color:#c6a16a!important;width:20px!important;height:20px!important;min-width:20px!important;flex:0 0 20px;padding:0!important;margin:1px 6px 0 0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;vertical-align:middle;cursor:pointer}
 input[type=checkbox]:focus-visible{outline:2px solid #e5c58f;outline-offset:2px}
@@ -2088,6 +2097,31 @@ function smeRenderVisualTourStep(){
 function smeShowWelcomeReminder(){smeShowInfoDialog('¿Querés hacer el recorrido?','<p>Cuando tengas un momento, podés recorrer las partes más útiles de SME.</p>','Ver recorrido','Ahora no');const overlay=document.querySelector('.sme-info-overlay');overlay?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));overlay?.querySelector('[data-info-secondary]')?.addEventListener('click',()=>{const state=smeReadWelcomeState();state.reminderDismissed=true;smeWriteWelcomeState(state);smeCloseInfoDialog()})}
 function smeShowWelcomeIfNeeded(){if(!smeAuthenticated||!smeCurrentUser)return;const state=smeReadWelcomeState();state.loginCount=(Number(state.loginCount)||0)+1;smeWriteWelcomeState(state);if(state.completed)return;if(!state.skipped){smeShowInfoDialog('Bienvenido a SME','<p><strong>Servicios Mecánicos Enzo</strong></p><p>Un espacio para organizar el trabajo, cuidar los detalles y tener cada cosa en su lugar.</p><p>¿Querés hacer un recorrido rápido para conocer las partes más útiles de SME?</p>','Comenzar','Omitir por ahora');const overlay=document.querySelector('.sme-info-overlay');overlay?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));overlay?.querySelector('[data-info-secondary]')?.addEventListener('click',smeSkipWelcome);return}if(state.skipped&&state.loginCount>=((Number(state.skippedAt)||1)+2)&&!state.reminderShown&&!state.reminderDismissed){state.reminderShown=true;smeWriteWelcomeState(state);smeShowWelcomeReminder()}}
 document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContextHelp);document.addEventListener('keydown',e=>{if(e.key==='Escape')smeCloseInfoDialog()});
+
+// Mantiene visible el campo activo cuando Android abre o redimensiona el teclado.
+(function installKeyboardViewportFix(){
+ let lastKeyboardState=false,scheduled=false;
+ const vv=window.visualViewport;
+ const adjust=()=>{
+  if(scheduled)return;scheduled=true;
+  requestAnimationFrame(()=>{
+   scheduled=false;
+   const active=document.activeElement;
+   const editable=active&&(/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))&&!active.readOnly&&active.type!=='checkbox'&&active.type!=='radio';
+   const keyboardOpen=!!(vv&&window.innerHeight-vv.height>140);
+   document.body.classList.toggle('sme-keyboard-open',keyboardOpen);
+   if(editable&&keyboardOpen){
+    const r=active.getBoundingClientRect(),bottom=(vv?vv.height:window.innerHeight)-24;
+    if(r.bottom>bottom||r.top<8)active.scrollIntoView({block:'center',behavior:'smooth'});
+   }
+   lastKeyboardState=keyboardOpen;
+  });
+ };
+ document.addEventListener('focusin',e=>{if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))setTimeout(adjust,120)});
+ document.addEventListener('focusout',()=>setTimeout(adjust,180));
+ vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);
+ window.addEventListener('resize',adjust);window.addEventListener('orientationchange',()=>setTimeout(adjust,250));
+})();
 function requireLocalAdmin(){
  try{
   const stored=JSON.parse(localStorage.getItem(SME_USERS_KEY)||'[]');
