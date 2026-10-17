@@ -1382,11 +1382,23 @@ function smeCan(key,action='view'){
  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions[key]||'none';
  return action==='edit'?level==='edit':level==='view'||level==='edit';
 }
+const SME_OWNER_ID_KEY='sme_immutable_owner_id_v1';
+function smeOwnerAccount(){
+ let ownerId='';try{ownerId=localStorage.getItem(SME_OWNER_ID_KEY)||''}catch(_){}
+ let owner=ownerId?smeUsers.find(u=>String(u.id)===ownerId):null;
+ if(!owner){
+  owner=smeUsers.find(u=>u.isPrimary===true||u.role==='admin'||normalizeSearch(u.jobTitle||'')==='administrador principal')||null;
+  if(owner){owner.isPrimary=true;owner.role='admin';owner.active=true;owner.permissions=Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit']));owner.backup=true;try{localStorage.setItem(SME_OWNER_ID_KEY,String(owner.id));localStorage.setItem(SME_USERS_KEY,JSON.stringify(smeUsers))}catch(error){console.warn('No se pudo fijar la identidad del propietario SME:',error)}}
+ }
+ return owner;
+}
 function smeCanBackup(action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
+ const owner=smeOwnerAccount();
+ const isOwner=!!(owner&&String(owner.id)===String(smeCurrentUser.id));
+ if(isOwner||smeCurrentUser.isPrimary===true||smeCurrentUser.role==='admin'||smePrimarySessionUser?.isPrimary===true)return true;
  const storedUser=smeUsers.find(u=>String(u.id)===String(smeCurrentUser.id));
- const isPrimary=!!(smeCurrentUser.isPrimary||smeCurrentUser.role==='admin'||storedUser?.isPrimary||storedUser?.role==='admin'||smePrimarySessionUser?.isPrimary);
- if(isPrimary)return true;
+ if(storedUser?.isPrimary===true||storedUser?.role==='admin')return true;
  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.backup;
  return action==='edit'?level==='edit':level==='view'||level==='edit'||level===true;
 }
@@ -1706,11 +1718,12 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
     const hash=await smeHashPassword(password,salt);
     const adminPhotoFile=form.elements['profilePhoto']?.files?.[0];
     const profilePhoto=adminPhotoFile?await fileToDataURL(adminPhotoFile,240,0.58):'';
-    const admin={id:'sme-admin-'+Date.now().toString(36),username,firstName,lastName,name,dni,phone,area:'Dirección y Supervisión',jobTitle:'Administrador principal',jobCustom:'',profilePhoto,role:'admin',isPrimary:true,active:true,permissions:Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit'])),backup:true,salt,hash,iterations:210000,createdAt:new Date().toISOString()};
+    const admin={id:'sme-owner-'+crypto.randomUUID(),username,firstName,lastName,name,dni,phone,area:'Dirección y Supervisión',jobTitle:'Administrador principal',jobCustom:'',profilePhoto,role:'admin',isPrimary:true,active:true,permissions:Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit'])),backup:true,salt,hash,iterations:210000,createdAt:new Date().toISOString()};
     if(firstSetup&&smeUsers.length){
      smeAuthInlineError(form,'Se encontraron cuentas anteriores sin un administrador principal. Por seguridad, no se reemplazaron. Conservá esos datos y consultá antes de continuar.');return
     }
     localStorage.setItem(SME_USERS_KEY,JSON.stringify([admin]));
+    localStorage.setItem(SME_OWNER_ID_KEY,String(admin.id));
     smeUsers=[admin];
     try{localStorage.removeItem(SME_AUTH_KEY)}catch(_){}
     smeCurrentUser=admin;
