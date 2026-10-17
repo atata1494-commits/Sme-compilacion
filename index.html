@@ -1386,21 +1386,25 @@ const SME_OWNER_ID_KEY='sme_immutable_owner_id_v1';
 function smeOwnerAccount(){
  let ownerId='';try{ownerId=localStorage.getItem(SME_OWNER_ID_KEY)||''}catch(_){}
  let owner=ownerId?smeUsers.find(u=>String(u.id)===ownerId):null;
- if(!owner){
-  owner=smeUsers.find(u=>u.isPrimary===true||u.role==='admin'||normalizeSearch(u.jobTitle||'')==='administrador principal')||null;
-  if(owner){owner.isPrimary=true;owner.role='admin';owner.active=true;owner.permissions=Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit']));owner.backup=true;try{localStorage.setItem(SME_OWNER_ID_KEY,String(owner.id));localStorage.setItem(SME_USERS_KEY,JSON.stringify(smeUsers))}catch(error){console.warn('No se pudo fijar la identidad del propietario SME:',error)}}
+ // Si la clave guardada pertenece a una cuenta ya inexistente, reconstruirla desde la primera cuenta administrativa.
+ if(!owner)owner=smeUsers.find(u=>u.isPrimary===true)||smeUsers.find(u=>u.role==='admin')||smeUsers.find(u=>normalizeSearch(u.jobTitle||'')==='administrador principal')||smeUsers[0]||null;
+ if(owner){
+  owner.isPrimary=true;owner.role='admin';owner.active=true;
+  owner.permissions=Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit']));owner.backup=true;
+  try{localStorage.setItem(SME_OWNER_ID_KEY,String(owner.id));localStorage.setItem(SME_USERS_KEY,JSON.stringify(smeUsers))}catch(error){console.warn('No se pudo fijar la identidad del propietario SME:',error)}
  }
  return owner;
 }
 function smeCanBackup(action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
  const owner=smeOwnerAccount();
- const isOwner=!!(owner&&String(owner.id)===String(smeCurrentUser.id));
- if(isOwner||smeCurrentUser.isPrimary===true||smeCurrentUser.role==='admin'||smePrimarySessionUser?.isPrimary===true)return true;
  const storedUser=smeUsers.find(u=>String(u.id)===String(smeCurrentUser.id));
- if(storedUser?.isPrimary===true||storedUser?.role==='admin')return true;
- const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.backup;
- return action==='edit'?level==='edit':level==='view'||level==='edit'||level===true;
+ const isOwner=!!(owner&&String(owner.id)===String(smeCurrentUser.id));
+ if(isOwner||smeCurrentUser.isPrimary===true||storedUser?.isPrimary===true)return true;
+ // Asegurar sincronía de la sesión con el registro persistido del usuario.
+ if(storedUser?.role==='admin'&&smeCurrentUser.role==='admin')return true;
+ const level=(storedUser?.permissions||smeCurrentUser.permissions||{}).backup;
+ return action==='edit'?level==='edit'||level===true:level==='view'||level==='edit'||level===true;
 }
 function smeUpdateSessionBar(){
  if(!smeSessionBar)return;
