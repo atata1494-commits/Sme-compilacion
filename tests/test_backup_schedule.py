@@ -38,6 +38,20 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("throw new Error('Registro sin identificador en '+key+'.')", SOURCE)
         self.assertIn("throw new Error('Identificador duplicado '+id+' en '+key+'.')", SOURCE)
 
+    def test_manual_backup_preserves_single_owner_for_reinstallation(self):
+        self.assertIn("function smeCreatePortableBackup()", SOURCE)
+        self.assertIn("_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2", SOURCE)
+        self.assertIn("ownerId:String(owner?.id||''),users", SOURCE)
+        self.assertIn("smeRecoverOwnerButton", SOURCE)
+        self.assertIn("Cuenta propietaria recuperada desde el respaldo", SOURCE)
+        self.assertIn("debe contener una única cuenta dueña", SOURCE)
+
+    def test_android_file_picker_does_not_lock_session_during_restore(self):
+        self.assertIn("smeBeginFilePicker();fileInput.click()", SOURCE)
+        self.assertIn("if(smeFilePickerPending)return;", SOURCE)
+        self.assertIn("smeFinishFilePicker();if(!smeCanBackup('edit'))", SOURCE)
+        self.assertIn("if(!smeAuthenticated||smeFilePickerPending)return;", SOURCE)
+
     def test_full_sqlite_restore_is_native_validated_and_reversible(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         storage = (ROOT / "src/storage/sqlite-store.js").read_text(encoding="utf-8")
