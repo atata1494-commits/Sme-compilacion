@@ -1,0 +1,63 @@
+name: Build SME Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sme-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout SME source
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --no-save sharp
+      - name: Run source regression tests
+        run: |
+          npm test
+          python -m unittest discover -s tests -v
+      - name: Build web assets
+        run: npm run build
+      - name: Set isolated test package identity
+        run: sed -i "s/com.serviciosmecanicosenzo.app/com.serviciosmecanicosenzo.test/" capacitor.config.ts
+      - name: Generate Android project
+        run: npx cap add android
+      - name: Sync Capacitor plugins and assets
+        run: npx cap sync android
+      - name: Apply SME launcher icons
+        run: node scripts/generate-android-icons.mjs
+      - name: Configure splash screen
+        run: node scripts/configure-android-splash.mjs
+      - name: Configure native backups
+        run: node scripts/configure-android-backups.mjs
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SME-Android-debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
