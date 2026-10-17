@@ -1357,7 +1357,15 @@ function smeCan(key,action='view'){
  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions[key]||'none';
  return action==='edit'?level==='edit':level==='view'||level==='edit';
 }
-function smeCanBackup(action='view'){if(!smeAuthenticated||!smeCurrentUser)return false;if(smeCurrentUser.isPrimary)return true;const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.backup;return action==='edit'?level==='edit':level==='view'||level==='edit'||level===true}
+function smeCanBackup(action='view'){
+ if(!smeAuthenticated||!smeCurrentUser)return false;
+ // Confirmar el rol desde el registro de usuarios local, además del objeto de sesión.
+ const storedUser=smeUsers.find(u=>String(u.id)===String(smeCurrentUser.id));
+ const isPrimary=!!(smeCurrentUser.isPrimary||storedUser?.isPrimary||smePrimarySessionUser?.isPrimary);
+ if(isPrimary)return true;
+ const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.backup;
+ return action==='edit'?level==='edit':level==='view'||level==='edit'||level===true;
+}
 function smeUpdateSessionBar(){
  if(!smeSessionBar)return;
  if(!smeAuthenticated||!smeCurrentUser){smeSessionBar.hidden=true;smeSessionBar.innerHTML='';return}
