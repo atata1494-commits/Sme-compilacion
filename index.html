@@ -1069,7 +1069,7 @@ function displayValues(key,o){
  }[key]||[];
  return fields.filter(x=>x[1]!==undefined&&x[1]!==''&&x[1]!==null);
 }
-document.addEventListener('click',async e=>{const go=e.target.closest('[data-go]');if(go){if(!smeCan(go.dataset.go,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(go.dataset.go);return}const nav=e.target.closest('nav button');if(nav){if(!smeCan(nav.dataset.page,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(nav.dataset.page);return}if(e.target.closest('#restoreBtn'))document.getElementById('restoreFile')?.click()});
+document.addEventListener('click',async e=>{const go=e.target.closest('[data-go]');if(go){if(!smeCan(go.dataset.go,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(go.dataset.go);return}const nav=e.target.closest('nav button');if(nav){if(!smeCan(nav.dataset.page,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(nav.dataset.page);return}if(e.target.closest('#restoreBtn')){const fileInput=document.getElementById('restoreFile');if(fileInput){smeBeginFilePicker();fileInput.click()}}});
 function canonicalJSON(value){if(Array.isArray(value))return '['+value.map(canonicalJSON).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalJSON(value[k])).join(',')+'}';return JSON.stringify(value)}
 app.addEventListener('click',async e=>{const backupButton=e.target.closest('#backup');if(!backupButton)return;e.preventDefault();e.stopPropagation();backupButton.disabled=true;const originalLabel=backupButton.textContent;backupButton.textContent='Guardando respaldo…';try{const json=JSON.stringify(db,null,2);if(storage?.isNative){const result=await SmeBackup.saveJsonBackup({filename:'respaldo-servicios-enzo.json',data:json});if(result?.cancelled){alert('No se guardó el respaldo.');return;}alert('Respaldo guardado correctamente.\n\nArchivo: '+(result?.filename||'respaldo-servicios-enzo.json'));}else{const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo-servicios-enzo.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(error){console.error('Error al exportar respaldo:',error);alert('No se pudo guardar el respaldo en Documentos. Detalle: '+String(error?.message||error));}finally{backupButton.disabled=false;backupButton.textContent=originalLabel}});
 document.addEventListener('change',e=>{if(e.target.id==='restoreFile'){const f=e.target.files[0];if(!f)return;const input=e.target;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('El archivo no contiene un respaldo válido.');const keys=Object.keys(emptyDB());for(const k of keys)if(data[k]!==undefined&&!Array.isArray(data[k]))throw new Error('La lista '+k+' del respaldo no es válida.');const incoming={...emptyDB(),...data};for(const k of keys)if(!Array.isArray(incoming[k]))incoming[k]=[];let added=0,identical=0;const merged={...db};for(const k of keys){const current=new Map();for(const record of db[k]){if(!record||record.id===undefined||record.id===null||String(record.id).trim()==='')throw new Error('Hay un registro sin ID en los datos actuales ('+k+'). No se modificó nada.');const id=String(record.id);if(current.has(id))throw new Error('Hay IDs duplicados en los datos actuales ('+k+'): '+id+'. No se modificó nada.');current.set(id,record)}const seenIncoming=new Set();for(const record of incoming[k]){if(!record||typeof record!=='object'||Array.isArray(record)||record.id===undefined||record.id===null||String(record.id).trim()==='')throw new Error('El respaldo contiene un registro sin ID en '+k+'. No se modificó nada.');const id=String(record.id);if(seenIncoming.has(id))throw new Error('El respaldo contiene IDs duplicados en '+k+': '+id+'. No se modificó nada.');seenIncoming.add(id);if(current.has(id)){if(canonicalJSON(current.get(id))!==canonicalJSON(record))throw new Error('Conflicto en '+k+' con ID '+id+'. Por seguridad no se importó ningún registro. Conservá ambos respaldos para revisar ese caso.');identical++;}else{current.set(id,record);added++;}}merged[k]=Array.from(current.values())}if(added===0){alert('No hay registros nuevos para agregar. Los datos actuales no cambiaron. Coincidencias idénticas: '+identical+'.');return}if(!await smeStyledConfirm('Importación segura','Vista previa de importación segura:\n\nRegistros nuevos que se agregarán: '+added+'\nRegistros idénticos que se omitirán: '+identical+'\n\nNo se borrarán ni reemplazarán registros actuales. Si el guardado falla, se conservará el estado anterior. ¿Continuar?'))return;const previous=db;db=merged;if(!(await save())){db=previous;return}render();alert('Importación segura completada. Registros agregados: '+added+'. Coincidencias idénticas omitidas: '+identical+'. Conservá el archivo de respaldo original hasta verificar todos los datos.')}catch(err){alert('No se importó ningún dato. '+String(err?.message||'Verificá que el archivo sea un respaldo válido de Servicios Mecánicos Enzo.'))}finally{input.value=''}};reader.readAsText(f)}});
@@ -1448,6 +1448,7 @@ function smeApplyPermissions(){
  }
  const restoreButton=document.getElementById('restoreBtn');
  const restoreInput=document.getElementById('restoreFile');
+ if(restoreInput)restoreInput.oncancel=()=>smeFinishFilePicker();
  if(restoreButton&&!smeCanBackup('edit'))restoreButton.hidden=true;
  if(restoreInput&&!smeCanBackup('edit'))restoreInput.hidden=true;
 }
@@ -1573,9 +1574,27 @@ function smeLockSession(message){
  smeAuthScreen('login',message,true);
 }
 function smeResetIdleTimer(){
- if(!smeAuthenticated)return;
+ if(!smeAuthenticated||smeFilePickerPending)return;
  smeClearIdleTimer();
  smeIdleTimer=setTimeout(()=>smeLockSession('La sesión se bloqueó después de '+SME_IDLE_TIMEOUT_SECONDS+' segundos sin actividad.'),SME_IDLE_TIMEOUT_MS);
+}
+let smeFilePickerPending=false,smeFilePickerFallback=null;
+function smeFinishFilePicker(){
+ smeFilePickerPending=false;
+ if(smeFilePickerFallback!==null){clearTimeout(smeFilePickerFallback);smeFilePickerFallback=null}
+ if(smeAuthenticated)smeResetIdleTimer();
+}
+function smeBeginFilePicker(){
+ smeFilePickerPending=true;
+ smeClearIdleTimer();
+ if(smeFilePickerFallback!==null)clearTimeout(smeFilePickerFallback);
+ // Fallback if an older Android file chooser does not emit the cancel event.
+ smeFilePickerFallback=setTimeout(()=>{
+  smeFilePickerFallback=null;
+  if(!smeFilePickerPending)return;
+  if(document.visibilityState==='visible')smeFinishFilePicker();
+  else if(smeAuthenticated)smeLockSession('La sesión se bloqueó al salir de la aplicación.');
+ },5*60*1000);
 }
 ['pointerdown','keydown','input','click','touchstart','scroll'].forEach(eventName=>{
  document.addEventListener(eventName,()=>{
@@ -1972,7 +1991,7 @@ document.addEventListener('click',e=>{
  const mutation=e.target.closest('[data-edit],[data-delete],[data-edit-reception],[data-delete-reception],[data-create-work],[data-edit-diagnosis],[data-delete-diagnosis],[data-account-edit],[data-account-delete],[data-account-payment],[data-pay-toggle],[data-task-action],[data-aviso-action],[data-gasto-action]');
  if(mutation&&!smeCan(page,'edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario puede consultar esta sección, pero no modificar sus datos.')}
 },true);
-document.addEventListener('change',e=>{if(e.target&&e.target.id==='restoreFile'&&!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();e.target.value='';alert('Tu usuario no tiene permiso para importar respaldos.')}},true);
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='restoreFile'){smeFinishFilePicker();if(!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();e.target.value='';alert('La sesión no está autorizada para importar respaldos. El archivo no se modificó. Ingresá con la cuenta propietaria y volvé a intentarlo.')}}},true);
 document.addEventListener('submit',e=>{
  if(['smeAuthForm','smeUserForm'].includes(e.target&&e.target.id))return;
  if(!smeCan(page,'edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario puede consultar esta sección, pero no modificar sus datos.')}
@@ -2208,6 +2227,8 @@ function requireLocalAdmin(){
  smeAuthScreen(mode, '', !!smeSelectedLoginUsername && !smeForcePasswordForNextLogin);
  document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'&&smeAuthenticated){
+   // Android's native document picker temporarily hides the app; keep the authorized import session alive.
+   if(smeFilePickerPending)return;
    smeLockSession('La sesión se bloqueó al salir de la aplicación.');
   }
  });
