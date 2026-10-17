@@ -1681,7 +1681,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
     for(const key of keys)if(Array.isArray(parsed[key]))incoming[key]=parsed[key];
     const serialized=smeValidateBackupSnapshot(incoming);
     const metadata=parsed._smeBackupMetadata;
-    if(metadata&&metadata.appId==='servicios-mecanicos-enzo'&&metadata.formatVersion>=2){
+    if(metadata&&metadata.appId==='servicios-mecanicos-enzo'&&metadata.formatVersion>=2&&(metadata.ownerId||(Array.isArray(metadata.users)&&metadata.users.length))){
      if(!Array.isArray(metadata.users)||!metadata.ownerId)throw new Error('El respaldo no incluye una cuenta propietaria recuperable.');
      const users=metadata.users.filter(u=>u&&typeof u==='object'&&u.id&&u.username&&u.salt&&u.hash);
      const owners=users.filter(u=>String(u.id)===String(metadata.ownerId)&&u.isPrimary===true);
