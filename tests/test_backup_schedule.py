@@ -27,7 +27,7 @@ class BackupScheduleSourceTests(unittest.TestCase):
     def test_automatic_backup_runs_only_after_native_storage_is_ready(self):
         self.assertIn("db=await storage.load(emptyDB);", SOURCE)
         self.assertIn("if(storage?.isNative){void smeRunAutomaticBackups()}", SOURCE)
-        self.assertIn("const serialized=smeValidateBackupSnapshot(db);", SOURCE)
+        self.assertIn("const serialized=smeValidateBackupSnapshot(smeCreatePortableBackup());", SOURCE)
 
     def test_backup_is_read_back_and_parsed_after_write(self):
         self.assertIn("await Filesystem.writeFile({path:name,data:serialized,directory:Directory.Documents,encoding:Encoding.UTF8})", SOURCE)
