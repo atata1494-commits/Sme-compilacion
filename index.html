@@ -197,7 +197,7 @@ async function smePruneAutomaticBackups(prefix,keepCount){
  }catch(error){console.warn('No se pudo revisar la retención de respaldos SME:',error)}
 }
 async function smeRunAutomaticBackups(){
- if(!storage?.isNative)return;
+ if(!storage?.isNative||!smeAuthenticated||!smeCurrentUser)return;
  try{
   const now=new Date(),dailyName=SME_BACKUP_DAILY_PREFIX+smeBackupDateKey(now)+'.json';
   const monthName=SME_BACKUP_MONTHLY_PREFIX+smeBackupMonthKey(now)+'.json';
@@ -210,13 +210,24 @@ async function smeRunAutomaticBackups(){
    const restored=JSON.parse(typeof readback.data==='string'?readback.data:'');
    smeValidateBackupSnapshot(restored);
   };
-  if(!existing.has(dailyName))await writeVerified(dailyName);
-  if(!existing.has(monthName))await writeVerified(monthName);
+  const ensurePortable=async name=>{
+   if(!existing.has(name)){await writeVerified(name);return}
+   // Upgrade older automatic snapshots that stored only workshop data, not account recovery information.
+   const owner=smeOwnerAccount();
+   const isOwner=!!(owner&&smeCurrentUser.isPrimary===true&&String(owner.id)===String(smeCurrentUser.id));
+   if(!isOwner)return;
+   try{
+    const readback=await Filesystem.readFile({path:name,directory:Directory.Documents,encoding:Encoding.UTF8});
+    const old=JSON.parse(typeof readback.data==='string'?readback.data:'');
+    if(!old?._smeBackupMetadata?.ownerId)await writeVerified(name);
+   }catch(error){console.warn('No se pudo verificar el respaldo automático existente:',error)}
+  };
+  await ensurePortable(dailyName);
+  await ensurePortable(monthName);
   await smePruneAutomaticBackups(SME_BACKUP_DAILY_PREFIX,SME_BACKUP_RETENTION_DAYS);
   await smePruneAutomaticBackups(SME_BACKUP_MONTHLY_PREFIX,SME_BACKUP_RETENTION_MONTHS);
  }catch(error){console.error('No se pudo completar el respaldo automático local de SME:',error)}
 }
-if(storage?.isNative){void smeRunAutomaticBackups()}
 function newRecordId(){return globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function'?globalThis.crypto.randomUUID():'sme-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);}
 let page='inicio',editingId=null;
 let smeRelatedFilter=null;
@@ -1072,8 +1083,9 @@ function displayValues(key,o){
 document.addEventListener('click',async e=>{const go=e.target.closest('[data-go]');if(go){if(!smeCan(go.dataset.go,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(go.dataset.go);return}const nav=e.target.closest('nav button');if(nav){if(!smeCan(nav.dataset.page,'view')){alert('Tu usuario no tiene permiso para acceder a esa sección.');return}smeNavigateTo(nav.dataset.page);return}if(e.target.closest('#restoreBtn')){const fileInput=document.getElementById('restoreFile');if(fileInput){smeBeginFilePicker();fileInput.click()}}});
 function smeCreatePortableBackup(){
  const owner=smeOwnerAccount();
- const users=Array.isArray(smeUsers)?JSON.parse(JSON.stringify(smeUsers)):[];
- return {...db,_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2,exportedAt:new Date().toISOString(),ownerId:String(owner?.id||''),users}};
+ const isOwner=!!(smeAuthenticated&&smeCurrentUser&&owner&&smeCurrentUser.isPrimary===true&&String(owner.id)===String(smeCurrentUser.id));
+ const users=isOwner&&Array.isArray(smeUsers)?JSON.parse(JSON.stringify(smeUsers)):[];
+ return {...db,_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2,exportedAt:new Date().toISOString(),ownerId:isOwner?String(owner.id):'',users}};
 }
 function canonicalJSON(value){if(Array.isArray(value))return '['+value.map(canonicalJSON).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalJSON(value[k])).join(',')+'}';return JSON.stringify(value)}
 app.addEventListener('click',async e=>{const backupButton=e.target.closest('#backup');if(!backupButton)return;e.preventDefault();e.stopPropagation();backupButton.disabled=true;const originalLabel=backupButton.textContent;backupButton.textContent='Guardando respaldo…';try{const json=JSON.stringify(smeCreatePortableBackup(),null,2);if(storage?.isNative){const result=await SmeBackup.saveJsonBackup({filename:'respaldo-servicios-enzo.json',data:json});if(result?.cancelled){alert('No se guardó el respaldo.');return;}alert('Respaldo guardado correctamente.\n\nArchivo: '+(result?.filename||'respaldo-servicios-enzo.json'));}else{const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='respaldo-servicios-enzo.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}}catch(error){console.error('Error al exportar respaldo:',error);alert('No se pudo guardar el respaldo en Documentos. Detalle: '+String(error?.message||error));}finally{backupButton.disabled=false;backupButton.textContent=originalLabel}});
@@ -1551,6 +1563,7 @@ let SME_IDLE_TIMEOUT_MS=SME_IDLE_TIMEOUT_SECONDS*1000;
    localStorage.setItem(SME_LAST_ACCOUNT_KEY,user.username);smeRequirePasswordForSwitch(false);
    if(smeAuthOverlay){smeAuthOverlay.remove();smeAuthOverlay=null}
    page='inicio';smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();
+  if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){console.info('Autenticación biométrica cancelada o fallida:',error);const code=error&&error.code;if(code&&/userCancel|systemCancel/i.test(String(code)))return;smeAuthShowInlineError('No se pudo validar la huella. Podés ingresar la contraseña de esta cuenta.','password')}
  }
 let smeIdleTimer=null;
@@ -1813,6 +1826,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
    render();
    smeResetIdleTimer();
    smeShowWelcomeIfNeeded();
+  if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){
    console.error('Error configurando acceso SME:',error);
    smeAuthInlineError(form,'No se pudo validar o guardar el acceso. Conservá tus datos e intentá nuevamente.');
