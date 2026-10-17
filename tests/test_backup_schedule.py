@@ -45,6 +45,8 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("smeRecoverOwnerButton", SOURCE)
         self.assertIn("Cuenta propietaria recuperada desde el respaldo", SOURCE)
         self.assertIn("debe contener una única cuenta dueña", SOURCE)
+        self.assertIn("String(u.id)===String(metadata.ownerId)&&u.isPrimary===true", SOURCE)
+        self.assertIn("users.filter(u=>u.isPrimary===true).length!==1", SOURCE)
 
     def test_secondary_account_is_never_promoted_to_owner_by_position(self):
         start = SOURCE.index("function smeOwnerAccount()")
