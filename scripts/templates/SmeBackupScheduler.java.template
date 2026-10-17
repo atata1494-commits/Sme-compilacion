@@ -1,0 +1,29 @@
+package __PACKAGE__;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import java.util.concurrent.TimeUnit;
+
+public final class SmeBackupScheduler {
+    private static final String UNIQUE_NAME = "sme-sqlite-daily-backup";
+    private SmeBackupScheduler() {}
+
+    public static void schedule(@NonNull Context context) {
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                .build();
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                SmeBackupWorker.class, 24, TimeUnit.HOURS)
+                .setConstraints(constraints)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.MINUTES)
+                .build();
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                UNIQUE_NAME, ExistingPeriodicWorkPolicy.KEEP, request);
+    }
+}
