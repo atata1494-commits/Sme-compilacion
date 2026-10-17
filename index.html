@@ -2306,6 +2306,10 @@ function requireLocalAdmin(){
    // Android's native document picker temporarily hides the app; keep the authorized import session alive.
    if(smeFilePickerPending)return;
    smeLockSession('La sesión se bloqueó al salir de la aplicación.');
+   return;
+  }
+  if(document.visibilityState==='visible'&&smeAuthenticated&&smeFilePickerPending){
+   setTimeout(()=>{if(document.visibilityState==='visible'&&smeFilePickerPending)smeFinishFilePicker()},250);
   }
  });
 }
