@@ -1392,7 +1392,7 @@ function smeOwnerAccount(){
  let ownerId='';try{ownerId=localStorage.getItem(SME_OWNER_ID_KEY)||''}catch(_){}
  let owner=ownerId?smeUsers.find(u=>String(u.id)===ownerId):null;
  // Si la clave guardada pertenece a una cuenta ya inexistente, reconstruirla desde la primera cuenta administrativa.
- if(!owner)owner=smeUsers.find(u=>u.isPrimary===true)||smeUsers.find(u=>u.role==='admin')||smeUsers.find(u=>normalizeSearch(u.jobTitle||'')==='administrador principal')||smeUsers[0]||null;
+ if(!owner)owner=smeUsers.find(u=>u.isPrimary===true)||smeUsers.find(u=>u.role==='admin')||smeUsers.find(u=>normalizeSearch(u.jobTitle||'')==='administrador principal')||null;
  if(owner){
   owner.isPrimary=true;owner.role='admin';owner.active=true;
   owner.permissions=Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit']));owner.backup=true;
