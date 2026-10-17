@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+<title id="title">SME — Servicios Mecánicos Enzo</title>
+<defs>
+  <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#17383b"/>
+    <stop offset=".5" stop-color="#0c292d"/>
+    <stop offset="1" stop-color="#102f33"/>
+  </linearGradient>
+  <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#c5b89a"/>
+    <stop offset=".48" stop-color="#97866a"/>
+    <stop offset="1" stop-color="#b2a184"/>
+  </linearGradient>
+  <linearGradient id="ivory" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#e1d8c5"/>
+    <stop offset="1" stop-color="#bdb4a1"/>
+  </linearGradient>
+  <pattern id="grain" width="76" height="58" patternUnits="userSpaceOnUse">
+    <path d="M-8 10 C12 5 27 15 48 10 S73 7 86 12 M-8 38 C20 31 34 43 58 37 S75 36 86 39" fill="none" stroke="#5d7978" stroke-width="1.1" opacity=".16"/>
+    <path d="M9 22 L34 21 M48 51 L69 50" stroke="#020f12" stroke-width="2" opacity=".18"/>
+    <circle cx="61" cy="18" r="1.2" fill="#a28b62" opacity=".2"/>
+  </pattern>
+  <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="125%">
+    <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#000" flood-opacity=".35"/>
+  </filter>
+</defs>
+<rect width="512" height="512" fill="url(#background)"/>
+<rect width="512" height="512" fill="url(#grain)"/>
+<g filter="url(#subtleShadow)">
+  <ellipse cx="256" cy="256" rx="247" ry="180" fill="#0c292d" stroke="#75674f" stroke-width="5"/>
+  <ellipse cx="256" cy="256" rx="239" ry="172" fill="none" stroke="url(#brass)" stroke-width="2.5"/>
+  <ellipse cx="256" cy="256" rx="231" ry="164" fill="none" stroke="#596867" stroke-width="1" opacity=".6"/>
+  <g id="curved-service-name" aria-label="SERVICIOS MECÁNICOS">
+  <text x="119.41" y="162.23" transform="rotate(-30.57 119.41 162.23)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">S</text>
+  <text x="133.35" y="154.71" transform="rotate(-26.19 133.35 154.71)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">E</text>
+  <text x="147.81" y="148.22" transform="rotate(-22.21 147.81 148.22)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">R</text>
+  <text x="162.66" y="142.71" transform="rotate(-18.54 162.66 142.71)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">V</text>
+  <text x="177.83" y="138.13" transform="rotate(-15.11 177.83 138.13)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">I</text>
+  <text x="193.23" y="134.44" transform="rotate(-11.88 193.23 134.44)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">C</text>
+  <text x="208.81" y="131.60" transform="rotate(-8.79 208.81 131.60)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">I</text>
+  <text x="224.53" y="129.59" transform="rotate(-5.80 224.53 129.59)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">O</text>
+  <text x="240.30" y="128.39" transform="rotate(-2.87 240.30 128.39)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">S</text>
+  <text x="256.16" y="128.00" transform="rotate(0.03 256.16 128.00)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill"> </text>
+  <text x="272.02" y="128.41" transform="rotate(2.93 272.02 128.41)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">M</text>
+  <text x="287.78" y="129.62" transform="rotate(5.85 287.78 129.62)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">E</text>
+  <text x="303.51" y="131.65" transform="rotate(8.85 303.51 131.65)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">C</text>
+  <text x="319.08" y="134.50" transform="rotate(11.94 319.08 134.50)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">Á</text>
+  <text x="334.54" y="138.23" transform="rotate(15.20 334.54 138.23)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">N</text>
+  <text x="349.69" y="142.83" transform="rotate(18.62 349.69 142.83)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">I</text>
+  <text x="364.53" y="148.36" transform="rotate(22.29 364.53 148.36)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">C</text>
+  <text x="378.97" y="154.87" transform="rotate(26.28 378.97 154.87)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">O</text>
+  <text x="392.89" y="162.40" transform="rotate(30.67 392.89 162.40)" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="600" letter-spacing=".2" fill="#d8d0bd" stroke="#10282b" stroke-width=".35" paint-order="stroke fill">S</text>
+  </g>
+  <path d="M119 226 H177 M335 226 H393" stroke="#94856a" stroke-width="1.8"/>
+  <text x="256" y="302" text-anchor="middle" font-family="Georgia,serif" font-size="112" font-weight="700" letter-spacing="1.5" fill="#071a1c" stroke="#071a1c" stroke-width="3">ENZO</text>
+  <text x="256" y="297" text-anchor="middle" font-family="Georgia,serif" font-size="112" font-weight="700" letter-spacing="1.5" fill="url(#ivory)" stroke="#9c9079" stroke-width=".8">ENZO</text>
+  <path d="M123 324 H226 M286 324 H389" stroke="#88785e" stroke-width="1.5"/>
+  <path d="M256 319 l6 5 -6 5 -6 -5z" fill="#aa9b7d"/>
+  <text x="256" y="359" text-anchor="middle" font-family="Georgia,serif" font-size="21" font-style="italic" fill="#c8beaa">El oficio de siempre,</text>
+  <text x="256" y="386" text-anchor="middle" font-family="Georgia,serif" font-size="21" font-style="italic" fill="#c8beaa">al servicio de hoy.</text>
+</g>
+</svg>
