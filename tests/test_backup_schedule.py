@@ -46,6 +46,13 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("Cuenta propietaria recuperada desde el respaldo", SOURCE)
         self.assertIn("debe contener una única cuenta dueña", SOURCE)
 
+    def test_secondary_account_is_never_promoted_to_owner_by_position(self):
+        start = SOURCE.index("function smeOwnerAccount()")
+        end = SOURCE.index("function smeCanBackup(", start)
+        owner_resolver = SOURCE[start:end]
+        self.assertNotIn("||smeUsers[0]||null", owner_resolver)
+        self.assertIn("No se modificó nada", SOURCE)
+
     def test_android_file_picker_does_not_lock_session_during_restore(self):
         self.assertIn("smeBeginFilePicker();fileInput.click()", SOURCE)
         self.assertIn("if(smeFilePickerPending)return;", SOURCE)
