@@ -41,7 +41,7 @@ class BackupScheduleSourceTests(unittest.TestCase):
     def test_manual_backup_preserves_single_owner_for_reinstallation(self):
         self.assertIn("function smeCreatePortableBackup()", SOURCE)
         self.assertIn("_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2", SOURCE)
-        self.assertIn("ownerId:String(owner?.id||''),users", SOURCE)
+        self.assertIn("ownerId:isOwner?String(owner.id):'',users", SOURCE)
         self.assertIn("smeRecoverOwnerButton", SOURCE)
         self.assertIn("Cuenta propietaria recuperada desde el respaldo", SOURCE)
         self.assertIn("debe contener una única cuenta dueña", SOURCE)
