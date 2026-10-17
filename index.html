@@ -1399,10 +1399,14 @@ function smeCanBackup(action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
  const owner=smeOwnerAccount();
  const storedUser=smeUsers.find(u=>String(u.id)===String(smeCurrentUser.id));
- const isOwner=!!(owner&&String(owner.id)===String(smeCurrentUser.id));
- if(isOwner||smeCurrentUser.isPrimary===true||storedUser?.isPrimary===true)return true;
- // Asegurar sincronía de la sesión con el registro persistido del usuario.
- if(storedUser?.role==='admin'&&smeCurrentUser.role==='admin')return true;
+ // El rol de propietario/administrador principal se resuelve antes de los permisos por módulo.
+ const role=String(smeCurrentUser.role||storedUser?.role||'').toLowerCase();
+ const job=normalizeSearch(smeCurrentUser.jobTitle||storedUser?.jobTitle||'');
+ const isOwner=!!(owner&&String(owner.id)===String(smeCurrentUser.id))
+  ||smeCurrentUser.isPrimary===true||storedUser?.isPrimary===true
+  ||role==='admin'||role==='owner'||role==='propietario'
+  ||job==='administrador principal'||job==='propietario'||job==='dueno'||job==='dueño';
+ if(isOwner)return true;
  const level=(storedUser?.permissions||smeCurrentUser.permissions||{}).backup;
  return action==='edit'?level==='edit'||level===true:level==='view'||level==='edit'||level===true;
 }
@@ -1962,7 +1966,7 @@ document.addEventListener('click',e=>{
  const exportBackup=e.target.closest('#backup');
  if(exportBackup&&!smeCanBackup('view')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario no tiene permiso para exportar respaldos.');return}
  const importBackup=e.target.closest('#restoreBtn');
- if(importBackup&&!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario no tiene permiso para importar respaldos.');return}
+ if(importBackup&&!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();alert('SME no reconoce esta sesión como la cuenta propietaria. Cerrá sesión y volvé a entrar con el administrador principal. Si persiste, no se modificó el respaldo.');return}
  const importDatabase=e.target.closest('#restoreDatabaseBtn');
  if(importDatabase&&!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario no tiene permiso para restaurar una base de datos completa.');return}
  const mutation=e.target.closest('[data-edit],[data-delete],[data-edit-reception],[data-delete-reception],[data-create-work],[data-edit-diagnosis],[data-delete-diagnosis],[data-account-edit],[data-account-delete],[data-account-payment],[data-pay-toggle],[data-task-action],[data-aviso-action],[data-gasto-action]');
