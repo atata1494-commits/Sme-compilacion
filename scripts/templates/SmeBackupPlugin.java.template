@@ -1,0 +1,341 @@
+package __PACKAGE__;
+
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.provider.OpenableColumns;
+
+import androidx.annotation.NonNull;
+
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.JSArray;
+import com.getcapacitor.JSObject;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.ActivityCallback;
+import com.getcapacitor.annotation.CapacitorPlugin;
+
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+@CapacitorPlugin(name = "SmeBackup")
+public final class SmeBackupPlugin extends Plugin {
+    private static final String DATABASE_FILE = "sme_tallerSQLite.db";
+    private static final String[] REQUIRED_TABLES = {
+        "schema_migrations", "app_metadata", "clientes", "vehiculos", "trabajos",
+        "presupuestos", "movimientos", "eventos", "recepciones", "diagnosticos",
+        "cuentas", "pagos_cuenta", "adjuntos", "cambios_sync", "cambios_recibidos",
+        "paquetes_intercambio", "conflictos_sync", "asistencias", "terceros",
+        "trabajos_externos", "config_horarios", "sme_tareas", "sme_avisos",
+        "sme_solicitudes_gasto", "sme_auditoria", "sme_tarea_eventos",
+        "sme_aviso_derivaciones", "sme_tarea_dependencias", "sme_permisos_usuario"
+    };
+    private static final String[] JSON_TABLES = {
+        "clientes", "vehiculos", "trabajos", "presupuestos", "movimientos",
+        "eventos", "recepciones", "diagnosticos", "cuentas", "asistencias",
+        "terceros", "trabajos_externos", "config_horarios", "sme_tareas",
+        "sme_avisos", "sme_solicitudes_gasto"
+    };
+
+    @PluginMethod
+    public void saveJsonBackup(PluginCall call) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, call.getString("filename", "respaldo-servicios-enzo.json"));
+        startActivityForResult(call, intent, "handleSaveJsonBackup");
+    }
+
+    @ActivityCallback
+    private void handleSaveJsonBackup(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result == null || result.getResultCode() == Activity.RESULT_CANCELED) {
+            JSObject response = new JSObject();
+            response.put("cancelled", true);
+            call.resolve(response);
+            return;
+        }
+        Intent dataIntent = result.getData();
+        Uri uri = dataIntent == null ? null : dataIntent.getData();
+        if (uri == null) {
+            call.reject("No se eligió dónde guardar el respaldo.");
+            return;
+        }
+        String json = call.getString("data", null);
+        if (json == null || json.isEmpty()) {
+            call.reject("El respaldo está vacío; no se guardó ningún archivo.");
+            return;
+        }
+        try (OutputStream output = getContext().getContentResolver().openOutputStream(uri, "wt")) {
+            if (output == null) throw new IllegalStateException("Android no pudo abrir el archivo para escritura.");
+            output.write(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            output.flush();
+            JSObject response = new JSObject();
+            response.put("cancelled", false);
+            response.put("filename", queryDisplayName(uri));
+            call.resolve(response);
+        } catch (Exception error) {
+            call.reject("No se pudo guardar el respaldo seleccionado: " + error.getMessage(), error);
+        }
+    }
+
+    private String queryDisplayName(Uri uri) {
+        try (Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                if (index >= 0) return cursor.getString(index);
+            }
+        } catch (Exception ignored) { }
+        return "respaldo-servicios-enzo.json";
+    }
+
+    @PluginMethod
+    public void pickAndValidateRestore(PluginCall call) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_TITLE, "Seleccionar respaldo completo de SME (.db)");
+        startActivityForResult(call, intent, "handlePickedBackup");
+    }
+
+    @ActivityCallback
+    private void handlePickedBackup(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result == null || result.getResultCode() == Activity.RESULT_CANCELED) {
+            JSObject response = new JSObject();
+            response.put("cancelled", true);
+            call.resolve(response);
+            return;
+        }
+        Intent data = result.getData();
+        Uri uri = data == null ? null : data.getData();
+        if (uri == null) {
+            call.reject("No se seleccionó ningún archivo.");
+            return;
+        }
+        File staged = new File(getContext().getCacheDir(), "sme-restore-" + UUID.randomUUID() + ".db");
+        try (InputStream input = getContext().getContentResolver().openInputStream(uri);
+             OutputStream output = new FileOutputStream(staged)) {
+            if (input == null) throw new IllegalStateException("No se pudo leer el archivo seleccionado.");
+            copy(input, output);
+            output.flush();
+            JSObject stats = validateDatabase(staged);
+            JSObject response = new JSObject();
+            response.put("cancelled", false);
+            response.put("token", staged.getName());
+            response.put("sizeBytes", staged.length());
+            response.put("clientCount", stats.getInt("clientCount"));
+            response.put("vehicleCount", stats.getInt("vehicleCount"));
+            response.put("workCount", stats.getInt("workCount"));
+            response.put("attachmentCount", stats.getInt("attachmentCount"));
+            response.put("schemaVersion", stats.getInt("schemaVersion"));
+            call.resolve(response);
+        } catch (Exception error) {
+            if (staged.exists()) staged.delete();
+            call.reject("El archivo no es un respaldo SQLite completo y válido de SME: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
+    public void discardRestore(PluginCall call) {
+        String token = call.getString("token", "");
+        File staged = stagedFile(token);
+        if (staged != null && staged.exists() && !staged.delete()) {
+            call.reject("No se pudo eliminar el archivo temporal del respaldo.");
+            return;
+        }
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void commitRestore(PluginCall call) {
+        String token = call.getString("token", "");
+        File staged = stagedFile(token);
+        if (staged == null || !staged.isFile()) {
+            call.reject("El respaldo temporal ya no está disponible. Seleccioná el archivo nuevamente.");
+            return;
+        }
+        File database = getContext().getDatabasePath(DATABASE_FILE);
+        File parent = database.getParentFile();
+        File incoming = new File(parent, DATABASE_FILE + ".restore");
+        File previous = new File(parent, DATABASE_FILE + ".pre-restore");
+        File safety = new File(new File(getContext().getFilesDir(), "SME/restore-safety"),
+            "SME-pre-restauracion-" + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + ".db");
+        boolean movedOriginal = false;
+        try {
+            validateDatabase(staged);
+            if (!parent.isDirectory() && !parent.mkdirs()) throw new IllegalStateException("No se pudo preparar la carpeta de la base de datos.");
+            // La base de Capacitor puede usar WAL. Consolidarlo antes de copiar evita
+            // que la copia de seguridad omita operaciones que aún estén en el archivo -wal.
+            if (database.isFile()) checkpointDatabase(database);
+            File safetyDirectory = safety.getParentFile();
+            if (!safetyDirectory.isDirectory() && !safetyDirectory.mkdirs()) throw new IllegalStateException("No se pudo crear la copia de seguridad previa.");
+            if (database.isFile()) copyFile(database, safety);
+            if (incoming.exists() && !incoming.delete()) throw new IllegalStateException("No se pudo limpiar un archivo temporal anterior.");
+            copyFile(staged, incoming);
+            validateDatabase(incoming);
+
+            if (previous.exists() && !previous.delete()) throw new IllegalStateException("No se pudo preparar la sustitución segura.");
+            // Tras el checkpoint, los sidecars viejos ya no son necesarios. Evita
+            // que SQLite intente aplicar un WAL de la base anterior a la restaurada.
+            deleteSidecar(new File(database.getAbsolutePath() + "-wal"));
+            deleteSidecar(new File(database.getAbsolutePath() + "-shm"));
+            if (database.exists()) {
+                if (!database.renameTo(previous)) throw new IllegalStateException("No se pudo apartar la base actual de forma segura.");
+                movedOriginal = true;
+            }
+            if (!incoming.renameTo(database)) {
+                if (movedOriginal) previous.renameTo(database);
+                throw new IllegalStateException("No se pudo instalar la base restaurada.");
+            }
+            try {
+                validateDatabase(database);
+            } catch (Exception validationError) {
+                if (database.exists()) database.delete();
+                if (movedOriginal && previous.exists() && !previous.renameTo(database)) {
+                    throw new IllegalStateException("Falló la validación y no se pudo revertir automáticamente; conservá la copia previa interna.", validationError);
+                }
+                throw validationError;
+            }
+            if (previous.exists() && !previous.delete()) {
+                android.util.Log.w("SMEBackup", "Se conservó la base anterior temporal en " + previous.getAbsolutePath());
+            }
+            if (staged.exists()) staged.delete();
+            JSObject response = new JSObject();
+            response.put("success", true);
+            response.put("safetyCopyKept", safety.isFile());
+            call.resolve(response);
+        } catch (Exception error) {
+            if (incoming.exists()) incoming.delete();
+            if (movedOriginal && !database.exists() && previous.exists()) previous.renameTo(database);
+            call.reject("No se completó la restauración. La base actual se conservó o se revirtió; detalle: " + error.getMessage(), error);
+        }
+    }
+
+    private File stagedFile(String token) {
+        if (token == null || !token.matches("sme-restore-[A-Za-z0-9-]+\\.db")) return null;
+        File file = new File(getContext().getCacheDir(), token);
+        try {
+            if (!file.getCanonicalFile().getParentFile().equals(getContext().getCacheDir().getCanonicalFile())) return null;
+        } catch (Exception error) {
+            return null;
+        }
+        return file;
+    }
+
+    private static void checkpointDatabase(File file) throws Exception {
+        SQLiteDatabase db = null;
+        try {
+            db = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, SQLiteDatabase.OPEN_READWRITE);
+            try (Cursor cursor = db.rawQuery("PRAGMA wal_checkpoint(TRUNCATE)", null)) {
+                if (cursor.moveToFirst() && cursor.getInt(0) != 0) {
+                    throw new IllegalStateException("No se pudo consolidar el registro WAL de la base actual.");
+                }
+            }
+        } finally {
+            if (db != null && db.isOpen()) db.close();
+        }
+    }
+
+    private static void deleteSidecar(File file) throws Exception {
+        if (file.exists() && !file.delete()) {
+            throw new IllegalStateException("No se pudo retirar un archivo auxiliar antiguo de SQLite.");
+        }
+    }
+
+    private JSObject validateDatabase(File file) throws Exception {
+        if (!file.isFile() || file.length() < 1024) throw new IllegalStateException("El archivo está vacío o incompleto.");
+        try (SQLiteDatabase db = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY)) {
+            String integrity = scalar(db, "PRAGMA integrity_check");
+            if (!"ok".equalsIgnoreCase(integrity)) throw new IllegalStateException("La comprobación interna de SQLite no fue satisfactoria.");
+            List<String> tables = new ArrayList<>();
+            try (Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null)) {
+                while (cursor.moveToNext()) tables.add(cursor.getString(0));
+            }
+            for (String table : REQUIRED_TABLES) {
+                if (!tables.contains(table)) throw new IllegalStateException("Falta la tabla requerida: " + table + ".");
+            }
+            int schemaVersion = Integer.parseInt(scalar(db, "PRAGMA user_version"));
+            if (schemaVersion < 3) throw new IllegalStateException("La copia tiene una versión de esquema anterior a la requerida.");
+            for (String table : JSON_TABLES) {
+                try (Cursor cursor = db.rawQuery("SELECT payload_json FROM " + table, null)) {
+                    while (cursor.moveToNext()) {
+                        String payload = cursor.getString(0);
+                        if (payload == null) throw new IllegalStateException("Hay un registro sin contenido en " + table + ".");
+                        Object parsed = new JSONTokener(payload).nextValue();
+                        if (!(parsed instanceof JSONObject)) throw new IllegalStateException("Hay un registro JSON inválido en " + table + ".");
+                    }
+                }
+            }
+            int attachmentCount = 0;
+            try (Cursor cursor = db.rawQuery("SELECT datos, sha256_hex FROM adjuntos", null)) {
+                while (cursor.moveToNext()) {
+                    byte[] bytes = cursor.getBlob(0);
+                    String expected = cursor.getString(1);
+                    if (bytes == null || expected == null || !expected.matches("[0-9a-fA-F]{64}")) {
+                        throw new IllegalStateException("Hay un adjunto sin datos o sin huella SHA-256 válida.");
+                    }
+                    String actual = sha256(bytes);
+                    if (!actual.equalsIgnoreCase(expected)) throw new IllegalStateException("La huella de un adjunto no coincide; se rechazó la copia para evitar perder fotos o firmas.");
+                    attachmentCount++;
+                }
+            }
+            JSObject stats = new JSObject();
+            stats.put("schemaVersion", schemaVersion);
+            stats.put("clientCount", count(db, "clientes"));
+            stats.put("vehicleCount", count(db, "vehiculos"));
+            stats.put("workCount", count(db, "trabajos"));
+            stats.put("attachmentCount", attachmentCount);
+            return stats;
+        }
+    }
+
+    private static int count(SQLiteDatabase db, String table) {
+        return Integer.parseInt(scalar(db, "SELECT COUNT(*) FROM " + table));
+    }
+
+    private static String scalar(SQLiteDatabase db, String sql) {
+        try (Cursor cursor = db.rawQuery(sql, null)) {
+            if (!cursor.moveToFirst()) throw new IllegalStateException("La consulta de validación no devolvió resultados.");
+            return cursor.getString(0);
+        }
+    }
+
+    private static String sha256(byte[] bytes) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256").digest(bytes);
+        StringBuilder out = new StringBuilder(digest.length * 2);
+        for (byte value : digest) out.append(String.format(Locale.ROOT, "%02x", value & 0xff));
+        return out.toString();
+    }
+
+    private static void copy(InputStream input, OutputStream output) throws Exception {
+        byte[] buffer = new byte[64 * 1024];
+        int count;
+        while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+    }
+
+    private static void copyFile(File source, File destination) throws Exception {
+        try (InputStream input = new FileInputStream(source); FileOutputStream output = new FileOutputStream(destination)) {
+            copy(input, output);
+            output.flush();
+            output.getFD().sync();
+        }
+    }
+}
