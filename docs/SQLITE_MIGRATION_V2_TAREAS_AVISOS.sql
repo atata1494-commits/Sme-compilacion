@@ -1,0 +1,8 @@
+-- DEPRECATED — DO NOT APPLY.
+-- The base app schema already uses SQLite user_version = 2 for attendance
+-- and third-party work. Applying an older tasks/notices migration labeled v2
+-- would collide with the base schema version.
+-- Tasks, notices, spending authorizations and audit history are implemented
+-- by docs/SQLITE_MIGRATION_V3_TAREAS_AVISOS.sql.
+-- This file remains only as a guard for old references; it intentionally does
+-- not modify the database.
