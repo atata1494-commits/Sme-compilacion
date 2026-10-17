@@ -1,0 +1,76 @@
+name: Android APK validation
+
+on:
+  push:
+    branches:
+      - security-access-test
+      - sme-integracion-completa-test
+  pull_request:
+    branches:
+      - security-access-test
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --no-save sharp
+
+      - name: Run SQLite schema tests
+        run: npm test
+
+      - name: Run SME source regression tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Add Android platform if absent
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Apply SME Android launcher icon
+        run: node scripts/generate-android-icons.mjs
+
+      - name: Configure native SME splash screen
+        run: node scripts/configure-android-splash.mjs
+
+      - name: Configure native daily SQLite backups
+        run: node scripts/configure-android-backups.mjs
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SME-Android-debug-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
