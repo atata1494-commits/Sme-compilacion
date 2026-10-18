@@ -2319,7 +2319,7 @@ function requireLocalAdmin(){
   if(document.visibilityState==='visible'){
    // Si volvió antes de los 10 segundos, cancelar el bloqueo y continuar donde estaba.
    if(smeBackgroundLockTimer!==null){clearTimeout(smeBackgroundLockTimer);smeBackgroundLockTimer=null;if(smeAuthenticated)smeResetIdleTimer()}
-   if(smeAuthenticated&&smeFilePickerPending)
+   if(document.visibilityState==='visible'&&smeAuthenticated&&smeFilePickerPending)
     setTimeout(()=>{if(document.visibilityState==='visible'&&smeFilePickerPending)smeFinishFilePicker()},250);
   }
  });
