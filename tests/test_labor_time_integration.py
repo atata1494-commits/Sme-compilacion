@@ -57,5 +57,28 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("No se altera ningún presupuesto guardado", SOURCE)
 
 
+    def test_faatra_has_a_visible_expired_historical_fallback_without_cache(self):
+        self.assertIn("const SME_FAATRA_FALLBACK=Object.freeze({value:84000", SOURCE)
+        self.assertIn("period:'Julio, agosto y septiembre de 2026'", SOURCE)
+        self.assertIn("usingFallback=!savedCurrent,current=savedCurrent||SME_FAATRA_FALLBACK", SOURCE)
+        self.assertIn("Último valor oficial conocido · histórico", SOURCE)
+        self.assertIn("no debe interpretarse como tarifa vigente", SOURCE)
+        self.assertIn("Se mantiene este valor histórico de respaldo", SOURCE)
+
+    def test_time_catalog_is_compact_and_detail_opens_only_after_selection(self):
+        self.assertIn('class="sme-time-table"', SOURCE)
+        self.assertIn("function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute)", SOURCE)
+        self.assertIn('id="smeLaborTimeDetail" class="sme-time-detail" hidden', SOURCE)
+        self.assertIn("selectedId=button.dataset.timeRow||'';draw()", SOURCE)
+        self.assertIn("results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup", SOURCE)
+
+    def test_budget_search_shows_compact_matches_and_one_selected_detail(self):
+        self.assertIn('id="smeBudgetLaborResults" class="sme-budget-time-results"', SOURCE)
+        self.assertIn('id="smeBudgetLaborSelected" class="sme-time-selected-detail" hidden', SOURCE)
+        self.assertIn('id="smeBudgetLaborCalculation" class="sme-budget-time-calculation" hidden', SOURCE)
+        self.assertIn("Escribí el nombre de un trabajo o motor para ver coincidencias", SOURCE)
+        self.assertIn("calculation.hidden=!(selected&&selected.suggested!==null)", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()

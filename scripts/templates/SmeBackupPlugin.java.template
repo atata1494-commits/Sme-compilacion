@@ -66,74 +66,89 @@ public final class SmeBackupPlugin extends Plugin {
     @PluginMethod
     public void fetchFaatraHourlyReference(PluginCall call) {
         new Thread(() -> {
-            HttpsURLConnection connection = null;
-            try {
-                URL url = new URL("https://www.faatra.org.ar/servicios/costo-hora/");
-                connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(9000);
-                connection.setReadTimeout(9000);
-                connection.setInstanceFollowRedirects(true);
-                connection.setRequestProperty("User-Agent", "SME-Android/1.0 (consulta de referencia pública)");
-                connection.setRequestProperty("Accept", "text/html,application/xhtml+xml");
-                connection.setRequestProperty("Accept-Language", "es-AR,es;q=0.9");
-                int status = connection.getResponseCode();
-                if (status < 200 || status >= 300) {
-                    throw new IllegalStateException("FAATRA respondió HTTP " + status + ".");
-                }
-                StringBuilder html = new StringBuilder();
-                try (InputStream input = connection.getInputStream();
-                     BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                    char[] buffer = new char[4096];
-                    int count;
-                    while ((count = reader.read(buffer)) != -1) {
-                        if (html.length() + count > 2_000_000) {
-                            throw new IllegalStateException("La página de FAATRA supera el tamaño esperado.");
-                        }
-                        html.append(buffer, 0, count);
-                    }
-                }
-                String text = Html.fromHtml(html.toString(), Html.FROM_HTML_MODE_LEGACY).toString()
-                    .replace('\u00a0', ' ')
-                    .replace('\u202f', ' ')
-                    .replaceAll("\\s+", " ")
-                    .trim();
-                Pattern ratePattern = Pattern.compile(
-                    "MEC[ÁA]NICA,\\s*ELECTRICIDAD\\s+Y\\s+OTROS.{0,120}?\\$\\s*([0-9][0-9.,]*)\\s*\\+\\s*IVA\\s*/\\s*1\\s*HORA\\s*TALLER",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-                );
-                Matcher rateMatcher = ratePattern.matcher(text);
-                if (!rateMatcher.find()) {
-                    throw new IllegalStateException("La página no contiene un valor de hora de mecánica reconocible. No se modificó ningún precio de SME.");
-                }
-                String digits = rateMatcher.group(1).replaceAll("[^0-9]", "");
-                long value;
+            Exception lastError = null;
+            String[] sourceUrls = {
+                "https://www.faatra.org.ar/servicios/costo-hora/",
+                "https://faatra.org.ar/servicios/costo-hora/"
+            };
+            for (String sourceUrl : sourceUrls) {
+                HttpsURLConnection connection = null;
                 try {
-                    value = Long.parseLong(digits);
-                } catch (NumberFormatException error) {
-                    throw new IllegalStateException("No se pudo interpretar el valor numérico publicado por FAATRA.", error);
+                    URL url = new URL(sourceUrl);
+                    connection = (HttpsURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(6500);
+                    connection.setReadTimeout(6500);
+                    connection.setInstanceFollowRedirects(true);
+                    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) SME-Android/1.0");
+                    connection.setRequestProperty("Accept", "text/html,application/xhtml+xml");
+                    connection.setRequestProperty("Accept-Language", "es-AR,es;q=0.9");
+                    int status = connection.getResponseCode();
+                    if (status < 200 || status >= 300) {
+                        throw new IllegalStateException("FAATRA respondió HTTP " + status + ".");
+                    }
+                    StringBuilder html = new StringBuilder();
+                    try (InputStream input = connection.getInputStream();
+                         BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                        char[] buffer = new char[4096];
+                        int count;
+                        while ((count = reader.read(buffer)) != -1) {
+                            if (html.length() + count > 2_000_000) {
+                                throw new IllegalStateException("La página de FAATRA supera el tamaño esperado.");
+                            }
+                            html.append(buffer, 0, count);
+                        }
+                    }
+                    String text = Html.fromHtml(html.toString(), Html.FROM_HTML_MODE_LEGACY).toString()
+                        .replace('\u00a0', ' ')
+                        .replace('\u202f', ' ')
+                        .replaceAll("\\s+", " ")
+                        .trim();
+                    Pattern ratePattern = Pattern.compile(
+                        "MEC[ÁA]NICA,\\s*ELECTRICIDAD\\s+Y\\s+OTROS.{0,600}?\\$\\s*([0-9][0-9.,]*)\\s*\\+\\s*IVA\\s*/\\s*1\\s*HORA\\s*TALLER",
+                        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+                    );
+                    Matcher rateMatcher = ratePattern.matcher(text);
+                    if (!rateMatcher.find()) {
+                        throw new IllegalStateException("La página consultada no contiene un valor reconocible de hora de mecánica.");
+                    }
+                    String digits = rateMatcher.group(1).replaceAll("[^0-9]", "");
+                    long value;
+                    try {
+                        value = Long.parseLong(digits);
+                    } catch (NumberFormatException error) {
+                        throw new IllegalStateException("No se pudo interpretar el valor numérico publicado por FAATRA.", error);
+                    }
+                    Pattern periodPattern = Pattern.compile(
+                        "FAATRA\\s*:\\s*([^•]{2,180}?20[0-9]{2})",
+                        Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+                    );
+                    Matcher periodMatcher = periodPattern.matcher(text);
+                    if (!periodMatcher.find()) {
+                        throw new IllegalStateException("No se pudo identificar el período de vigencia publicado por FAATRA.");
+                    }
+                    String period = periodMatcher.group(1).trim().replaceAll("[.;,\\s]+$", "");
+                    if (period.length() < 5) {
+                        throw new IllegalStateException("El período publicado por FAATRA está incompleto.");
+                    }
+                    JSObject response = new JSObject();
+                    response.put("value", value);
+                    response.put("period", period);
+                    response.put("sourceUrl", url.toString());
+                    response.put("currency", "ARS");
+                    response.put("taxTreatment", "IVA no incluido");
+                    call.resolve(response);
+                    return;
+                } catch (Exception error) {
+                    lastError = error;
+                } finally {
+                    if (connection != null) connection.disconnect();
                 }
-                Pattern periodPattern = Pattern.compile(
-                    "VALOR\\s+HORA\\s+TALLER.{0,220}?FAATRA\\s*:\\s*([^•]{2,140}?20[0-9]{2})",
-                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-                );
-                Matcher periodMatcher = periodPattern.matcher(text);
-                if (!periodMatcher.find()) {
-                    throw new IllegalStateException("No se pudo identificar el período de vigencia publicado por FAATRA. No se guardó una referencia incompleta.");
-                }
-                String period = periodMatcher.group(1).trim().replaceAll("[.;,\\s]+$", "");
-                JSObject response = new JSObject();
-                response.put("value", value);
-                response.put("period", period);
-                response.put("sourceUrl", url.toString());
-                response.put("currency", "ARS");
-                response.put("taxTreatment", "IVA no incluido");
-                call.resolve(response);
-            } catch (Exception error) {
-                call.reject("No se pudo comprobar la referencia de hora taller de FAATRA: " + error.getMessage(), error);
-            } finally {
-                if (connection != null) connection.disconnect();
             }
+            String details = lastError == null || lastError.getMessage() == null
+                ? "No se pudo leer la página oficial."
+                : lastError.getMessage();
+            call.reject("No se pudo comprobar la referencia de hora taller de FAATRA: " + details, lastError);
         }, "sme-faatra-reference-check").start();
     }
 

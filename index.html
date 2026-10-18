@@ -145,6 +145,48 @@ form button{margin-top:10px;width:100%}
 /* Módulo de presupuestos: acciones compactas, datos privados visualmente diferenciados. */
 .sme-budget-module{min-width:0}.sme-budget-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.sme-budget-tab{background:rgba(39,43,38,.72);border:1px solid #615641;color:#d8c8aa;padding:10px 12px;font-size:13px}.sme-budget-tab[aria-pressed="true"]{background:#c6a16a;color:#211b13;border-color:#e5c58f;font-weight:750}.sme-budget-pane[hidden]{display:none!important}.sme-budget-private{border-color:#92744c;background:linear-gradient(145deg,rgba(35,48,43,.98),rgba(31,35,31,.98))}.sme-budget-private-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap}.sme-budget-private-heading h3{margin:0;color:#e5c58f;font-family:Georgia,serif;font-size:20px}.sme-budget-private-heading span{font-size:10px;font-weight:800;letter-spacing:1px;color:#f0c98a;border:1px solid #92744c;border-radius:999px;padding:5px 8px}.sme-budget-cost-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px}.sme-budget-cost-grid label{min-width:0}.sme-budget-actual-costs{margin:12px 0;border-top:1px solid #5a5549;border-bottom:1px solid #5a5549;padding:10px 0}.sme-budget-actual-costs summary{cursor:pointer;color:#e5c58f;font-weight:700}.sme-budget-cost-summary{margin:14px 0 4px;padding:12px;border:1px solid #5c594d;border-radius:10px;background:rgba(11,22,20,.52)}.sme-budget-cost-summary h4{margin:0 0 10px;color:#e5c58f;font-size:16px}.sme-budget-cost-summary p{margin:7px 0;font-size:13px;line-height:1.45}.sme-budget-cost-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sme-budget-cost-metric{padding:9px;border:1px solid #4e5246;border-radius:8px}.sme-budget-cost-metric small{display:block;color:#bdb29e;font-size:11px}.sme-budget-cost-metric strong{display:block;margin-top:3px;font-size:16px;color:#ead5ad;overflow-wrap:anywhere}.sme-budget-cost-warning{border-left:3px solid #d6a24b;padding:8px 10px;background:rgba(160,94,39,.12);color:#f0cf9b}.sme-budget-cost-good{border-left:3px solid #719a83;padding:8px 10px;background:rgba(70,116,82,.12);color:#c8e1c8}.sme-budget-history{margin-top:10px}.sme-budget-history li{margin:7px 0;font-size:12px;color:#d7c7a9}.sme-budget-module form button{width:100%}
 @media(max-width:430px){.sme-budget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sme-budget-tab{padding:10px 7px}.sme-budget-cost-grid{grid-template-columns:1fr}.sme-budget-cost-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Catálogo de tiempos: filas compactas y detalle solo para el trabajo seleccionado. */
+.sme-time-table{margin-top:10px;overflow:hidden;border:1px solid #4f5349;border-radius:12px;background:rgba(33,39,35,.88)}
+.sme-time-table-head,.sme-time-row{display:grid;grid-template-columns:minmax(0,1fr) 88px 84px;gap:8px;align-items:center}
+.sme-time-table-head{padding:10px 12px;background:#182725;color:#d9bb85;font-size:10px;line-height:1.2;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.sme-time-row{width:100%;min-width:0;margin:0;padding:11px 12px;border:0;border-top:1px solid #454a40;border-radius:0;background:transparent;color:var(--ink);text-align:left}
+.sme-time-row:active,.sme-time-row.is-selected{background:rgba(198,161,106,.13);box-shadow:inset 3px 0 #c6a16a}
+.sme-time-row-name{display:block;min-width:0}
+.sme-time-row-name strong{display:block;font-size:13px;line-height:1.25;font-weight:700;overflow-wrap:anywhere;color:#ead9b9}
+.sme-time-row-name small{display:block;margin-top:3px;font-size:10px;line-height:1.25;color:var(--muted)}
+.sme-time-row-hours{font-size:12px;font-weight:750;color:#e5c58f;white-space:nowrap}
+.sme-time-row-status{font-size:9px;line-height:1.2;text-align:right;color:#b8d6bc}
+.sme-time-row-status.is-pending{color:#e2bd7a}
+.sme-time-no-results,.sme-time-search-empty{padding:14px;color:var(--muted);font-size:13px;line-height:1.4}
+.sme-time-detail{margin-top:12px}
+.sme-time-detail[hidden],#smeBudgetLaborSelected[hidden],#smeBudgetLaborCalculation[hidden]{display:none!important}
+.sme-time-detail-card{margin-top:0;border-color:#8a704a;background:linear-gradient(145deg,rgba(35,48,43,.98),rgba(31,35,31,.98))}
+.sme-time-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:9px}
+.sme-time-card-head strong{min-width:0;line-height:1.25}
+.sme-time-card-head span{flex:0 0 auto}
+.sme-time-range{font-weight:750;color:#e5c58f}
+.sme-budget-time-results{margin-top:4px;max-height:230px;overflow-y:auto;overscroll-behavior:contain;border:1px solid #494e44;border-radius:10px;background:rgba(22,30,27,.65)}
+.sme-budget-time-results .sme-time-row{grid-template-columns:minmax(0,1fr) 64px 70px;padding:10px}
+.sme-budget-time-results .sme-time-row-name strong{font-size:12px}
+.sme-budget-time-results .sme-time-row-name small{font-size:10px}
+.sme-budget-time-results .sme-time-row-status{font-size:9px}
+.sme-time-selected-detail{margin-top:10px}
+.sme-budget-time-calculation{margin-top:12px;padding-top:10px;border-top:1px solid #4c5147}
+.sme-budget-time-calculation .form-grid{gap:6px 10px}
+.sme-budget-time-calculation .form-grid label{font-size:12px}
+.sme-budget-time-calculation button{margin-top:6px}
+@media(max-width:390px){
+ .sme-time-table-head,.sme-time-row{grid-template-columns:minmax(0,1fr) 68px 65px;gap:5px}
+ .sme-time-table-head{padding:9px 8px;font-size:9px}
+ .sme-time-row{padding:10px 8px}
+ .sme-time-row-name strong{font-size:12px}
+ .sme-time-row-hours{font-size:11px}
+ .sme-time-row-status{font-size:8px}
+ .sme-budget-time-results .sme-time-row{grid-template-columns:minmax(0,1fr) 52px 59px;padding:9px 7px}
+ .sme-time-card-head{display:block}
+ .sme-time-card-head span{display:inline-block;margin-top:5px}
+}
 </style>
 </head>
 <body>
@@ -854,52 +896,83 @@ function smeLaborHoursLabel(value){if(value===null||value===undefined||value==='
 function smeLaborTimeRange(item){return item.suggested===null?'Sin tiempo confirmado':'Mín. '+smeLaborHoursLabel(item.min)+' · sugerido '+smeLaborHoursLabel(item.suggested)+' · máx. '+smeLaborHoursLabel(item.max)}
 function smeLaborTimeCardMarkup(item,actionLabel,actionAttr){
  const statusClass=item.suggested===null?'sme-time-pending':'sme-time-orientative';
- return '<article class="item sme-time-card"><div class="sme-time-card-head"><strong>'+esc(item.title)+'</strong><span class="'+statusClass+'">'+esc(item.status)+'</span></div><p class="muted">'+esc(item.family)+' · '+esc(item.application)+'</p><p class="sme-time-range">'+esc(smeLaborTimeRange(item))+'</p><p>'+esc(item.scope)+'</p>'+(actionAttr?'<div class="quick"><button type="button" class="secondary" '+actionAttr+'="'+esc(item.id)+'">'+esc(actionLabel)+'</button></div>':'')+'</article>';
+ return '<article class="item sme-time-detail-card"><div class="sme-time-card-head"><strong>'+esc(item.title)+'</strong><span class="'+statusClass+'">'+esc(item.status)+'</span></div><p class="muted">'+esc(item.family)+' · '+esc(item.application)+'</p><p class="sme-time-range">'+esc(smeLaborTimeRange(item))+'</p><p>'+esc(item.scope)+'</p>'+(actionAttr?'<div class="quick"><button type="button" class="secondary" '+actionAttr+'="'+esc(item.id)+'">'+esc(actionLabel)+'</button></div>':'')+'</article>';
+}
+function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute){
+ const hrs=item.suggested===null?'—':smeLaborHoursLabel(item.suggested);
+ const shortStatus=item.suggested===null?'Pendiente':'Orientativo';
+ return '<button type="button" class="sme-time-row'+(selected?' is-selected':'')+'" '+actionAttribute+'="'+esc(item.id)+'" aria-pressed="'+String(!!selected)+'"><span class="sme-time-row-name"><strong>'+esc(item.title)+'</strong><small>'+esc(item.family)+'</small></span><span class="sme-time-row-hours">'+esc(hrs)+'</span><span class="sme-time-row-status '+(item.suggested===null?'is-pending':'is-orientative')+'">'+shortStatus+'</span></button>';
 }
 function smeLaborTimesPage(){
  if(!smeCan('tiempos','view')){page='inicio';render();return}
  const canUseBudget=smeCan('presupuestos','edit');
- app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. No son plazos garantizados ni modifican tarifas o presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><p class="muted">Los resultados incluyen trabajos orientativos y operaciones pendientes de validar. Los registros sin horas no se usan para calcular importes.</p></section><div id="smeLaborTimeResults" class="list" aria-live="polite"></div>';
- const input=document.getElementById('smeLaborTimeSearch'),results=document.getElementById('smeLaborTimeResults');
- const draw=()=>{
-  const query=normalizeSearch(input.value),words=query.split(' ').filter(Boolean);
-  const matches=SME_LABOR_TIME_CATALOG.filter(item=>!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word)));
-  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCardMarkup(item,canUseBudget?'Consultar en Presupuestos':'',canUseBudget?'data-labor-time-open':'')).join(''):'<div class="item muted">No encontré coincidencias. Probá una palabra más corta, como “tapa”, “distribución” o “embrague”.</div>';
-  results.querySelectorAll('[data-labor-time-open]').forEach(button=>button.addEventListener('click',()=>{
-   const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===button.dataset.laborTimeOpen);if(!item)return;
+ app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Base de consulta rápida para estimar horas. Elegí una fila para ver el alcance completo; los tiempos son orientativos y no modifican presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><p class="muted">Las operaciones sin horas confirmadas se identifican como pendientes y no se usan para calcular importes.</p></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section>';
+ const input=document.getElementById('smeLaborTimeSearch'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
+ let selectedId='';
+ const paintDetail=()=>{
+  const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===selectedId);
+  detail.hidden=!item;
+  detail.innerHTML=item?smeLaborTimeCardMarkup(item,canUseBudget?'Consultar en Presupuestos':'',canUseBudget?'data-labor-time-open':''):'';
+  const action=detail.querySelector('[data-labor-time-open]');
+  if(action)action.addEventListener('click',()=>{
+   if(!smeCan('presupuestos','edit'))return;
    smePendingLaborTimeId=item.id;smeNavigateTo('presupuestos');
-  }));
+  });
  };
- input.addEventListener('input',draw);draw();
- if(smePendingLaborTimeId){const pending=SME_LABOR_TIME_CATALOG.find(item=>item.id===smePendingLaborTimeId);if(pending)input.value=pending.title;draw()}
+ const draw=()=>{
+  const words=normalizeSearch(input.value).split(' ').filter(Boolean);
+  const matches=SME_LABOR_TIME_CATALOG.filter(item=>!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word)));
+  if(selectedId&&!matches.some(item=>item.id===selectedId))selectedId='';
+  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,item.id===selectedId,'data-time-row')).join(''):'<div class="sme-time-no-results">No encontré coincidencias. Probá “tapa”, “distribución”, “K4M” o “embrague”.</div>';
+  results.querySelectorAll('[data-time-row]').forEach(button=>button.addEventListener('click',()=>{selectedId=button.dataset.timeRow||'';draw()}));
+  paintDetail();
+ };
+ input.addEventListener('input',draw);
+ draw();
+ if(smePendingLaborTimeId){
+  const pending=SME_LABOR_TIME_CATALOG.find(item=>item.id===smePendingLaborTimeId);
+  if(pending){input.value=pending.title;selectedId=pending.id;draw()}
+ }
 }
 let smePendingLaborTimeId='';
 function smeInitBudgetLaborTimeAssist(form){
  const panel=document.getElementById('smeBudgetLaborTimeAssist');if(!panel)return;
- const search=document.getElementById('smeBudgetLaborSearch'),results=document.getElementById('smeBudgetLaborResults'),hoursInput=document.getElementById('smeBudgetLaborHours'),rateInput=document.getElementById('smeBudgetLaborRate'),preview=document.getElementById('smeBudgetLaborPreview'),selectedBox=document.getElementById('smeBudgetLaborSelected'),applyButton=document.getElementById('smeApplyLaborTime'),laborField=form.elements.manoObra,detailField=form.elements.detalle;
+ const search=document.getElementById('smeBudgetLaborSearch'),results=document.getElementById('smeBudgetLaborResults'),hoursInput=document.getElementById('smeBudgetLaborHours'),rateInput=document.getElementById('smeBudgetLaborRate'),preview=document.getElementById('smeBudgetLaborPreview'),selectedBox=document.getElementById('smeBudgetLaborSelected'),calculation=document.getElementById('smeBudgetLaborCalculation'),applyButton=document.getElementById('smeApplyLaborTime'),laborField=form.elements.manoObra,detailField=form.elements.detalle;
  let selected=null;
  const lockedQuote=()=>{const q=editingId===null?null:db.presupuestos.find(item=>String(item.id)===String(editingId));return !!(q&&['Aprobado','En ejecución','Entregado','Pendiente de pago','Finalizado'].includes(String(q.estado||'')))};
  const paintPreview=()=>{
   const hours=Number(String(hoursInput.value||'').replace(',','.')),rate=parseMoneyInput(rateInput.value||'0');
-  preview.textContent=selected&&selected.suggested!==null&&Number.isFinite(hours)&&hours>0&&Number.isFinite(rate)&&rate>0?'Importe orientativo de mano de obra: $ '+money(hours*rate):'Elegí una operación con horas sugeridas e ingresá horas y tarifa para ver el importe.';
+  preview.textContent=selected&&selected.suggested!==null&&Number.isFinite(hours)&&hours>0&&Number.isFinite(rate)&&rate>0?'Importe orientativo de mano de obra: $ '+money(hours*rate):'Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.';
   applyButton.disabled=!selected||selected.suggested===null||!Number.isFinite(hours)||hours<=0||!Number.isFinite(rate)||rate<=0||lockedQuote();
   if(lockedQuote())preview.textContent='Este presupuesto ya está aprobado o en una etapa posterior. La sugerencia no puede aplicarse a un presupuesto acordado.';
  };
  const selectItem=item=>{
-  selected=item;hoursInput.value=item&&item.suggested!==null?String(item.suggested):'';
-  selectedBox.innerHTML=item?smeLaborTimeCardMarkup(item,'',''):'<p class="muted">Todavía no elegiste una operación.</p>';
+  selected=item||null;
+  selectedBox.hidden=!selected;
+  calculation.hidden=!(selected&&selected.suggested!==null);
+  selectedBox.innerHTML=selected?smeLaborTimeCardMarkup(selected,'',''):'';
+  hoursInput.value=selected&&selected.suggested!==null?String(selected.suggested):'';
   paintPreview();
  };
  const draw=()=>{
-  const query=normalizeSearch(search.value),words=query.split(' ').filter(Boolean);
-  const matches=SME_LABOR_TIME_CATALOG.filter(item=>!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word)));
-  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCardMarkup(item,'Seleccionar','data-budget-time-select')).join(''):'<div class="item muted">No encontré coincidencias. Probá con “tapa”, “distribución”, “K4M” o “embrague”.</div>';
+  const words=normalizeSearch(search.value).split(' ').filter(Boolean);
+  if(words.length===0){
+   results.innerHTML='<div class="sme-time-search-empty">Escribí el nombre de un trabajo o motor para ver coincidencias.</div>';
+   return;
+  }
+  const matches=SME_LABOR_TIME_CATALOG.filter(item=>words.every(word=>smeLaborTimeSearchText(item).includes(word)));
+  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,selected?.id===item.id,'data-budget-time-select')).join(''):'<div class="sme-time-no-results">No encontré coincidencias. Probá con “tapa”, “distribución”, “K4M” o “embrague”.</div>';
   results.querySelectorAll('[data-budget-time-select]').forEach(button=>button.addEventListener('click',()=>{
    const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===button.dataset.budgetTimeSelect);if(!item)return;
-   selectItem(item);results.querySelectorAll('[data-budget-time-select]').forEach(node=>node.classList.toggle('active',node===button));
+   selectItem(item);draw();
   }));
  };
- search.addEventListener('input',draw);hoursInput.addEventListener('input',paintPreview);rateInput.addEventListener('input',paintPreview);draw();
+ search.addEventListener('input',()=>{
+  const words=normalizeSearch(search.value).split(' ').filter(Boolean);
+  if(selected&&(!words.length||!words.every(word=>smeLaborTimeSearchText(selected).includes(word))))selectItem(null);
+  draw();
+ });
+ hoursInput.addEventListener('input',paintPreview);rateInput.addEventListener('input',paintPreview);draw();
  applyButton.addEventListener('click',()=>{
   if(lockedQuote()){preview.textContent='No se modificó el presupuesto porque ya está aprobado o en una etapa posterior.';applyButton.disabled=true;return}
   if(!selected||selected.suggested===null){preview.textContent='Esta operación todavía no tiene un tiempo suficientemente validado para calcular un importe.';return}
@@ -914,12 +987,10 @@ function smeInitBudgetLaborTimeAssist(form){
  });
  if(smePendingLaborTimeId){
   const pending=SME_LABOR_TIME_CATALOG.find(item=>item.id===smePendingLaborTimeId);
-  if(pending){search.value=pending.title;draw();selectItem(pending)}
+  if(pending){search.value=pending.title;draw();selectItem(pending);draw()}
   smePendingLaborTimeId='';
  }
-}
-
-function listPage(title,key,fields,submit){
+}title,key,fields,submit){
  editingId=null;
  let budgetInitialView='formal';
  let html='<h2 class="section-title">'+title+'</h2>';if(smeRelatedFilter)html+='<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>';
@@ -929,7 +1000,7 @@ function listPage(title,key,fields,submit){
  for(const [name,label,type] of fields)html+=fieldHTML(key,name,label,type,'');
  if(key==='presupuestos'){
   html+='<input type="hidden" name="horasOrientativas" value=""><input type="hidden" name="operacionTiempoOrientativa" value=""><input type="hidden" name="tarifaHoraOrientativa" value="">';
-  if(smeCan('tiempos','view'))html+='<section class="panel sme-labor-time-assist" id="smeBudgetLaborTimeAssist"><h3>Consultar tiempos orientativos</h3><p class="muted">Buscá la operación adecuada. Las horas son una sugerencia; la tarifa la ingresás vos. No se altera ningún presupuesto guardado hasta que revises y guardes el formulario.</p><label>Buscar trabajo o motor<input id="smeBudgetLaborSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div id="smeBudgetLaborResults" class="list" style="max-height:330px;overflow:auto" aria-live="polite"></div><div id="smeBudgetLaborSelected"><p class="muted">Todavía no elegiste una operación.</p></div><div class="form-grid"><label>Horas a presupuestar<input id="smeBudgetLaborHours" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Horas"></label><label>Tarifa de mano de obra por hora ($)<input id="smeBudgetLaborRate" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label></div><p id="smeBudgetLaborPreview" class="muted" aria-live="polite">Elegí una operación e ingresá horas y tarifa para ver el importe.</p><button type="button" id="smeApplyLaborTime" disabled>Usar importe en presupuesto</button></section>';
+  if(smeCan('tiempos','view'))html+='<section class="panel sme-labor-time-assist" id="smeBudgetLaborTimeAssist"><h3>Consultar tiempos orientativos</h3><p class="muted">Buscá una operación. Seleccioná una coincidencia para ver el detalle y usar sus horas como punto de partida; la tarifa la ingresás vos. No se altera ningún presupuesto guardado hasta que revises y guardes el formulario.</p><label>Buscar trabajo o motor<input id="smeBudgetLaborSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div id="smeBudgetLaborResults" class="sme-budget-time-results" aria-live="polite"></div><div id="smeBudgetLaborSelected" class="sme-time-selected-detail" hidden></div><div id="smeBudgetLaborCalculation" class="sme-budget-time-calculation" hidden><div class="form-grid"><label>Horas a presupuestar<input id="smeBudgetLaborHours" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Horas"></label><label>Tarifa de mano de obra por hora ($)<input id="smeBudgetLaborRate" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label></div><p id="smeBudgetLaborPreview" class="muted" aria-live="polite">Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.</p><button type="button" id="smeApplyLaborTime" disabled>Usar importe en presupuesto</button></div></section>';
  }
  html+='<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit">'+submit+'</button><button type="button" class="secondary" id="cancelEdit" hidden>Cancelar edición</button></form></div><label>Buscar en '+title.toLowerCase()+'<input id="searchRecords" type="search" placeholder="Buscar por nombre, patente, estado..."></label><div class="list" id="recordsList"></div>';
  if(key==='presupuestos'){
@@ -1677,6 +1748,8 @@ function smeModuleKey(value){return ({movimientos:'caja',eventos:'agenda'})[valu
 
 const SME_FAATRA_REFERENCE_KEY='sme_faatra_hourly_reference_v1';
 const SME_FAATRA_SOURCE_URL='https://www.faatra.org.ar/servicios/costo-hora/';
+// Respaldo con el último valor oficial conocido; es histórico y nunca se presenta como vigente.
+const SME_FAATRA_FALLBACK=Object.freeze({value:84000,period:'Julio, agosto y septiembre de 2026',sourceUrl:SME_FAATRA_SOURCE_URL,checkedAt:'',fallback:true});
 function smeReadFaatraState(){
  try{const raw=localStorage.getItem(SME_FAATRA_REFERENCE_KEY);const value=raw?JSON.parse(raw):null;return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
  catch(error){console.warn('No se pudo leer el estado de la referencia FAATRA:',error);return {}}
@@ -1713,26 +1786,25 @@ function smeFaatraPeriodExpiry(period){
 }
 function smeFaatraReferenceCardMarkup(){
  if(!smeCanSeeFaatraReference())return '';
- const state=smeReadFaatraState(),current=state.current&&typeof state.current==='object'?state.current:null;
- const expired=current?smeFaatraPeriodExpiry(current.period):null;
- const valueMarkup=current
-  ?'<div class="sme-faatra-rate"><span>Último valor publicado por FAATRA</span><strong>$ '+smeFaatraMoney(current.value)+' + IVA</strong><small>por hora de taller</small></div>'
-  :'<p class="muted">Todavía no hay un valor de FAATRA guardado en este dispositivo. La consulta necesita conexión a internet.</p>';
- const periodMarkup=current
-  ?'<p class="muted">Período publicado: <strong>'+esc(current.period||'No identificado')+'</strong> · Última comprobación correcta: '+esc(smeFaatraDateLabel(current.checkedAt))+'</p>'
-  :'<p class="muted">Última comprobación: '+esc(state.lastAttemptDate||'sin realizar')+'</p>';
+ const state=smeReadFaatraState(),savedCurrent=state.current&&typeof state.current==='object'?state.current:null;
+ const usingFallback=!savedCurrent,current=savedCurrent||SME_FAATRA_FALLBACK;
+ const expired=smeFaatraPeriodExpiry(current.period);
+ const valueMarkup='<div class="sme-faatra-rate"><span>'+(usingFallback?'Último valor oficial conocido · histórico':'Último valor publicado por FAATRA')+'</span><strong>$ '+smeFaatraMoney(current.value)+' + IVA</strong><small>por hora de taller</small></div>';
+ const periodMarkup=usingFallback
+  ?'<p class="muted">Período publicado: <strong>'+esc(current.period)+'</strong>. No hay una comprobación correcta guardada en este dispositivo.</p>'
+  :'<p class="muted">Período publicado: <strong>'+esc(current.period||'No identificado')+'</strong> · Última comprobación correcta: '+esc(smeFaatraDateLabel(current.checkedAt))+'</p>';
  const expiryMarkup=expired===true
-  ?'<p class="sme-faatra-warning" role="status">Atención: el período publicado ya venció. FAATRA todavía no muestra un período posterior en esta consulta; confirmá su vigencia antes de tomarlo como referencia actual.</p>'
-  :current&&!current.period
+  ?'<p class="sme-faatra-warning" role="status">'+(usingFallback?'Este período histórico ya venció. El valor de $ 84.000 + IVA corresponde a julio-septiembre de 2026 y no debe interpretarse como tarifa vigente.':'Atención: el período publicado ya venció. FAATRA todavía no muestra un período posterior en esta consulta; confirmá su vigencia antes de tomarlo como referencia actual.')+'</p>'
+  :!current.period
    ?'<p class="sme-faatra-warning" role="status">No se pudo identificar el período de vigencia; verificá la publicación original antes de usar este dato.</p>':'';
  const errorMarkup=state.lastError
-  ?'<p class="muted" role="status">No se pudo comprobar FAATRA en el último intento. Se conserva el dato anterior sin marcarlo como actualizado.</p>':'';
+  ?'<p class="muted" role="status">'+(usingFallback?'No se pudo consultar FAATRA en el último intento. Se mantiene este valor histórico de respaldo; no se presenta como actualizado.':'No se pudo comprobar FAATRA en el último intento. Se conserva el dato anterior sin marcarlo como actualizado.')+'</p>'
+  :usingFallback?'<p class="muted" role="status">Al conectarse, SME intentará comprobar si FAATRA publicó un período nuevo.</p>':'';
  return '<section class="panel sme-faatra-reference" id="smeFaatraReferenceCard"><div class="sme-faatra-heading"><div><h3>Referencia de hora taller · FAATRA</h3><p class="muted">Consulta orientativa para el personal autorizado.</p></div><span class="sme-faatra-source-tag">FUENTE EXTERNA</span></div>'+
   valueMarkup+periodMarkup+expiryMarkup+errorMarkup+
   '<p class="muted sme-faatra-disclaimer">Este dato no modifica ninguna tarifa, presupuesto ni cálculo de SME. El precio del taller lo decide únicamente la persona autorizada por el taller.</p>'+
   '<div class="quick"><button type="button" class="secondary" id="smeRefreshFaatraReference">Comprobar ahora</button><a href="'+SME_FAATRA_SOURCE_URL+'" target="_blank" rel="noopener noreferrer">Ver publicación oficial de FAATRA</a></div></section>';
 }
-function smeRefreshFaatraReferenceCard(){
  const existing=document.getElementById('smeFaatraReferenceCard');
  if(!existing)return;
  const holder=document.createElement('div');holder.innerHTML=smeFaatraReferenceCardMarkup();
@@ -1765,7 +1837,7 @@ async function smeCheckFaatraReference(force=false){
   const value=Number(result&&result.value),period=String(result&&result.period||'').trim();
   if(!Number.isFinite(value)||value<=0||!period)throw new Error('La respuesta no incluyó un valor y un período de publicación reconocibles.');
   const current={value,period,sourceUrl:String(result.sourceUrl||SME_FAATRA_SOURCE_URL),checkedAt:new Date().toISOString()};
-  const previous=state.current&&typeof state.current==='object'?state.current:null;
+  const previous=state.current&&typeof state.current==='object'?state.current:SME_FAATRA_FALLBACK;
   const changed=!!previous&&(Number(previous.value)!==value||String(previous.period||'').trim().toLocaleLowerCase('es-AR')!==period.toLocaleLowerCase('es-AR'));
   const next={...state,current,lastAttemptDate:today,lastError:''};
   if(changed){
