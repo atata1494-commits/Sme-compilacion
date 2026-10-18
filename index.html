@@ -990,7 +990,8 @@ function smeInitBudgetLaborTimeAssist(form){
   if(pending){search.value=pending.title;draw();selectItem(pending);draw()}
   smePendingLaborTimeId='';
  }
-}title,key,fields,submit){
+
+function listPage(title,key,fields,submit){
  editingId=null;
  let budgetInitialView='formal';
  let html='<h2 class="section-title">'+title+'</h2>';if(smeRelatedFilter)html+='<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>';
@@ -1805,6 +1806,7 @@ function smeFaatraReferenceCardMarkup(){
   '<p class="muted sme-faatra-disclaimer">Este dato no modifica ninguna tarifa, presupuesto ni cálculo de SME. El precio del taller lo decide únicamente la persona autorizada por el taller.</p>'+
   '<div class="quick"><button type="button" class="secondary" id="smeRefreshFaatraReference">Comprobar ahora</button><a href="'+SME_FAATRA_SOURCE_URL+'" target="_blank" rel="noopener noreferrer">Ver publicación oficial de FAATRA</a></div></section>';
 }
+function smeRefreshFaatraReferenceCard(){
  const existing=document.getElementById('smeFaatraReferenceCard');
  if(!existing)return;
  const holder=document.createElement('div');holder.innerHTML=smeFaatraReferenceCardMarkup();
