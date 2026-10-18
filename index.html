@@ -805,6 +805,7 @@ function smeRelatedButtons(key,o){
 }
 function listPage(title,key,fields,submit){
  editingId=null;
+ let budgetInitialView='formal';
  let html='<h2 class="section-title">'+title+'</h2>';if(smeRelatedFilter)html+='<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>';
  if(key==='movimientos')html+=cashSummaryMarkup()
  if((key==='vehiculos'||key==='trabajos'||key==='presupuestos'||key==='eventos')&&!db.clientes.length&&key!=='eventos')html+='<div class="panel muted">Consejo: primero cargá un cliente en la sección Clientes para poder relacionarlo aquí.</div>';
@@ -1255,8 +1256,10 @@ function smeUserPreviewDialog(user,mode='view'){
    :SME_MODULES.filter(m=>permissions[m.key]&&permissions[m.key]!=='none').map(m=>'<li><span>'+esc(m.label)+'</span><small>'+(permissions[m.key]==='edit'?'Consultar y modificar':'Solo consultar')+'</small></li>').join('');
   const backup=user&&user.isPrimary?'Acceso completo':permissions.backup===true||permissions.backup==='edit'?'Consultar y modificar':permissions.backup==='view'?'Solo consultar':'Sin acceso';
   const active=user&&user.active===false?'Deshabilitado':'Habilitado';
+  const costPermission=user&&user.isPrimary?'Consultar y modificar':(permissions.presupuestosCostos==='edit'?'Consultar y modificar':permissions.presupuestosCostos==='view'?'Solo consultar':'Sin acceso');
   const permissionsMarkup=(permissionItems||'<li><span>Sin acceso a módulos</span><small>Sin acceso</small></li>')+
-   '<li><span>Respaldos e importación</span><small>'+backup+'</small></li>';
+   '<li><span>Respaldos e importación</span><small>'+backup+'</small></li>'+
+   '<li><span>Costos internos y márgenes de presupuestos</span><small>'+costPermission+'</small></li>';
   const isSave=mode==='save';
   overlay.innerHTML='<section class="sme-review-dialog" role="dialog" aria-modal="true" aria-labelledby="smeReviewTitle">'+
    '<h2 id="smeReviewTitle">'+(isSave?'Revisá el usuario antes de guardar':'Perfil del usuario')+'</h2>'+
@@ -1442,6 +1445,10 @@ function smeCan(key,action='view'){
  if(key==='usuarios')return !!smeCurrentUser.isPrimary;
  if(key==='avisos'&&action!=='edit')return true;
  if(smeCurrentUser.isPrimary)return true;
+ if(key==='presupuestos'&&['costs','costs-edit'].includes(action)){
+  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.presupuestosCostos||'none';
+  return action==='costs-edit'?level==='edit':level==='view'||level==='edit';
+ }
  const level=smeCurrentUser.permissions&&smeCurrentUser.permissions[key]||'none';
  return action==='edit'?level==='edit':level==='view'||level==='edit';
 }
@@ -1498,7 +1505,7 @@ function smeApplyPermissions(){
  });
  const editAllowed=smeCan(page,'edit');
  if(!editAllowed){
-  document.querySelectorAll('main form:not(#smeUserForm)').forEach(form=>{
+  document.querySelectorAll('main form:not(#smeUserForm):not(#smeInternalCostForm)').forEach(form=>{
    const panel=form.closest('.panel');
    if(panel)panel.hidden=true;
   });
@@ -1965,6 +1972,7 @@ function smeApplyRecommendedPermissions(form){
  const recommended=smeRecommendedPermissions(form.elements['area'].value,form.elements['jobTitle'].value==='__custom__'?form.elements['jobCustom'].value:form.elements['jobTitle'].value);
  for(const m of SME_MODULES){const select=form.elements['perm_'+m.key];if(select)select.value=recommended[m.key]||'none'}
  const backup=form.elements.perm_backup;if(backup)backup.value='none';
+ const costs=form.elements.perm_presupuestosCostos;if(costs)costs.value='none';
  const note=form.querySelector('[data-permission-preset-note]');if(note)note.textContent='Perfil recomendado aplicado. Podés cambiar cualquier permiso antes de guardar.';
 }
 function smeUserPage(editId){
@@ -1979,6 +1987,7 @@ function smeUserPage(editId){
   const editCustomJob=editing?(selectedJobValue==='__custom__'?(editing.jobCustom||editing.jobTitle||''):(editing.jobCustom||'')):'';
   const profilePhotoField='<div class="sme-profile-editor"><div id="smePhotoPreview">'+smeAvatarMarkup(editing||{area:selectedArea||'Área de Mecánica'},'sme-profile-preview')+'</div><div class="sme-profile-fields"><label for="smeUserPhoto">Foto de perfil (opcional)</label><input id="smeUserPhoto" name="profilePhoto" type="file" accept="image/*"><label class="sme-remove-photo"><input type="checkbox" name="removeProfilePhoto" '+(editing&&editing.profilePhoto?'':'disabled')+'> Quitar foto guardada</label><small class="muted">Si no cargás una foto, se muestra el icono del área.</small></div></div>';
   const permissionRows=isPrimary?'<div class="panel muted">El administrador principal conserva acceso completo a todas las secciones.</div>':SME_MODULES.map(m=>'<div class="permission-row"><label for="smePerm_'+m.key+'">'+m.label+'</label><select id="smePerm_'+m.key+'" name="perm_'+m.key+'">'+smePermissionOptions(permissions[m.key]||'none')+'</select></div>').join('')+
+ '<h4 style="margin:18px 0 6px;color:#e5c58f">Permisos sensibles de presupuestos</h4><p class="muted">Estos permisos son independientes del acceso general a presupuestos.</p><div class="permission-row"><label for="smePerm_presupuestosCostos">Costos internos y márgenes</label><select id="smePerm_presupuestosCostos" name="perm_presupuestosCostos">'+smePermissionOptions(permissions.presupuestosCostos||'none')+'</select></div>'+
  '<div class="permission-row"><label for="smePerm_backup">Respaldos e importación</label><select id="smePerm_backup" name="perm_backup">'+smePermissionOptions(permissions.backup===true?'edit':permissions.backup||'none')+'</select></div>';
  app.innerHTML='<h2 class="section-title">Administración de usuarios</h2><p class="muted">Creá cuentas individuales, elegí a qué secciones puede entrar cada persona y deshabilitá el acceso cuando corresponda. Los cambios se guardan en este dispositivo.</p>'+'<section class="panel" id="smeIdleSettingsPanel"><h3>Seguridad de sesión</h3><p class="muted">Bloquear automáticamente después de cuánto tiempo sin actividad.</p><label for="smeIdleTimeoutSelect">Tiempo de inactividad</label><select id="smeIdleTimeoutSelect">'+SME_IDLE_TIMEOUT_OPTIONS.map(seconds=>'<option value="'+seconds+'" '+(seconds===SME_IDLE_TIMEOUT_SECONDS?'selected':'')+'>'+seconds+' segundos</option>').join('')+'</select><p class="muted">El cambio se aplica a esta instalación. El contador se reinicia al interactuar con la aplicación.</p><div class="quick"><button type="button" id="smeSaveIdleTimeout">Guardar configuración</button></div></section>'+'<div class="panel"><form id="smeUserForm"><h3>'+(editing?'Modificar usuario':'Crear usuario')+'</h3><div class="form-grid sme-name-grid"><label for="smeUserFirstName">Nombre<input id="smeUserFirstName" name="firstName" required maxlength="50" value="'+esc(nameParts.firstName)+'" placeholder="Nombre"></label><label for="smeUserLastName">Apellido<input id="smeUserLastName" name="lastName" required maxlength="50" value="'+esc(nameParts.lastName)+'" placeholder="Apellido"></label></div><label for="smeUserDni">DNI</label><input id="smeUserDni" name="dni" required inputmode="numeric" maxlength="12" value="'+esc(editing&&editing.dni||'')+'" placeholder="DNI de 7 u 8 números"><label for="smeUserPhone">Número de celular</label><input id="smeUserPhone" name="phone" type="tel" required maxlength="22" value="'+esc(editing&&editing.phone||'')+'" placeholder="Ej.: +54 9 297 ..."><label for="smeUserArea">Área de trabajo</label><select id="smeUserArea" name="area" required '+(isPrimary?'disabled':'')+'><option value="" '+(!selectedArea?'selected':'')+'>Elegí el área</option>'+SME_AREAS.map(a=>'<option value="'+esc(a.value)+'" '+(selectedArea===a.value?'selected':'')+'>'+esc(a.value)+'</option>').join('')+'</select><label for="smeUserJobTitle">Puesto de trabajo</label><select id="smeUserJobTitle" name="jobTitle" required>'+smeJobOptions(selectedArea,selectedJobValue)+'</select><label for="smeUserJobCustom">Otro puesto (si corresponde)</label><input id="smeUserJobCustom" name="jobCustom" maxlength="50" value="'+esc(editCustomJob)+'" placeholder="Ej.: Electricista automotor"><label for="smeUserLogin">Nombre de usuario</label><input id="smeUserLogin" name="username" required minlength="3" maxlength="32" value="'+esc(editing&&editing.username||'')+'" placeholder="Ej.: mecanico1"><label for="smeUserPassword">Contraseña '+(editing?'nueva (opcional)':'')+'</label><input id="smeUserPassword" name="password" type="password" minlength="10" autocomplete="new-password" '+(editing?'':'required')+' placeholder="'+(editing?'Dejá vacío para conservar la actual':'Mínimo 10 caracteres')+'"><label for="smeUserPassword2">Repetir contraseña '+(editing?'nueva (si la cambiás)':'')+'</label><input id="smeUserPassword2" name="password2" type="password" minlength="10" autocomplete="new-password" '+(editing?'':'required')+' placeholder="Repetí la contraseña">'+profilePhotoField+(isPrimary?'':'<label><input type="checkbox" name="active" value="yes" '+(!(editing&&editing.active===false)?'checked':'')+'> Usuario habilitado</label>')+
  '<h3 style="margin-top:22px">Permisos por sección</h3><p class="muted">Perfil recomendado según área y puesto; podés cambiar cada permiso antes de guardar. “Solo consultar” permite ver e imprimir. “Consultar y modificar” permite cargar, editar y eliminar registros.</p><p class="muted" data-permission-preset-note>'+(editing?'Revisá los permisos actuales de esta cuenta.':'Elegí el puesto para aplicar una recomendación inicial.')+'</p>'+permissionRows+'<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit" class="accent">'+(editing?'Guardar cambios':'Crear usuario')+'</button><button type="button" class="secondary" id="smeCancelUserEdit" '+(editing?'':'hidden')+'>Cancelar edición</button></form></div><h3 class="section-title" style="font-size:20px;margin-top:22px">Usuarios registrados</h3><div class="list" id="smeUsersList">'+smeUsers.map(u=>'<div class="item"><div class="sme-user-row-head">'+smeAvatarMarkup(u,'sme-user-avatar')+'<div class="sme-user-row-copy"><strong>'+esc(smeUserDisplayName(u))+(u.isPrimary?' · Administrador principal':'')+'</strong><div class="muted">Área: '+esc(smeAreaForUser(u))+'<br>Puesto: '+esc(smeJobForUser(u))+'<br>Usuario: '+esc(u.username)+'<br>DNI: '+esc(u.dni||'Sin cargar')+'<br>Celular: '+esc(u.phone||'Sin cargar')+'<br>Estado: '+(u.active===false?'Deshabilitado':'Habilitado')+(u.isPrimary?'<br>Permisos: acceso completo':'<br>Secciones con acceso: '+SME_MODULES.filter(m=>(u.permissions||{})[m.key]&&u.permissions[m.key]!=='none').length+(u.permissions&&(u.permissions.backup===true||(u.permissions.backup&&u.permissions.backup!=='none'))?' · Respaldos':'') )+'</div></div></div><div class="user-actions"><button type="button" class="secondary" data-user-view="'+esc(u.id)+'">Ver perfil</button><button type="button" class="secondary" data-user-edit="'+esc(u.id)+'">Modificar</button>'+(u.isPrimary?'':'<button type="button" class="secondary" data-user-open="'+esc(u.id)+'" '+(u.active===false?'disabled':'')+'>Cambiar de cuenta</button><button type="button" class="secondary" data-user-toggle="'+esc(u.id)+'">'+(u.active===false?'Habilitar':'Deshabilitar')+'</button>')+'</div></div>').join('')+'</div>';
@@ -2047,6 +2056,7 @@ const form=app.querySelector('#smeUserForm');
   if(smeUsers.some(u=>u.username===username&&String(u.id)!==String(editing&&editing.id))){smeFormError(form,'Ya existe un usuario con ese nombre.','username');return}
   const permissions=isPrimary?Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit'])):Object.fromEntries(SME_MODULES.map(m=>[m.key,form.elements['perm_'+m.key]?.value||'none']));
   permissions.backup=isPrimary?'edit':(form.elements.perm_backup?.value||'none');
+  permissions.presupuestosCostos=isPrimary?'edit':(form.elements.perm_presupuestosCostos?.value||'none');
   const profilePhoto=photoFile?await fileToDataURL(photoFile,240,0.58):(removeProfilePhoto?'':(editing&&editing.profilePhoto||''));
   const next={...(editing||{}),id:editing?editing.id:'sme-user-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),username,firstName,lastName,name,dni,phone,area,jobTitle,jobCustom:selectedJob==='__custom__'?jobCustom:'',profilePhoto,role:isPrimary?'admin':'usuario',isPrimary,active:isPrimary?true:!!form.elements.active?.checked,permissions,updatedAt:new Date().toISOString()};
   if(!editing)next.createdAt=next.updatedAt;
