@@ -351,17 +351,8 @@ function smeShowBackExitPrompt(){
 }
 async function smeHandleHardwareBack(){
  if(page!=='inicio'){
-  smeHideBackExitPrompt();
-  exitBackPressedAt=0;
-  let previousPage=null;
-  while(pageHistory.length){
-   const candidate=pageHistory.pop();
-   if(candidate==='inicio'||smeCan(candidate,'view')){previousPage=candidate;break}
-  }
-  if(previousPage){page=previousPage;render();return}
-  page='inicio';
-  pageHistory.length=0;
-  render();
+  // Atrás vuelve siempre al Inicio; no recorre las pantallas visitadas.
+  smeNavigateTo('inicio');
   return;
  }
  const now=Date.now();
