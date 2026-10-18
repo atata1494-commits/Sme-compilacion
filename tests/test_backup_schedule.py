@@ -100,5 +100,18 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("SME-historico-mensual-", worker)
 
 
+    def test_manual_full_sqlite_export_is_separate_from_portable_json(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("saveFullDatabaseBackup", plugin)
+        self.assertIn("ACTION_CREATE_DOCUMENT", plugin)
+        self.assertIn("checkpointDatabase(database)", plugin)
+        self.assertIn("validateDatabase(database)", plugin)
+        self.assertIn("SME-copia-completa.db", plugin)
+        self.assertIn("id=\"backupFullDatabaseBtn\"", SOURCE)
+        self.assertIn("SmeBackup.saveFullDatabaseBackup", SOURCE)
+        self.assertIn("Exportar respaldo JSON", SOURCE)
+        self.assertIn("Restaurar copia completa (.db)", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
