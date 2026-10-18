@@ -83,12 +83,24 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("SmeBackupPlugin.java.template", configure)
         self.assertIn("async close()", storage)
         self.assertIn("Restaurar copia completa (.db)", SOURCE)
-        self.assertIn("smeStyledConfirm('Restaurar copia completa'", SOURCE)
+        self.assertIn("smeStyledConfirm('Confirmar restauración completa'", SOURCE)
         self.assertIn("SmeBackup.commitRestore", SOURCE)
         self.assertIn("checkpointDatabase(database)", plugin)
         self.assertIn("PRAGMA wal_checkpoint(TRUNCATE)", plugin)
         self.assertIn('new File(database.getAbsolutePath() + "-wal")', plugin)
         self.assertIn('new File(database.getAbsolutePath() + "-shm")', plugin)
+
+    def test_sqlite_restore_requires_primary_password_and_reports_outcome(self):
+        self.assertIn("smeCurrentUser.isPrimary!==true", SOURCE)
+        self.assertIn("smeAskPassword('Autorizar restauración'", SOURCE)
+        self.assertIn("smeHashPassword(enteredPassword,smeCurrentUser.salt)", SOURCE)
+        self.assertIn("RESULTADO: RESTAURACIÓN COMPLETADA", SOURCE)
+        self.assertIn("RESULTADO: RESTAURACIÓN NO COMPLETADA", SOURCE)
+        self.assertIn("await smeShowMessage('Informe de restauración',report,'success')", SOURCE)
+        self.assertIn("await smeShowMessage('Informe de restauración',report,'error')", SOURCE)
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn('response.put("clientCount", finalStats.getInt("clientCount"))', plugin)
+
     def test_startup_snapshot_is_supplemented_by_native_background_worker(self):
         # JavaScript startup snapshots alone do not run with the app closed.
         self.assertIn("no sustituye un trabajador nativo Android", SOURCE)
