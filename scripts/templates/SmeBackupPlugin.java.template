@@ -236,7 +236,15 @@ public final class SmeBackupPlugin extends Plugin {
             if (database.isFile()) checkpointDatabase(database);
             File safetyDirectory = safety.getParentFile();
             if (!safetyDirectory.isDirectory() && !safetyDirectory.mkdirs()) throw new IllegalStateException("No se pudo crear la copia de seguridad previa.");
-            if (database.isFile()) copyFile(database, safety);
+            if (database.isFile()) {
+                copyFile(database, safety);
+                // No iniciar una restauración si la copia previa no supera las mismas
+                // validaciones que el respaldo entrante.
+                validateDatabase(safety);
+                if (safety.length() != database.length()) {
+                    throw new IllegalStateException("La copia interna previa no coincide en tamaño con la base actual.");
+                }
+            }
             if (incoming.exists() && !incoming.delete()) throw new IllegalStateException("No se pudo limpiar un archivo temporal anterior.");
             copyFile(staged, incoming);
             validateDatabase(incoming);
