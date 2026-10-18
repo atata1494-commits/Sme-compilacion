@@ -126,6 +126,18 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("Exportar respaldo JSON", SOURCE)
         self.assertIn("Restaurar copia completa (.db)", SOURCE)
 
+    def test_orientative_budget_is_optional_and_kept_distinct_from_formal_quote(self):
+        self.assertIn("smeToggleOrientativeBudget", SOURCE)
+        self.assertIn("smeOrientativeBudgetForm", SOURCE)
+        self.assertIn("type:'Orientativo'", SOURCE)
+        self.assertIn("estimacionMinima:String(min)", SOURCE)
+        self.assertIn("estimacionMaxima:String(max)", SOURCE)
+        self.assertIn("max<min", SOURCE)
+        self.assertIn("No se realizarán trabajos adicionales sin autorización", SOURCE)
+        self.assertIn("navigator.share", SOURCE)
+        self.assertIn("Rango orientativo", SOURCE)
+        self.assertIn("No es un precio definitivo", SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
