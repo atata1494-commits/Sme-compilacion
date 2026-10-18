@@ -91,7 +91,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("Open Labor Project publica 0,3 h", SOURCE)
         self.assertIn("sourceLinks.map(link=>'<a href=", SOURCE)
         self.assertIn("https://openlaborproject.com/data-provenance", SOURCE)
-        self.assertIn("Origen y confianza:", SOURCE)
+        self.assertIn("Contexto del dato:", SOURCE)
         self.assertIn("id:'dist-aveo-16-2014'", SOURCE)
 
     def test_manual_clutch_and_gearbox_do_not_reuse_incompatible_transmission_times(self):
@@ -176,7 +176,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("No hay una hora única publicada para este promedio", SOURCE)
 
     def test_published_hours_are_only_shown_when_the_value_exists(self):
-        self.assertIn("if(Number.isFinite(item.publishedHours))return 'Tiempo publicado:'", SOURCE)
+        self.assertIn("if(Number.isFinite(item.publishedHours))return 'Tiempo publicado: '+smeLaborHoursLabel(item.publishedHours)", SOURCE)
 
 if __name__ == "__main__":
     unittest.main()
