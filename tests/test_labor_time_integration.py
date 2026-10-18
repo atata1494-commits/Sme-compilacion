@@ -11,7 +11,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("const SME_LABOR_TIME_CATALOG = [", SOURCE)
         self.assertIn("Referencias para estimar horas de trabajo", SOURCE)
         self.assertIn("min:4,suggested:5,max:6", SOURCE)
-        self.assertIn("min:6,suggested:7,max:8", SOURCE)
+        self.assertIn("min:4.5,suggested:5.5,max:7.5,status:'Promedio agrupado SME'", SOURCE)
         self.assertIn("status:'Pendiente de confirmar'", SOURCE)
         self.assertNotIn("ATIA Argentina · Categoría", SOURCE)
 
@@ -96,10 +96,12 @@ class LaborTimeIntegrationTests(unittest.TestCase):
 
     def test_manual_clutch_and_gearbox_do_not_reuse_incompatible_transmission_times(self):
         self.assertIn("id:'clutch-sedan'", SOURCE)
-        self.assertIn("status:'Pendiente de validar'", SOURCE)
-        self.assertIn("transmisiones automáticas o de doble embrague", SOURCE)
-        self.assertIn("id:'gearbox-remove-install'", SOURCE)
-        self.assertIn("min:null,suggested:null,max:null,status:'Pendiente de revalidar'", SOURCE)
+        self.assertIn("id:'clutch-pickup-4x2'", SOURCE)
+        self.assertIn("id:'clutch-pickup-4x4'", SOURCE)
+        self.assertIn("min:5.5,suggested:7,max:8.5,status:'Promedio agrupado SME'", SOURCE)
+        self.assertIn("min:6.5,suggested:8,max:10,status:'Promedio agrupado SME'", SOURCE)
+        self.assertIn("id:'gearbox-pickup-4x2'", SOURCE)
+        self.assertIn("id:'gearbox-pickup-4x4'", SOURCE)
 
 
     def test_time_catalog_hides_unconfirmed_rows_by_default_and_provides_a_filter(self):
@@ -119,6 +121,33 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertLess(SOURCE.index('id="smeBudgetLaborSelected"'), SOURCE.index('id="smeBudgetLaborResults"'))
         self.assertLess(SOURCE.index('id="smeBudgetLaborCalculation"'), SOURCE.index('id="smeBudgetLaborResults"'))
         self.assertIn("selectedBox.scrollIntoView({behavior:'smooth',block:'start'})", SOURCE)
+
+
+    def test_grouped_average_clutch_catalog_covers_sedan_pickup_4x2_and_4x4(self):
+        for row_id in ["clutch-sedan", "clutch-pickup-4x2", "clutch-pickup-4x4", "gearbox-pickup-4x2", "gearbox-pickup-4x4"]:
+            self.assertIn("id:'" + row_id + "'", SOURCE)
+        self.assertIn("Promedio agrupado SME", SOURCE)
+        self.assertIn("No es una norma argentina", SOURCE)
+        self.assertIn("No sumar el tiempo de caja por separado", SOURCE)
+
+    def test_more_everyday_grouped_jobs_have_reference_hours(self):
+        for row_id in [
+            "gasket-head-diesel-4cyl", "valve-cover-gasket", "oil-pan-gasket",
+            "valve-adjustment-8v", "radiator-replace", "coolant-hose",
+            "accessory-belt-tensioner", "rear-shocks-pair", "front-control-arm",
+            "stabilizer-links", "cv-axle", "rear-drum-brakes", "rear-disc-brakes",
+            "brake-fluid-bleed", "brake-caliper", "air-filter", "cabin-filter",
+            "fuel-filter", "spark-plugs-4cyl", "battery-replace", "fuel-pump", "ac-compressor"
+        ]:
+            self.assertIn("id:'" + row_id + "'", SOURCE)
+            self.assertIn("status:'Promedio agrupado SME'", SOURCE)
+
+    def test_grouped_average_records_include_scope_and_references(self):
+        self.assertIn("sourceNote:'Comparativos externos", SOURCE)
+        self.assertIn("sourceLinks:[{label:'Ford F-150 manual 4×4 · embrague'", SOURCE)
+        self.assertIn("sourceLinks:[{label:'Ford Fiesta · pastillas delanteras'", SOURCE)
+        self.assertIn("la tarifa la ingresás vos", SOURCE)
+        self.assertIn("No se altera ningún presupuesto guardado", SOURCE)
 
 
 if __name__ == "__main__":
