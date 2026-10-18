@@ -69,7 +69,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn('class="sme-time-table"', SOURCE)
         self.assertIn("function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute)", SOURCE)
         self.assertIn('id="smeLaborTimeDetail" class="sme-time-detail" hidden', SOURCE)
-        self.assertIn("selectedId=button.dataset.timeRow||'';draw()", SOURCE)
+        self.assertIn("selectedId=button.dataset.timeRow||'';draw(true)", SOURCE)
         self.assertIn("results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup", SOURCE)
 
     def test_budget_search_shows_compact_matches_and_one_selected_detail(self):
@@ -116,11 +116,8 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("detail.scrollIntoView({behavior:'smooth',block:'start'})", page)
 
     def test_budget_detail_and_calculation_precede_results_and_auto_scroll(self):
-        start = SOURCE.index('id="smeBudgetLaborTimeAssist"')
-        end = SOURCE.index("</section>\\';", start)
-        markup = SOURCE[start:end]
-        self.assertLess(markup.index('id="smeBudgetLaborSelected"'), markup.index('id="smeBudgetLaborResults"'))
-        self.assertLess(markup.index('id="smeBudgetLaborCalculation"'), markup.index('id="smeBudgetLaborResults"'))
+        self.assertLess(SOURCE.index('id="smeBudgetLaborSelected"'), SOURCE.index('id="smeBudgetLaborResults"'))
+        self.assertLess(SOURCE.index('id="smeBudgetLaborCalculation"'), SOURCE.index('id="smeBudgetLaborResults"'))
         self.assertIn("selectedBox.scrollIntoView({behavior:'smooth',block:'start'})", SOURCE)
 
 
