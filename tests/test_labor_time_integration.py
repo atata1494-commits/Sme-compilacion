@@ -80,5 +80,27 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("calculation.hidden=!(selected&&selected.suggested!==null)", SOURCE)
 
 
+    def test_k4m_clio_time_has_a_specific_technical_source_and_no_fake_range(self):
+        self.assertIn("id:'dist-k4m-clio-748'", SOURCE)
+        self.assertIn("publishedHours:2.7,status:'Referencia técnica específica'", SOURCE)
+        self.assertIn("Ficha técnica ContiTech · K4M 748", SOURCE)
+        self.assertIn("Tiempo publicado: '+smeLaborHoursLabel(item.publishedHours)", SOURCE)
+
+    def test_comparative_entries_show_source_quality_and_links(self):
+        self.assertIn("status:'Comparativo externo'", SOURCE)
+        self.assertIn("Open Labor Project publica 0,3 h", SOURCE)
+        self.assertIn("sourceLinks.map(link=>'<a href=", SOURCE)
+        self.assertIn("https://openlaborproject.com/data-provenance", SOURCE)
+        self.assertIn("Origen y confianza:", SOURCE)
+        self.assertIn("id:'dist-aveo-16-2014'", SOURCE)
+
+    def test_manual_clutch_and_gearbox_do_not_reuse_incompatible_transmission_times(self):
+        self.assertIn("id:'clutch-sedan'", SOURCE)
+        self.assertIn("status:'Pendiente de validar'", SOURCE)
+        self.assertIn("transmisiones automáticas o de doble embrague", SOURCE)
+        self.assertIn("id:'gearbox-remove-install'", SOURCE)
+        self.assertIn("min:null,suggested:null,max:null,status:'Pendiente de revalidar'", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()
