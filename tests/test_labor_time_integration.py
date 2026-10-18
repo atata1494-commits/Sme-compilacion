@@ -53,7 +53,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn('name="horasOrientativas"', SOURCE)
         self.assertIn('name="operacionTiempoOrientativa"', SOURCE)
         self.assertIn('name="tarifaHoraOrientativa"', SOURCE)
-        self.assertIn("La tarifa la ingresás vos", SOURCE)
+        self.assertIn("la tarifa la ingresás vos", SOURCE)
         self.assertIn("No se altera ningún presupuesto guardado", SOURCE)
 
 
