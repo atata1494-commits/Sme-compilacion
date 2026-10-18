@@ -2302,15 +2302,25 @@ function requireLocalAdmin(){
   if(lastUser)smeSelectedLoginUsername=lastUser.username;
  }
  smeAuthScreen(mode, '', !!smeSelectedLoginUsername && !smeForcePasswordForNextLogin);
+ let smeBackgroundLockTimer=null;
+ const SME_BACKGROUND_GRACE_MS=10000;
  document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'&&smeAuthenticated){
-   // Android's native document picker temporarily hides the app; keep the authorized import session alive.
+   // No bloquear por un toque accidental en Aplicaciones recientes: dar 10 segundos para volver.
    if(smeFilePickerPending)return;
-   smeLockSession('La sesión se bloqueó al salir de la aplicación.');
+   if(smeBackgroundLockTimer!==null)clearTimeout(smeBackgroundLockTimer);
+   smeBackgroundLockTimer=setTimeout(()=>{
+    smeBackgroundLockTimer=null;
+    if(document.visibilityState==='hidden'&&smeAuthenticated&&!smeFilePickerPending)
+     smeLockSession('La sesión se bloqueó después de permanecer fuera de SME.');
+   },SME_BACKGROUND_GRACE_MS);
    return;
   }
-  if(document.visibilityState==='visible'&&smeAuthenticated&&smeFilePickerPending){
-   setTimeout(()=>{if(document.visibilityState==='visible'&&smeFilePickerPending)smeFinishFilePicker()},250);
+  if(document.visibilityState==='visible'){
+   // Si volvió antes de los 10 segundos, cancelar el bloqueo y continuar donde estaba.
+   if(smeBackgroundLockTimer!==null){clearTimeout(smeBackgroundLockTimer);smeBackgroundLockTimer=null;if(smeAuthenticated)smeResetIdleTimer()}
+   if(smeAuthenticated&&smeFilePickerPending)
+    setTimeout(()=>{if(document.visibilityState==='visible'&&smeFilePickerPending)smeFinishFilePicker()},250);
   }
  });
 }
