@@ -2273,7 +2273,7 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
  let scheduled=false,forceNext=false,focusToken=0;
  const vv=window.visualViewport;
  const isEditable=el=>!!(el&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)&&!el.readOnly&&el.type!=='checkbox'&&el.type!=='radio');
- const keyboardLikely=el=>!!(el&&(/^(INPUT|TEXTAREA)$/.test(el.tagName))&&el.type!=='checkbox'&&el.type!=='radio';
+ const keyboardLikely=el=>!!(el&&(/^(INPUT|TEXTAREA)$/.test(el.tagName))&&el.type!=='checkbox'&&el.type!=='radio');
  const keepFieldVisible=(active)=>{
   if(!isEditable(active))return;
   const visibleTop=(vv?vv.offsetTop:0)+12;
