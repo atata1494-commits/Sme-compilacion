@@ -5,6 +5,7 @@ on:
     branches:
       - security-access-test
       - sme-integracion-completa-test
+      - fixes-caja-tareas-teclado-horario
   pull_request:
     branches:
       - security-access-test
