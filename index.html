@@ -2093,38 +2093,39 @@ function smeBuildVisualTour(){
   {key:'diagnosticos',label:'Diagnósticos',page:'mas',title:'Diagnósticos',text:'Revisá los diagnósticos que tu cuenta puede consultar o registrar.'},
   {key:'presupuestos',label:'Presupuestos',page:'mas',title:'Presupuestos',text:'Consultá o prepará presupuestos según los permisos de tu cuenta.'},
   {key:'agenda',label:'Agenda',page:'mas',title:'Agenda',text:'Consultá los turnos y recordatorios disponibles para tu cuenta.'},
-  {key:'caja',label:'Caja',page:'mas',title:'Caja',text:'Consultá los movimientos de caja si tenés acceso a este módulo.'},
+  {key:'avisos',label:'Avisos internos',page:'mas',title:'Avisos internos',text:'Revisá faltantes, roturas, demoras y avisos habilitados para tu cuenta.'},
+  {key:'caja',label:'Caja',page:'mas',title:'Caja',text:'Consultá los ingresos y egresos si tenés acceso a este módulo.'},
+  {key:'cuentas',label:'Cuentas corrientes',page:'mas',title:'Cuentas corrientes',text:'Consultá los saldos pendientes y las deudas habilitadas para tu cuenta.'},
   {key:'terceros',label:'Trabajos externos',page:'mas',title:'Trabajos externos',text:'Consultá proveedores, permanencias y costos externos autorizados.'},
-  {key:'cuentas',label:'Cuentas corrientes',page:'mas',title:'Cuentas corrientes',text:'Consultá saldos y deudas a los que tu cuenta tiene acceso.'},
   {key:'gastos',label:'Autorizaciones de gastos',page:'mas',title:'Autorizaciones de gastos',text:'Revisá los gastos que requieren autorización si esta función está habilitada.'}
  ].filter(item=>smeCan(item.key,'view'));
- const selected=[];
- const add=item=>{if(item&&!selected.some(x=>x.key===item.key))selected.push(item)};
- // La selección prioriza el trabajo cotidiano y luego las funciones útiles habilitadas.
- add(candidates.find(x=>x.key==='tareas'));
- add(candidates.find(x=>x.key==='asistencias'));
- add(candidates.find(x=>x.key==='recepciones'));
- add(candidates.find(x=>x.key==='diagnosticos'));
- add(candidates.find(x=>x.key==='presupuestos'));
- add(candidates.find(x=>x.key==='agenda'));
- add(candidates.find(x=>x.key==='caja'));
- add(candidates.find(x=>x.key==='terceros'));
- add(candidates.find(x=>x.key==='cuentas'));
- add(candidates.find(x=>x.key==='gastos'));
+ const byKey=key=>candidates.find(item=>item.key===key);
  const steps=[{
   key:'inicio',page:'inicio',title:'Inicio: lo principal del día',
   text:'Acá ves el resumen del taller y los avisos. El signo ? abre la ayuda contextual. “Mi jornada” permite acceder a tu horario personal si está habilitado.',
   selectors:['.home-overview','#smeHelpButton',...(smeCan('asistencias','view')?['.home-shift']:[])]
  }];
  const workAccess=smeCan('trabajos','view');
- if(workAccess)steps.push({key:'trabajos',page:'trabajos',title:'Trabajos y órdenes',text:'Consultá y continuá las órdenes del taller que tu cuenta tiene autorizadas.',selectors:['#app .section-title','#nav [data-page="trabajos"]']});
- // Completar entre 3 y 5 pasos como máximo, sin repetir funciones ni mostrar módulos sin permiso.
- const maxSteps=Math.min(5,Math.max(3,2+Math.min(3,candidates.length)));
- for(const item of selected){
-  if(steps.length>=maxSteps)break;
-  steps.push({key:item.key,page:item.page,title:item.label,text:item.text,selectors:['#app [data-go="'+item.key+'"]']});
+ const usedKeys=new Set(['inicio']);
+ if(workAccess){steps.push({key:'trabajos',page:'trabajos',title:'Trabajos y órdenes',text:'Consultá y continuá las órdenes del taller que tu cuenta tiene autorizadas.',selectors:['#app .section-title','#nav [data-page="trabajos"]']});usedKeys.add('trabajos')}
+ // Los primeros pasos explican funciones cotidianas; se reserva el último para Gestión.
+ const individualPriority=['tareas','asistencias','recepciones','diagnosticos','presupuestos','agenda','avisos','caja','cuentas','terceros','gastos'];
+ for(const key of individualPriority){
+  if(steps.length>=4)break;
+  const item=byKey(key);
+  if(!item||usedKeys.has(key))continue;
+  steps.push({key:item.key,page:item.page,title:item.title,text:item.text,selectors:['#app [data-go="'+item.key+'"]']});
+  usedKeys.add(key);
  }
- // Si la cuenta tiene muy pocos módulos, no inventar accesos ni mostrar módulos no autorizados.
+ const managementPriority=['avisos','caja','cuentas','gastos','terceros','presupuestos','agenda','recepciones','diagnosticos','asistencias','tareas'];
+ const managementTargets=managementPriority.map(byKey).filter(Boolean).filter(item=>!usedKeys.has(item.key)).slice(0,3);
+ if(managementTargets.length){
+  steps.push({
+   key:'gestion',page:'mas',title:'Gestión: herramientas según tus permisos',
+   text:'En Gestión encontrás las funciones habilitadas para tu cuenta. Los puntos iluminados muestran accesos útiles; lo que no tenés permitido no aparece en este recorrido.',
+   selectors:managementTargets.map(item=>'#app [data-go="'+item.key+'"]')
+  });
+ }
  return steps.slice(0,5);
 }
 function smeShowWelcomeTourStep(step){
@@ -2176,7 +2177,16 @@ function smeRenderVisualTourStep(){
   '.home-shift':['Mi jornada','Desde “Ver horario” registrás tu entrada y salida y consultás tu jornada.'],
   '#app [data-go="asistencias"]':['Control horario','Acá consultás registros horarios y, según tus permisos, revisás fichajes y alertas del equipo.'],
   '#app [data-go="horario"]':['Horario','Aquí encontrás las funciones de horario disponibles para tu cuenta.'],
-  '#app [data-go="tareas"]':['Tareas','Consultá las tareas que tenés asignadas, si aparecen habilitadas.'],
+  '#app [data-go="tareas"]':['Tareas','Consultá las tareas que tenés asignadas y qué queda pendiente.'],
+  '#app [data-go="recepciones"]':['Recepción','Registrá el estado del vehículo al ingresar al taller.'],
+  '#app [data-go="diagnosticos"]':['Diagnósticos','Consultá las inspecciones técnicas habilitadas para tu cuenta.'],
+  '#app [data-go="presupuestos"]':['Presupuestos','Prepará o consultá cotizaciones según tus permisos.'],
+  '#app [data-go="agenda"]':['Agenda','Consultá turnos y recordatorios.'],
+  '#app [data-go="avisos"]':['Avisos internos','Revisá faltantes, roturas, demoras y necesidades comunicadas al equipo.'],
+  '#app [data-go="caja"]':['Caja','Consultá ingresos y egresos registrados, si tenés acceso.'],
+  '#app [data-go="cuentas"]':['Cuentas corrientes','Revisá saldos por cobrar y cuentas por pagar disponibles para tu cuenta.'],
+  '#app [data-go="terceros"]':['Trabajos externos','Consultá proveedores, permanencias y costos externos autorizados.'],
+  '#app [data-go="gastos"]':['Autorizaciones de gastos','Revisá las solicitudes de gasto habilitadas para tu cuenta.'],
   '#app .section-title':['Órdenes de trabajo','En esta sección consultás y continuás las órdenes del taller autorizadas para tu cuenta.'],
   '#nav [data-page="trabajos"]':['Trabajos','Abrí Trabajos para consultar las órdenes de trabajo del taller.']
  };
@@ -2262,7 +2272,7 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
  let scheduled=false,forceNext=false;
  const vv=window.visualViewport;
  const adjust=(force=false)=>{
-  forceNext=forceNext||force;
+  forceNext=forceNext||!!force;
   if(scheduled)return;scheduled=true;
   requestAnimationFrame(()=>{
    scheduled=false;
@@ -2277,14 +2287,13 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
     const marginTop=18,marginBottom=keyboardOpen?32:24;
     const r=active.getBoundingClientRect();
     if(r.bottom>visibleBottom-marginBottom||r.top<visibleTop+marginTop){
-     const delta=r.bottom>visibleBottom-marginBottom?r.bottom-(visibleBottom-marginBottom):r.top-(visibleTop+marginTop);
-     window.scrollBy({top:delta,behavior:'auto'});
+     active.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
      requestAnimationFrame(()=>{
       if(document.activeElement!==active)return;
       const after=active.getBoundingClientRect();
       if(after.bottom>visibleBottom-marginBottom||after.top<visibleTop+marginTop){
-       const correction=after.bottom>visibleBottom-marginBottom?after.bottom-(visibleBottom-marginBottom):after.top-(visibleTop+marginTop);
-       window.scrollBy({top:correction,behavior:'auto'});
+       const scrollDelta=after.bottom>visibleBottom-marginBottom?after.bottom-(visibleBottom-marginBottom):after.top-(visibleTop+marginTop);
+       window.scrollBy({top:scrollDelta,behavior:'auto'});
       }
      });
     }
@@ -2297,8 +2306,8 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
   [0,100,220,380,550].forEach(delay=>setTimeout(()=>adjust(true),delay));
  });
  document.addEventListener('focusout',()=>setTimeout(()=>adjust(),180));
- vv?.addEventListener('resize',()=>adjust(true));vv?.addEventListener('scroll',()=>adjust(true));
- window.addEventListener('resize',()=>adjust(true));window.addEventListener('orientationchange',()=>setTimeout(()=>adjust(true),250));
+ vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);
+ window.addEventListener('resize',adjust);window.addEventListener('orientationchange',()=>setTimeout(()=>adjust(true),250));
 })();
 function requireLocalAdmin(){
  try{
