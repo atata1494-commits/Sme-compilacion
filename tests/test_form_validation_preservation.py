@@ -48,5 +48,12 @@ class FormValidationPreservationTests(unittest.TestCase):
         self.assertIn("vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);", SOURCE)
 
 
+    def test_android_back_from_subpage_goes_home_not_previous_visited_page(self):
+        handler = SOURCE.split("async function smeHandleHardwareBack(){", 1)[1].split("\\nasync function save()", 1)[0]
+        self.assertIn("if(page!=='inicio'){\\n  // Atrás vuelve siempre al Inicio; no recorre las pantallas visitadas.\\n  smeNavigateTo('inicio');\\n  return;\\n }", handler)
+        self.assertNotIn("pageHistory.pop()", handler)
+        self.assertIn("await CapacitorApp.exitApp();", handler)
+
+
 if __name__ == "__main__":
     unittest.main()
