@@ -110,7 +110,7 @@ public final class SmeBackupPlugin extends Plugin {
                     );
                     Matcher rateMatcher = ratePattern.matcher(text);
                     if (!rateMatcher.find()) {
-                        throw new IllegalStateException("La página consultada no contiene un valor reconocible de hora de mecánica.");
+                        throw new IllegalStateException("La página consultada no contiene un valor reconocible de hora de mecánica. No se modificó ningún precio de SME.");
                     }
                     String digits = rateMatcher.group(1).replaceAll("[^0-9]", "");
                     long value;
