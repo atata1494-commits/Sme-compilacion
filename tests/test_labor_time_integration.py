@@ -102,5 +102,27 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("min:null,suggested:null,max:null,status:'Pendiente de revalidar'", SOURCE)
 
 
+    def test_time_catalog_hides_unconfirmed_rows_by_default_and_provides_a_filter(self):
+        self.assertIn('id="smeLaborTimesShowPending" type="checkbox"', SOURCE)
+        self.assertIn("Incluir trabajos sin horas confirmadas", SOURCE)
+        self.assertIn("const includePending=showPending.checked||words.length>0", SOURCE)
+        self.assertIn("(includePending||item.suggested!==null)", SOURCE)
+        self.assertIn("showPending.addEventListener('change',()=>draw())", SOURCE)
+
+    def test_selected_time_detail_is_above_catalog_and_scrolls_into_view(self):
+        page = SOURCE[SOURCE.index("function smeLaborTimesPage()"):SOURCE.index("let smePendingLaborTimeId")]
+        self.assertLess(page.index('id="smeLaborTimeDetail"'), page.index('id="smeLaborTimeResults"'))
+        self.assertIn("draw(true)", page)
+        self.assertIn("detail.scrollIntoView({behavior:'smooth',block:'start'})", page)
+
+    def test_budget_detail_and_calculation_precede_results_and_auto_scroll(self):
+        start = SOURCE.index('id="smeBudgetLaborTimeAssist"')
+        end = SOURCE.index("</section>\\';", start)
+        markup = SOURCE[start:end]
+        self.assertLess(markup.index('id="smeBudgetLaborSelected"'), markup.index('id="smeBudgetLaborResults"'))
+        self.assertLess(markup.index('id="smeBudgetLaborCalculation"'), markup.index('id="smeBudgetLaborResults"'))
+        self.assertIn("selectedBox.scrollIntoView({behavior:'smooth',block:'start'})", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()

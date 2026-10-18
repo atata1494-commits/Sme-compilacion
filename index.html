@@ -159,8 +159,11 @@ form button{margin-top:10px;width:100%}
 .sme-time-row-status{font-size:9px;line-height:1.2;text-align:right;color:#b8d6bc}
 .sme-time-row-status.is-pending{color:#e2bd7a}
 .sme-time-no-results,.sme-time-search-empty{padding:14px;color:var(--muted);font-size:13px;line-height:1.4}
-.sme-time-detail{margin-top:12px}
+.sme-time-filter{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:13px;line-height:1.35}
+#smeLaborTimesShowPending{width:auto;min-height:0;margin:0;accent-color:#c6a16a;flex:0 0 auto}
+.sme-time-detail{margin:10px 0 12px;scroll-margin-top:14px}
 .sme-time-detail[hidden],#smeBudgetLaborSelected[hidden],#smeBudgetLaborCalculation[hidden]{display:none!important}
+#smeBudgetLaborSelected{scroll-margin-top:14px}
 .sme-time-detail-card{margin-top:0;border-color:#8a704a;background:linear-gradient(145deg,rgba(35,48,43,.98),rgba(31,35,31,.98))}
 .sme-time-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:9px}
 .sme-time-card-head strong{min-width:0;line-height:1.25}
@@ -175,7 +178,7 @@ form button{margin-top:10px;width:100%}
 .sme-budget-time-results .sme-time-row-name strong{font-size:12px}
 .sme-budget-time-results .sme-time-row-name small{font-size:10px}
 .sme-budget-time-results .sme-time-row-status{font-size:9px}
-.sme-time-selected-detail{margin-top:10px}
+.sme-time-selected-detail{margin-top:10px;scroll-margin-top:14px}
 .sme-budget-time-calculation{margin-top:12px;padding-top:10px;border-top:1px solid #4c5147}
 .sme-budget-time-calculation .form-grid{gap:6px 10px}
 .sme-budget-time-calculation .form-grid label{font-size:12px}
@@ -921,8 +924,8 @@ function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute){
 function smeLaborTimesPage(){
  if(!smeCan('tiempos','view')){page='inicio';render();return}
  const canUseBudget=smeCan('presupuestos','edit');
- app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><p class="muted">Las operaciones sin horas confirmadas se identifican como pendientes y no se usan para calcular importes.</p></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section>';
- const input=document.getElementById('smeLaborTimeSearch'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
+ app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><label class="sme-time-filter"><input id="smeLaborTimesShowPending" type="checkbox"> Incluir trabajos sin horas confirmadas</label><p class="muted">Se muestran primero los trabajos con horas sugeridas. Los pendientes aparecen cuando los buscás o activás este filtro.</p></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section>';
+ const input=document.getElementById('smeLaborTimeSearch'),showPending=document.getElementById('smeLaborTimesShowPending'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
  let selectedId='';
  const paintDetail=()=>{
   const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===selectedId);
@@ -934,15 +937,18 @@ function smeLaborTimesPage(){
    smePendingLaborTimeId=item.id;smeNavigateTo('presupuestos');
   });
  };
- const draw=()=>{
+ const draw=(focusDetail=false)=>{
   const words=normalizeSearch(input.value).split(' ').filter(Boolean);
-  const matches=SME_LABOR_TIME_CATALOG.filter(item=>!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word)));
+  const includePending=showPending.checked||words.length>0;
+  const matches=SME_LABOR_TIME_CATALOG.filter(item=>(includePending||item.suggested!==null)&&(!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word))));
   if(selectedId&&!matches.some(item=>item.id===selectedId))selectedId='';
-  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,item.id===selectedId,'data-time-row')).join(''):'<div class="sme-time-no-results">No encontré coincidencias. Probá “tapa”, “distribución”, “K4M” o “embrague”.</div>';
-  results.querySelectorAll('[data-time-row]').forEach(button=>button.addEventListener('click',()=>{selectedId=button.dataset.timeRow||'';draw()}));
+  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,item.id===selectedId,'data-time-row')).join(''):'<div class="sme-time-no-results">No encontré coincidencias con horas sugeridas. Para consultar operaciones pendientes, activá “Incluir trabajos sin horas confirmadas”.</div>';
+  results.querySelectorAll('[data-time-row]').forEach(button=>button.addEventListener('click',()=>{selectedId=button.dataset.timeRow||'';draw(true)}));
   paintDetail();
+  if(focusDetail&&selectedId)setTimeout(()=>detail.scrollIntoView({behavior:'smooth',block:'start'}),50);
  };
- input.addEventListener('input',draw);
+ input.addEventListener('input',()=>draw());
+ showPending.addEventListener('change',()=>draw());
  draw();
  if(smePendingLaborTimeId){
   const pending=SME_LABOR_TIME_CATALOG.find(item=>item.id===smePendingLaborTimeId);
@@ -980,6 +986,7 @@ function smeInitBudgetLaborTimeAssist(form){
   results.querySelectorAll('[data-budget-time-select]').forEach(button=>button.addEventListener('click',()=>{
    const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===button.dataset.budgetTimeSelect);if(!item)return;
    selectItem(item);draw();
+   setTimeout(()=>selectedBox.scrollIntoView({behavior:'smooth',block:'start'}),50);
   }));
  };
  search.addEventListener('input',()=>{
@@ -1017,7 +1024,7 @@ function listPage(title,key,fields,submit){
  for(const [name,label,type] of fields)html+=fieldHTML(key,name,label,type,'');
  if(key==='presupuestos'){
   html+='<input type="hidden" name="horasOrientativas" value=""><input type="hidden" name="operacionTiempoOrientativa" value=""><input type="hidden" name="tarifaHoraOrientativa" value="">';
-  if(smeCan('tiempos','view'))html+='<section class="panel sme-labor-time-assist" id="smeBudgetLaborTimeAssist"><h3>Consultar tiempos orientativos</h3><p class="muted">Buscá una operación. Seleccioná una coincidencia para ver el detalle y usar sus horas como punto de partida; la tarifa la ingresás vos. No se altera ningún presupuesto guardado hasta que revises y guardes el formulario.</p><label>Buscar trabajo o motor<input id="smeBudgetLaborSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div id="smeBudgetLaborResults" class="sme-budget-time-results" aria-live="polite"></div><div id="smeBudgetLaborSelected" class="sme-time-selected-detail" hidden></div><div id="smeBudgetLaborCalculation" class="sme-budget-time-calculation" hidden><div class="form-grid"><label>Horas a presupuestar<input id="smeBudgetLaborHours" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Horas"></label><label>Tarifa de mano de obra por hora ($)<input id="smeBudgetLaborRate" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label></div><p id="smeBudgetLaborPreview" class="muted" aria-live="polite">Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.</p><button type="button" id="smeApplyLaborTime" disabled>Usar importe en presupuesto</button></div></section>';
+  if(smeCan('tiempos','view'))html+='<section class="panel sme-labor-time-assist" id="smeBudgetLaborTimeAssist"><h3>Consultar tiempos orientativos</h3><p class="muted">Buscá una operación. Seleccioná una coincidencia para ver el detalle y usar sus horas como punto de partida; la tarifa la ingresás vos. No se altera ningún presupuesto guardado hasta que revises y guardes el formulario.</p><label>Buscar trabajo o motor<input id="smeBudgetLaborSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div id="smeBudgetLaborSelected" class="sme-time-selected-detail" hidden></div><div id="smeBudgetLaborCalculation" class="sme-budget-time-calculation" hidden><div class="form-grid"><label>Horas a presupuestar<input id="smeBudgetLaborHours" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Horas"></label><label>Tarifa de mano de obra por hora ($)<input id="smeBudgetLaborRate" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label></div><p id="smeBudgetLaborPreview" class="muted" aria-live="polite">Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.</p><button type="button" id="smeApplyLaborTime" disabled>Usar importe en presupuesto</button></div><div id="smeBudgetLaborResults" class="sme-budget-time-results" aria-live="polite"><div class="sme-time-search-empty">Escribí el nombre de un trabajo o motor para ver coincidencias.</div></div></section>';
  }
  html+='<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit">'+submit+'</button><button type="button" class="secondary" id="cancelEdit" hidden>Cancelar edición</button></form></div><label>Buscar en '+title.toLowerCase()+'<input id="searchRecords" type="search" placeholder="Buscar por nombre, patente, estado..."></label><div class="list" id="recordsList"></div>';
  if(key==='presupuestos'){
