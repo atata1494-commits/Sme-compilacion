@@ -77,8 +77,9 @@ input::placeholder,textarea::placeholder{color:#b4bdb8}
 input:focus,select:focus,textarea:focus{border-color:#c6a16a;background:#2d3e40}
 /* Teclado móvil: reservar espacio y mantener visible el campo enfocado. */
 html{scroll-padding-bottom:calc(110px + env(safe-area-inset-bottom))}
-body.sme-keyboard-open nav{display:none}
-body.sme-keyboard-open main{padding-bottom:calc(48vh + 28px + env(safe-area-inset-bottom))}
+body.sme-keyboard-open nav{display:none!important}
+body.sme-keyboard-open main{padding-bottom:calc(55vh + 44px + env(safe-area-inset-bottom))}
+body.sme-keyboard-open{scroll-padding-bottom:55vh}
 input,select,textarea,button{scroll-margin-top:18px;scroll-margin-bottom:24px}
 form [data-form-error]:empty{display:none}
 form [data-form-error]:not(:empty){display:block;padding:9px 10px;border:1px solid #a86b60;border-radius:8px;background:#3b2825}
@@ -2269,8 +2270,41 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
 
 // Mantiene visible el campo al tocarlo, antes de empezar a escribir, incluso al final de formularios.
 (function installKeyboardViewportFix(){
- let scheduled=false,forceNext=false;
+ let scheduled=false,forceNext=false,focusToken=0;
  const vv=window.visualViewport;
+ const isEditable=el=>!!(el&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)&&!el.readOnly&&el.type!=='checkbox'&&el.type!=='radio');
+ const keyboardLikely=el=>!!(el&&(/^(INPUT|TEXTAREA)$/.test(el.tagName))&&el.type!=='checkbox'&&el.type!=='radio';
+ const keepFieldVisible=(active)=>{
+  if(!isEditable(active))return;
+  const visibleTop=(vv?vv.offsetTop:0)+12;
+  const viewportBottom=vv?vv.offsetTop+vv.height:window.innerHeight;
+  // La barra de navegación inferior puede seguir visible en WebView aunque el teclado ya esté abierto.
+  const nav=document.querySelector('nav');
+  const navHeight=nav&&!nav.hidden?nav.getBoundingClientRect().height:0;
+  const visibleBottom=Math.min(viewportBottom,window.innerHeight-navHeight)-28;
+  const r=active.getBoundingClientRect();
+  let delta=0;
+  if(r.bottom>visibleBottom)delta=r.bottom-visibleBottom;
+  else if(r.top<visibleTop)delta=r.top-visibleTop;
+  if(delta){
+   const scroller=active.closest('main')||document.scrollingElement||document.documentElement;
+   try{scroller.scrollBy({top:delta,behavior:'auto'})}catch(_){window.scrollBy(0,delta)}
+  }
+  // Segundo ajuste tras el desplazamiento, por si el teclado termina de animarse.
+  requestAnimationFrame(()=>{
+   if(document.activeElement!==active)return;
+   const rr=active.getBoundingClientRect();
+   const bottom=(vv?vv.offsetTop+vv.height:window.innerHeight);
+   const navNow=document.querySelector('nav');
+   const navH=navNow&&!navNow.hidden?navNow.getBoundingClientRect().height:0;
+   const limit=Math.min(bottom,window.innerHeight-navH)-28;
+   if(rr.bottom>limit){
+    const d=rr.bottom-limit;
+    const scroller=active.closest('main')||document.scrollingElement||document.documentElement;
+    try{scroller.scrollBy({top:d,behavior:'auto'})}catch(_){window.scrollBy(0,d)}
+   }
+  });
+ };
  const adjust=(force=false)=>{
   forceNext=forceNext||!!force;
   if(scheduled)return;scheduled=true;
@@ -2278,36 +2312,34 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
    scheduled=false;
    const forceNow=forceNext;forceNext=false;
    const active=document.activeElement;
-   const editable=active&&(/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))&&!active.readOnly&&active.type!=='checkbox'&&active.type!=='radio';
-   const keyboardOpen=!!(vv&&(window.innerHeight-vv.height>100||vv.height<window.innerHeight*.85));
+   const editable=isEditable(active);
+   const keyboardOpen=keyboardLikely(active)||!!(vv&&(window.innerHeight-vv.height>100||vv.height<window.innerHeight*.85));
    document.body.classList.toggle('sme-keyboard-open',keyboardOpen);
-   if(editable&&(keyboardOpen||forceNow)){
-    const visibleTop=vv?vv.offsetTop:0;
-    const visibleBottom=vv?vv.offsetTop+vv.height:window.innerHeight;
-    const marginTop=18,marginBottom=keyboardOpen?32:24;
-    const r=active.getBoundingClientRect();
-    if(r.bottom>visibleBottom-marginBottom||r.top<visibleTop+marginTop){
-     active.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
-     requestAnimationFrame(()=>{
-      if(document.activeElement!==active)return;
-      const after=active.getBoundingClientRect();
-      if(after.bottom>visibleBottom-marginBottom||after.top<visibleTop+marginTop){
-       const scrollDelta=after.bottom>visibleBottom-marginBottom?after.bottom-(visibleBottom-marginBottom):after.top-(visibleTop+marginTop);
-       window.scrollBy({top:scrollDelta,behavior:'auto'});
-      }
-     });
-    }
-   }
+   if(editable&&(keyboardOpen||forceNow))keepFieldVisible(active);
   });
  };
  document.addEventListener('focusin',e=>{
-  if(!e.target||!/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
-  // Reintentar mientras Android termina de mostrar el teclado virtual.
-  [0,100,220,380,550].forEach(delay=>setTimeout(()=>adjust(true),delay));
+  if(!isEditable(e.target))return;
+  const token=++focusToken;
+  // En Android WebView el visualViewport no siempre cambia al abrir el teclado.
+  // Activar el modo teclado desde el foco y ajustar el campo en varios momentos.
+  if(keyboardLikely(e.target))document.body.classList.add('sme-keyboard-open');
+  [0,80,160,280,420,600].forEach(delay=>setTimeout(()=>{
+   if(token===focusToken)adjust(true);
+  },delay));
  });
- document.addEventListener('focusout',()=>setTimeout(()=>adjust(),180));
- vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);
- window.addEventListener('resize',adjust);window.addEventListener('orientationchange',()=>setTimeout(()=>adjust(true),250));
+ document.addEventListener('focusout',()=>{
+  const token=++focusToken;
+  setTimeout(()=>{
+   if(token!==focusToken)return;
+   const active=document.activeElement;
+   if(!isEditable(active))document.body.classList.remove('sme-keyboard-open');
+   else adjust(true);
+  },120);
+ });
+ vv?.addEventListener('resize',()=>adjust(true));vv?.addEventListener('scroll',()=>adjust(true));
+ window.addEventListener('resize',()=>adjust(true));
+ window.addEventListener('orientationchange',()=>setTimeout(()=>adjust(true),250));
 })();
 function requireLocalAdmin(){
  try{
