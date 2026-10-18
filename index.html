@@ -105,6 +105,7 @@ form button{margin-top:10px;width:100%}
 .diag-report{margin:12px 0 4px;padding:12px;border:1px solid #565144;border-radius:10px;background:rgba(14,29,28,.35)}.diag-report h3{margin:0 0 10px;color:#e5c58f}.diag-report h4{margin:12px 0 6px;color:#e3cfaa}.diag-report-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:8px 0}.diag-report-stats span{display:block;border:1px solid #595448;border-radius:7px;padding:7px;font-size:13px}.diag-report-stats b{font-size:17px;margin-right:4px;color:#f0d6a8}.diag-report-note{font-size:12px;color:var(--muted)}.diag-priority{border-left:3px solid #bba575;padding:8px 10px;margin:9px 0;background:rgba(0,0,0,.12);border-radius:4px}.diag-priority-urgente{border-left-color:#ce6b5f}.diag-priority-alta{border-left-color:#d6a24b}.diag-priority-preventiva{border-left-color:#719a9b}.diag-priority ul,.diag-compact-findings{margin:5px 0;padding-left:20px}.diag-priority li,.diag-compact-findings li{margin:6px 0}.diag-priority li div{font-size:13px;color:var(--muted)}.diag-report p{white-space:pre-wrap}
 .debt-overdue{color:#ff9e91;font-weight:700}.item details summary{cursor:pointer;color:#d8bd8b}.item details{margin:8px 0}.item form[hidden]{display:none!important}.item form.panel{margin-top:10px;background:rgba(10,20,20,.35)}
 @media(min-width:620px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.dashboard-stats{grid-template-columns:repeat(4,minmax(0,1fr))}.dashboard-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.title{font-size:32px}.brand-logo{width:145px;height:78px}}
+@media(max-width:520px){.sme-time-filter-grid{grid-template-columns:1fr;gap:0}.sme-time-filter-grid label{margin:7px 0 3px}}
 @media(max-width:370px){header{padding:12px 10px}.header-inner{gap:8px}.brand-logo{width:92px;height:58px}.title{font-size:19px}.subtitle{font-size:12px}main{padding-left:10px;padding-right:10px}.tile{padding:12px}}
 
 .related-actions{margin:9px 0 0;padding-top:8px;border-top:1px solid #49463d}.related-actions button{font-size:12px;padding:8px 10px}
@@ -159,6 +160,8 @@ form button{margin-top:10px;width:100%}
 .sme-time-row-status{font-size:9px;line-height:1.2;text-align:right;color:#b8d6bc}
 .sme-time-row-status.is-pending{color:#e2bd7a}
 .sme-time-no-results,.sme-time-search-empty{padding:14px;color:var(--muted);font-size:13px;line-height:1.4}
+.sme-time-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:2px}
+.sme-time-filter-grid label{min-width:0;margin:10px 0 4px;font-size:12px}
 .sme-time-filter{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:13px;line-height:1.35}
 #smeLaborTimesShowPending{width:auto;min-height:0;margin:0;accent-color:#c6a16a;flex:0 0 auto}
 .sme-time-detail{margin:10px 0 12px;scroll-margin-top:14px}
@@ -169,6 +172,9 @@ form button{margin-top:10px;width:100%}
 .sme-time-card-head strong{min-width:0;line-height:1.25}
 .sme-time-card-head span{flex:0 0 auto}
 .sme-time-range{font-weight:750;color:#e5c58f}
+.sme-time-metadata{margin:10px 0;padding:10px 11px;border:1px solid #494e44;border-radius:8px;background:rgba(12,20,18,.2);font-size:12px;line-height:1.45}
+.sme-time-metadata p{margin:3px 0;overflow-wrap:anywhere}
+.sme-time-metadata strong{color:#e5c58f}
 .sme-time-source-note{margin:12px 0 5px;padding:9px 10px;border-left:2px solid #8a704a;background:rgba(12,20,18,.25);color:#c9c0ae;font-size:12px;line-height:1.45}
 .sme-time-sources{margin:7px 0 2px;color:#c9c0ae;font-size:12px;line-height:1.5}
 .sme-time-sources strong{color:#e5c58f}
@@ -936,25 +942,116 @@ const SME_LABOR_TIME_CATALOG = [
  {id:'ball-joint',title:'Cambio de una rótula de suspensión',family:'Tren rodante',application:'Auto/pickup liviana; una rótula según diseño',min:0.8,suggested:1.5,max:2.8,status:'Promedio agrupado SME',scope:'Si la rótula viene integrada a la parrilla/brazo o está remachada, cambia el trabajo. Alineación y piezas adicionales se cotizan aparte.',keywords:'rotula suspension brazo parrilla tren delantero rótula una unidad auto pickup',sourceNote:'Promedio de partida SME; verificar si la rótula se reemplaza por separado o forma parte del brazo.'},
  {id:'timing-chain',title:'Distribución por cadena · naftero 4 cilindros',family:'Distribución',application:'Motor de cuatro cilindros con cadena frontal y arquitectura simple/media',min:6,suggested:9,max:14,status:'Promedio agrupado SME',scope:'Referencia amplia para retirar tapa frontal y reemplazar cadena, guías y tensores. Sistemas con cadena trasera, varios árboles, VVT compleja o necesidad de sacar motor pueden superar el máximo. Definir sellado y piezas incluidas.',keywords:'cadena distribucion kit cadena patines tensor distribucion motor 4 cilindros naftero',sourceNote:'Estimación agrupada SME: las cadenas varían mucho más entre motores que una correa, por lo que hay que ajustar al identificar el motor.'},
 ];
-function smeLaborTimeSearchText(item){return normalizeSearch([item.title,item.family,item.application,item.scope,item.keywords].join(' '))}
+
+const SME_LABOR_TIME_GROUP_OVERRIDES={
+ 'dist-8v':'Naftero 8v · grupo general',
+ 'dist-16v-simple':'Naftero 16v · grupo general',
+ 'dist-k4m':'Naftero 16v · familia K4M',
+ 'dist-k4m-clio-748':'Naftero 16v · Renault K4M',
+ 'dist-k4m-megane-748':'Naftero 16v · Renault K4M',
+ 'dist-k4m-scenic-748':'Naftero 16v · Renault K4M',
+ 'dist-k4m-laguna-748':'Naftero 16v · Renault K4M',
+ 'dist-aveo-16-2014':'Naftero 16v · Chevrolet Aveo',
+ 'dist-fiesta-16-2011':'Naftero 16v · Ford Fiesta',
+ 'gasket-head-8v':'Naftero 8v · 4 cilindros',
+ 'gasket-head-16v':'Naftero 16v · 4 cilindros',
+ 'gasket-head-diesel-4cyl':'Diésel · 4 cilindros',
+ 'clutch-sedan':'Auto/sedán · caja manual',
+ 'clutch-pickup-4x2':'Pickup 4×2 · caja manual',
+ 'clutch-pickup-4x4':'Pickup 4×4 · caja manual',
+ 'gearbox-remove-install':'Auto/sedán · caja manual',
+ 'gearbox-pickup-4x2':'Pickup 4×2 · caja manual',
+ 'gearbox-pickup-4x4':'Pickup 4×4 · caja manual',
+ 'clutch-utilitaria-fwd':'Utilitario liviano · tracción delantera',
+ 'front-shocks-pickup':'Pickup · 4×2/4×4',
+ 'oil-service-uno-fire-2014':'Auto compacto · Fiat Uno Fire',
+ 'front-brakes-pads-uno-fire-2014':'Auto compacto · Fiat Uno Fire',
+ 'spark-plugs-uno-fire-2014':'Auto compacto · Fiat Uno Fire'
+};
+function smeInferLaborTimeVehicleGroup(item){
+ if(SME_LABOR_TIME_GROUP_OVERRIDES[item.id])return SME_LABOR_TIME_GROUP_OVERRIDES[item.id];
+ const txt=normalizeSearch([item.title,item.application,item.keywords].join(' '));
+ if(/pickup.*4x4|4x4.*pickup|transferencia reductora/.test(txt))return 'Pickup 4×4';
+ if(/pickup.*4x2|4x2.*pickup|dos ruedas motrices/.test(txt))return 'Pickup 4×2';
+ if(/utilitario|furgon|kangoo|berlingo|partner|doblo|furgoneta/.test(txt))return 'Utilitario liviano';
+ if(/diesel|tdci|hdi|tdi|jtd|gasoil/.test(txt))return 'Diésel · aplicación general';
+ if(/8v|8 valvulas/.test(txt))return 'Naftero 8v · grupo general';
+ if(/16v|16 valvulas|k4m|tu5|sigma/.test(txt))return 'Naftero 16v · grupo general';
+ if(/sedan|sedan manual|auto compacto|traccion delantera/.test(txt))return 'Auto/sedán · aplicación general';
+ return 'Auto/pickup liviana · grupo general';
+}
+function smeLaborTimeMetadata(item){
+ const links=Array.isArray(item.sourceLinks)?item.sourceLinks:[];
+ const first=links.find(link=>link&&link.url)||null;
+ let sourceName=item.sourceName||'';
+ if(!sourceName&&first){
+  const url=String(first.url).toLowerCase();
+  sourceName=url.includes('openlaborproject.com')?'Open Labor Project · base comparativa'
+   :url.includes('scribd.com')?(String(item.id).includes('k4m')?'Ficha técnica ContiTech · documento compartido':'Documento técnico público compartido')
+   :'Referencia externa enlazada';
+ }
+ if(!sourceName)sourceName=item.suggested===null?'Sin fuente de horas confirmada':'Estimación interna de SME';
+ let confidence=item.confidence||'';
+ let confidenceDetail=item.confidenceDetail||'';
+ if(!confidence){
+  if(item.status==='Referencia técnica específica'){
+   confidence='Media · ficha técnica específica';
+   confidenceDetail='Dato puntual para la aplicación citada. Confirmar el motor, año y alcance antes de presupuestar.';
+  }else if(item.status==='Comparativo externo'){
+   confidence='Media-baja · comparativo externo';
+   confidenceDetail='El dato procede de una base externa; puede no estar verificado con información OEM ni corresponder al parque argentino.';
+  }else if(String(item.status||'').includes('Promedio agrupado')){
+   confidence='Orientativa · promedio agrupado SME';
+   confidenceDetail='Promedio de planificación para una familia de trabajos/vehículos; ajustar según acceso, estado y alcance real.';
+  }else if(String(item.status||'').includes('Promedio genérico')||item.status==='Orientativo'){
+   confidence='Baja · promedio genérico';
+   confidenceDetail='Referencia amplia de SME que requiere juicio del taller.';
+  }else if(item.suggested===null){
+   confidence='Pendiente';
+   confidenceDetail='No se recomienda usar horas para calcular este trabajo hasta incorporar una referencia suficiente.';
+  }else{
+   confidence='Orientativa';
+   confidenceDetail='Verificar la aplicación y el alcance del trabajo real.';
+  }
+ }
+ return Object.assign(item,{
+  vehicleGroup:item.vehicleGroup||smeInferLaborTimeVehicleGroup(item),
+  variants:item.variants||item.application||'Aplicación por confirmar',
+  sourceName,
+  sourceUrl:item.sourceUrl||(first?first.url:''),
+  sourceType:item.sourceType||(first?(String(first.url).includes('openlaborproject.com')?'Comparativo externo':String(first.url).includes('scribd.com')?'Ficha/documento técnico público':'Referencia externa'):(item.suggested===null?'Pendiente':'Estimación interna SME')),
+  publishedHours:Number.isFinite(item.publishedHours)?item.publishedHours:null,
+  confidence,
+  confidenceDetail
+ });
+}
+SME_LABOR_TIME_CATALOG.forEach(smeLaborTimeMetadata);
+
+function smeLaborTimeSearchText(item){return normalizeSearch([item.title,item.family,item.application,item.variants,item.vehicleGroup,item.sourceName,item.confidence,item.scope,item.keywords].join(' '))}
 function smeLaborHoursLabel(value){if(value===null||value===undefined||value==='')return '—';return Number(value).toLocaleString('es-AR',{maximumFractionDigits:2})+' h'}
-function smeLaborTimeRange(item){if(item.suggested===null)return 'Sin tiempo confirmado';if(item.publishedHours!==undefined)return 'Tiempo publicado: '+smeLaborHoursLabel(item.publishedHours);return 'Mín. '+smeLaborHoursLabel(item.min)+' · sugerido '+smeLaborHoursLabel(item.suggested)+' · máx. '+smeLaborHoursLabel(item.max)}
+function smeLaborTimeRange(item){if(item.suggested===null)return 'Sin tiempo confirmado';if(Number.isFinite(item.publishedHours))return 'Tiempo publicado: '+smeLaborHoursLabel(item.publishedHours);return 'Mín. '+smeLaborHoursLabel(item.min)+' · sugerido '+smeLaborHoursLabel(item.suggested)+' · máx. '+smeLaborHoursLabel(item.max)}
 function smeLaborTimeCardMarkup(item,actionLabel,actionAttr){
  const statusClass=item.suggested===null?'sme-time-pending':'sme-time-orientative';
- const sourceNote=item.sourceNote?'<p class="sme-time-source-note"><strong>Origen y confianza:</strong> '+esc(item.sourceNote)+'</p>':'';
+ const publishedHours=Number.isFinite(item.publishedHours)?smeLaborHoursLabel(item.publishedHours):'No hay una hora única publicada para este promedio';
+ const sourceNote=item.sourceNote?'<p class="sme-time-source-note"><strong>Contexto del dato:</strong> '+esc(item.sourceNote)+'</p>':'';
  const sourceLinks=Array.isArray(item.sourceLinks)&&item.sourceLinks.length?'<div class="sme-time-sources"><strong>Ver referencias:</strong> '+item.sourceLinks.map(link=>'<a href="'+esc(link.url)+'" target="_blank" rel="noopener noreferrer">'+esc(link.label)+'</a>').join(' · ')+'</div>':'';
- return '<article class="item sme-time-detail-card"><div class="sme-time-card-head"><strong>'+esc(item.title)+'</strong><span class="'+statusClass+'">'+esc(item.status)+'</span></div><p class="muted">'+esc(item.family)+' · '+esc(item.application)+'</p><p class="sme-time-range">'+esc(smeLaborTimeRange(item))+'</p><p>'+esc(item.scope)+'</p>'+sourceNote+sourceLinks+(actionAttr?'<div class="quick"><button type="button" class="secondary" '+actionAttr+'="'+esc(item.id)+'">'+esc(actionLabel)+'</button></div>':'')+'</article>';
+ const metadata='<div class="sme-time-metadata"><p><strong>Grupo:</strong> '+esc(item.vehicleGroup)+' · <strong>Confianza:</strong> '+esc(item.confidence)+'</p><p><strong>Aplicación/variantes:</strong> '+esc(item.variants)+'</p><p><strong>Fuente principal:</strong> '+esc(item.sourceName)+'</p><p><strong>Horas publicadas:</strong> '+esc(publishedHours)+'</p><p class="muted">'+esc(item.confidenceDetail)+'</p></div>';
+ return '<article class="item sme-time-detail-card"><div class="sme-time-card-head"><strong>'+esc(item.title)+'</strong><span class="'+statusClass+'">'+esc(item.status)+'</span></div><p class="muted">'+esc(item.family)+' · '+esc(item.vehicleGroup)+'</p><p class="sme-time-range">'+esc(smeLaborTimeRange(item))+'</p>'+metadata+'<p>'+esc(item.scope)+'</p>'+sourceNote+sourceLinks+(actionAttr?'<div class="quick"><button type="button" class="secondary" '+actionAttr+'="'+esc(item.id)+'">'+esc(actionLabel)+'</button></div>':'')+'</article>';
 }
 function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute){
  const hrs=item.suggested===null?'—':smeLaborHoursLabel(item.suggested);
  const shortStatus=item.suggested===null?'Pendiente':item.status==='Referencia técnica específica'?'Ficha técnica':item.status==='Comparativo externo'?'Comparativo':item.status.includes('Promedio')?'Promedio':'Orientativo';
- return '<button type="button" class="sme-time-row'+(selected?' is-selected':'')+'" '+actionAttribute+'="'+esc(item.id)+'" aria-pressed="'+String(!!selected)+'"><span class="sme-time-row-name"><strong>'+esc(item.title)+'</strong><small>'+esc(item.family)+'</small></span><span class="sme-time-row-hours">'+esc(hrs)+'</span><span class="sme-time-row-status '+(item.suggested===null?'is-pending':'is-orientative')+'">'+shortStatus+'</span></button>';
+ return '<button type="button" class="sme-time-row'+(selected?' is-selected':'')+'" '+actionAttribute+'="'+esc(item.id)+'" aria-pressed="'+String(!!selected)+'"><span class="sme-time-row-name"><strong>'+esc(item.title)+'</strong><small>'+esc(item.family)+' · '+esc(item.vehicleGroup)+'</small></span><span class="sme-time-row-hours">'+esc(hrs)+'</span><span class="sme-time-row-status '+(item.suggested===null?'is-pending':'is-orientative')+'">'+shortStatus+'</span></button>';
 }
 function smeLaborTimesPage(){
  if(!smeCan('tiempos','view')){page='inicio';render();return}
  const canUseBudget=smeCan('presupuestos','edit');
- app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><label class="sme-time-filter"><input id="smeLaborTimesShowPending" type="checkbox"> Incluir trabajos sin horas confirmadas</label><p class="muted">Se muestran primero los trabajos con horas sugeridas. Los pendientes aparecen cuando los buscás o activás este filtro.</p></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section>';
- const input=document.getElementById('smeLaborTimeSearch'),showPending=document.getElementById('smeLaborTimesShowPending'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
+ app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p><section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div class="sme-time-filter-grid"><label>Familia de trabajo<select id="smeLaborTimeFamilyFilter"><option value="">Todas las familias</option></select></label><label>Grupo de vehículo<select id="smeLaborTimeVehicleFilter"><option value="">Todos los grupos</option></select></label></div><label class="sme-time-filter"><input id="smeLaborTimesShowPending" type="checkbox"> Incluir trabajos sin horas confirmadas</label><p class="muted">Se muestran primero los trabajos con horas sugeridas. Los pendientes aparecen cuando los buscás o activás este filtro.</p></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section>';
+ const input=document.getElementById('smeLaborTimeSearch'),familyFilter=document.getElementById('smeLaborTimeFamilyFilter'),vehicleFilter=document.getElementById('smeLaborTimeVehicleFilter'),showPending=document.getElementById('smeLaborTimesShowPending'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
+ const families=[...new Set(SME_LABOR_TIME_CATALOG.map(item=>item.family).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+ const vehicleGroups=[...new Set(SME_LABOR_TIME_CATALOG.map(item=>item.vehicleGroup).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+ familyFilter.innerHTML='<option value="">Todas las familias</option>'+families.map(value=>'<option value="'+esc(value)+'">'+esc(value)+'</option>').join('');
+ vehicleFilter.innerHTML='<option value="">Todos los grupos</option>'+vehicleGroups.map(value=>'<option value="'+esc(value)+'">'+esc(value)+'</option>').join('');
  let selectedId='';
  const paintDetail=()=>{
   const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===selectedId);
@@ -969,7 +1066,7 @@ function smeLaborTimesPage(){
  const draw=(focusDetail=false)=>{
   const words=normalizeSearch(input.value).split(' ').filter(Boolean);
   const includePending=showPending.checked||words.length>0;
-  const matches=SME_LABOR_TIME_CATALOG.filter(item=>(includePending||item.suggested!==null)&&(!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word))));
+  const matches=SME_LABOR_TIME_CATALOG.filter(item=>(includePending||item.suggested!==null)&&(!familyFilter.value||item.family===familyFilter.value)&&(!vehicleFilter.value||item.vehicleGroup===vehicleFilter.value)&&(!words.length||words.every(word=>smeLaborTimeSearchText(item).includes(word))));
   if(selectedId&&!matches.some(item=>item.id===selectedId))selectedId='';
   results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,item.id===selectedId,'data-time-row')).join(''):'<div class="sme-time-no-results">No encontré coincidencias con horas sugeridas. Para consultar operaciones pendientes, activá “Incluir trabajos sin horas confirmadas”.</div>';
   results.querySelectorAll('[data-time-row]').forEach(button=>button.addEventListener('click',()=>{selectedId=button.dataset.timeRow||'';draw(true)}));
@@ -977,6 +1074,8 @@ function smeLaborTimesPage(){
   if(focusDetail&&selectedId)setTimeout(()=>detail.scrollIntoView({behavior:'smooth',block:'start'}),50);
  };
  input.addEventListener('input',()=>draw());
+ familyFilter.addEventListener('change',()=>draw());
+ vehicleFilter.addEventListener('change',()=>draw());
  showPending.addEventListener('change',()=>draw());
  draw();
  if(smePendingLaborTimeId){

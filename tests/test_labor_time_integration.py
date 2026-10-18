@@ -150,5 +150,33 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("No se altera ningún presupuesto guardado", SOURCE)
 
 
+
+    def test_every_labor_entry_gets_normalized_source_confidence_and_variant_metadata(self):
+        self.assertIn("function smeLaborTimeMetadata(item)", SOURCE)
+        self.assertIn("vehicleGroup:item.vehicleGroup||smeInferLaborTimeVehicleGroup(item)", SOURCE)
+        self.assertIn("variants:item.variants||item.application", SOURCE)
+        self.assertIn("sourceName", SOURCE)
+        self.assertIn("confidenceDetail", SOURCE)
+        self.assertIn("publishedHours:Number.isFinite(item.publishedHours)?item.publishedHours:null", SOURCE)
+        self.assertIn("SME_LABOR_TIME_CATALOG.forEach(smeLaborTimeMetadata)", SOURCE)
+
+    def test_catalog_can_be_filtered_by_work_family_and_vehicle_group(self):
+        self.assertIn('id="smeLaborTimeFamilyFilter"', SOURCE)
+        self.assertIn('id="smeLaborTimeVehicleFilter"', SOURCE)
+        self.assertIn("familyFilter.addEventListener('change',()=>draw())", SOURCE)
+        self.assertIn("vehicleFilter.addEventListener('change',()=>draw())", SOURCE)
+        self.assertIn("item.family===familyFilter.value", SOURCE)
+        self.assertIn("item.vehicleGroup===vehicleFilter.value", SOURCE)
+
+    def test_selected_detail_shows_source_hours_confidence_and_applicable_variants(self):
+        self.assertIn("<strong>Confianza:</strong>", SOURCE)
+        self.assertIn("<strong>Fuente principal:</strong>", SOURCE)
+        self.assertIn("<strong>Horas publicadas:</strong>", SOURCE)
+        self.assertIn("<strong>Aplicación/variantes:</strong>", SOURCE)
+        self.assertIn("No hay una hora única publicada para este promedio", SOURCE)
+
+    def test_published_hours_are_only_shown_when_the_value_exists(self):
+        self.assertIn("if(Number.isFinite(item.publishedHours))return 'Tiempo publicado:'", SOURCE)
+
 if __name__ == "__main__":
     unittest.main()
