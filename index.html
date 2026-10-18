@@ -231,7 +231,6 @@ async function smeRunAutomaticBackups(){
 function newRecordId(){return globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function'?globalThis.crypto.randomUUID():'sme-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);}
 let page='inicio',editingId=null;
 let smeRelatedFilter=null;
-let pageHistory=[];
 let exitBackPressedAt=0;
 let exitBackPromptTimer=null;
 let thirdPartyEditingId=null;
@@ -242,7 +241,6 @@ function smeHideBackExitPrompt(){
  if(prompt)prompt.hidden=true;
 }
 function smeResetNavigation(){
- pageHistory.length=0;
  exitBackPressedAt=0;
  smeHideBackExitPrompt();
 }
@@ -273,8 +271,6 @@ function smeNavigateTo(nextPage){
  if(nextPage==='inicio'){
   smeResetNavigation();
  }else if(nextPage!==page){
-  pageHistory.push(page);
-  if(pageHistory.length>40)pageHistory.shift();
   exitBackPressedAt=0;
   smeHideBackExitPrompt();
  }
@@ -349,10 +345,14 @@ function smeShowBackExitPrompt(){
   exitBackPressedAt=0;
  },2200);
 }
+const SME_BACK_PARENT_BY_PAGE=Object.freeze({
+ clientes:'inicio',vehiculos:'inicio',trabajos:'inicio',mas:'inicio',
+ agenda:'mas',caja:'mas',cuentas:'mas',presupuestos:'mas',recepciones:'mas',diagnosticos:'mas',usuarios:'mas',asistencias:'mas',terceros:'mas',tareas:'mas',avisos:'mas',gastos:'mas'
+});
 async function smeHandleHardwareBack(){
  if(page!=='inicio'){
-  // Atrás vuelve siempre al Inicio; no recorre las pantallas visitadas.
-  smeNavigateTo('inicio');
+  const parentPage=SME_BACK_PARENT_BY_PAGE[page]||'inicio';
+  smeNavigateTo(parentPage);
   return;
  }
  const now=Date.now();
@@ -677,7 +677,7 @@ function gastoPage(){
 
 function render(){
  smeRememberCurrentPage();
- if(page!=='inicio'&&page!=='mas'&&!smeCan(page,'view')){page='inicio';pageHistory.length=0;}
+ if(page!=='inicio'&&page!=='mas'&&!smeCan(page,'view')){page='inicio';}
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||(['agenda','caja','cuentas','presupuestos','recepciones','diagnosticos','usuarios','asistencias','terceros','tareas','avisos','gastos'].includes(page)&&b.dataset.page==='mas')));
  if(page==='inicio'){renderDashboard()}
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
