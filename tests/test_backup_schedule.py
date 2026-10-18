@@ -129,7 +129,7 @@ class BackupScheduleSourceTests(unittest.TestCase):
     def test_orientative_budget_is_optional_and_kept_distinct_from_formal_quote(self):
         self.assertIn("smeToggleOrientativeBudget", SOURCE)
         self.assertIn("smeOrientativeBudgetForm", SOURCE)
-        self.assertIn("type:'Orientativo'", SOURCE)
+        self.assertIn("tipo:'Orientativo'", SOURCE)
         self.assertIn("estimacionMinima:String(min)", SOURCE)
         self.assertIn("estimacionMaxima:String(max)", SOURCE)
         self.assertIn("max<min", SOURCE)
@@ -138,6 +138,32 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("Rango orientativo", SOURCE)
         self.assertIn("No es un precio definitivo", SOURCE)
 
+
+    def test_budget_module_separates_private_costs_and_permissions(self):
+        self.assertIn('data-budget-tab="quick"', SOURCE)
+        self.assertIn('data-budget-tab="formal"', SOURCE)
+        self.assertIn('data-budget-tab="costs"', SOURCE)
+        self.assertIn('data-budget-tab="records"', SOURCE)
+        self.assertIn('id="smeInternalCostForm"', SOURCE)
+        self.assertIn("permissions.presupuestosCostos", SOURCE)
+        self.assertIn("smeCan('presupuestos','costs-edit')", SOURCE)
+        self.assertIn("hours", SOURCE)
+        self.assertIn("hourlyCost", SOURCE)
+        self.assertIn("partsCost", SOURCE)
+        self.assertIn("externalCost", SOURCE)
+        self.assertIn("consumablesCost", SOURCE)
+        self.assertIn("shippingCost", SOURCE)
+        self.assertIn("overheadCost", SOURCE)
+        self.assertIn("contingencyPct", SOURCE)
+        self.assertIn("targetMarginPct", SOURCE)
+        self.assertIn("actualLaborCost", SOURCE)
+        self.assertIn("actualPartsCost", SOURCE)
+        self.assertIn("actualOtherCost", SOURCE)
+        self.assertIn("quote.analisisInterno=", SOURCE)
+        self.assertIn("historial:history.slice(-50)", SOURCE)
+        self.assertIn("El precio del presupuesto y su estado quedaron sin cambios", SOURCE)
+        self.assertIn("precio formal cambió desde el último análisis interno", SOURCE)
+        self.assertNotIn("analisisInterno", SOURCE[SOURCE.index("function displayValues("):SOURCE.index("function recordTitle(")])
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
