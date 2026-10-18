@@ -15,13 +15,17 @@ class AndroidBackNavigationTests(unittest.TestCase):
         self.assertIn("@capacitor/app", package["dependencies"])
         self.assertIn("import { App as CapacitorApp } from '@capacitor/app';", index)
 
-    def test_back_button_from_any_section_returns_to_home(self):
+    def test_back_button_follows_parent_menu_not_visit_history(self):
         index = INDEX.read_text(encoding="utf-8")
         self.assertIn("CapacitorApp.addListener('backButton'", index)
+        self.assertIn("const SME_BACK_PARENT_BY_PAGE=Object.freeze({", index)
+        self.assertIn("mas:'inicio'", index)
+        self.assertIn("presupuestos:'mas'", index)
+        self.assertIn("asistencias:'mas'", index)
         handler = index.split("async function smeHandleHardwareBack(){", 1)[1].split("async function save()", 1)[0]
-        subpage_branch = handler.split("const now=Date.now();", 1)[0]
-        self.assertIn("smeNavigateTo('inicio');", subpage_branch)
-        self.assertNotIn("pageHistory.pop()", handler)
+        self.assertIn("const parentPage=SME_BACK_PARENT_BY_PAGE[page]||'inicio';", handler)
+        self.assertIn("smeNavigateTo(parentPage);", handler)
+        self.assertNotIn("pageHistory", index)
 
     def test_home_requires_a_second_back_press_to_exit(self):
         index = INDEX.read_text(encoding="utf-8")
