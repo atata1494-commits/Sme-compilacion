@@ -36,16 +36,19 @@ class FormValidationPreservationTests(unittest.TestCase):
 
 
     def test_android_keyboard_fix_uses_visual_viewport_offsets(self):
-        self.assertIn("const visibleTop=vv?vv.offsetTop:0;", SOURCE)
-        self.assertIn("const visibleBottom=vv?vv.offsetTop+vv.height:window.innerHeight;", SOURCE)
+        self.assertIn("const visibleTop=(vv?vv.offsetTop:0)+12;", SOURCE)
+        self.assertIn("const viewportBottom=vv?vv.offsetTop+vv.height:window.innerHeight;", SOURCE)
 
     def test_android_keyboard_fix_uses_non_smooth_nearest_scroll(self):
-        self.assertIn("active.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});", SOURCE)
-        self.assertIn("window.scrollBy({top:scrollDelta,behavior:'auto'});", SOURCE)
+        self.assertIn("const scroller=active.closest('main')||document.scrollingElement||document.documentElement;", SOURCE)
+        self.assertIn("scroller.scrollBy({top:delta,behavior:'auto'})", SOURCE)
+        self.assertIn("requestAnimationFrame(()=>{", SOURCE)
+        self.assertIn("if(rr.bottom>limit){", SOURCE)
 
     def test_android_keyboard_mode_is_removed_after_keyboard_closes(self):
         self.assertIn("document.body.classList.toggle('sme-keyboard-open',keyboardOpen);", SOURCE)
-        self.assertIn("vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);", SOURCE)
+        self.assertIn("vv?.addEventListener('resize',()=>adjust(true));vv?.addEventListener('scroll',()=>adjust(true));", SOURCE)
+        self.assertIn("document.body.classList.remove('sme-keyboard-open')", SOURCE)
 
 
     def test_android_back_from_subpage_returns_to_parent_menu(self):
