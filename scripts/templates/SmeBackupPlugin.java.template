@@ -189,6 +189,7 @@ public final class SmeBackupPlugin extends Plugin {
             JSObject response = new JSObject();
             response.put("cancelled", false);
             response.put("token", staged.getName());
+            response.put("filename", queryDisplayName(uri));
             response.put("sizeBytes", staged.length());
             response.put("clientCount", stats.getInt("clientCount"));
             response.put("vehicleCount", stats.getInt("vehicleCount"));
@@ -262,8 +263,9 @@ public final class SmeBackupPlugin extends Plugin {
                 if (movedOriginal) previous.renameTo(database);
                 throw new IllegalStateException("No se pudo instalar la base restaurada.");
             }
+            JSObject finalStats;
             try {
-                validateDatabase(database);
+                finalStats = validateDatabase(database);
             } catch (Exception validationError) {
                 if (database.exists()) database.delete();
                 if (movedOriginal && previous.exists() && !previous.renameTo(database)) {
@@ -278,6 +280,13 @@ public final class SmeBackupPlugin extends Plugin {
             JSObject response = new JSObject();
             response.put("success", true);
             response.put("safetyCopyKept", safety.isFile());
+            response.put("safetyCopyName", safety.isFile() ? safety.getName() : "");
+            response.put("sizeBytes", database.length());
+            response.put("clientCount", finalStats.getInt("clientCount"));
+            response.put("vehicleCount", finalStats.getInt("vehicleCount"));
+            response.put("workCount", finalStats.getInt("workCount"));
+            response.put("attachmentCount", finalStats.getInt("attachmentCount"));
+            response.put("schemaVersion", finalStats.getInt("schemaVersion"));
             call.resolve(response);
         } catch (Exception error) {
             if (incoming.exists()) incoming.delete();
