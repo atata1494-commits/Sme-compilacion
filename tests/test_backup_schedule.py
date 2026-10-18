@@ -76,6 +76,8 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("PRAGMA user_version", plugin)
         self.assertIn("sha256(bytes)", plugin)
         self.assertIn("SME-pre-restauracion-", plugin)
+        self.assertIn("validateDatabase(safety)", plugin)
+        self.assertIn("safety.length() != database.length()", plugin)
         self.assertIn("renameTo(database)", plugin)
         self.assertIn("registerPlugin(SmeBackupPlugin.class)", configure)
         self.assertIn("SmeBackupPlugin.java.template", configure)
