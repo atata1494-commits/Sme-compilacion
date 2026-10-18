@@ -1647,7 +1647,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
  const selectedLoginUser=loggingIn?smeUsers.find(u=>u.username===smeSelectedLoginUsername&&u.active!==false)||null:null;
  const canBiometricLogin=loggingIn&&!!selectedLoginUser&&!smeForcePasswordForNextLogin&&smeBiometricEnabled(selectedLoginUser)&&Capacitor.isNativePlatform();
  const title=selectedLoginUser?'Ingresar al taller':firstSetup?'Crear acceso administrador':migration?'Actualizar acceso de administrador':'Ingresar al taller';
- const intro=selectedLoginUser?(smeForcePasswordForNextLogin?'Cambio de cuenta: ingresá la contraseña de la cuenta de destino.':'Ingresá la contraseña o usá la huella habilitada para esta cuenta.') :firstSetup?'Si ya usabas SME, recuperá primero tu respaldo para conservar la misma cuenta dueña. Creá el administrador solo en una instalación nueva o si tu respaldo antiguo no contiene la cuenta. Guardá la contraseña en un lugar seguro.':migration?'Esta instalación tiene el acceso de prueba anterior. Validá la contraseña actual y configurá el nuevo usuario administrador.':'Elegí una cuenta guardada o escribí tu usuario y contraseña personales.';
+ const intro=selectedLoginUser?(smeForcePasswordForNextLogin?'Cambio de cuenta: ingresá la contraseña de la cuenta de destino.':'Ingresá la contraseña o usá la huella habilitada para esta cuenta.') :firstSetup?'Esta instalación todavía no tiene una cuenta local. Creá UNA sola cuenta propietaria para habilitar el acceso; después de ingresar, abrí Gestión y usá Importar respaldo JSON para recuperar los datos. Los usuarios adicionales solo se crean desde la cuenta propietaria. Guardá la contraseña en un lugar seguro.':migration?'Esta instalación tiene el acceso de prueba anterior. Validá la contraseña actual y configurá el nuevo usuario administrador.':'Elegí una cuenta guardada o escribí tu usuario y contraseña personales.';
  const quickUsers=loggingIn&&!selectedLoginUser&&quickList.length?'<div class="sme-quick-access">'+
   (primaryQuickUser?'<button type="button" class="sme-quick-primary" data-sme-pick-user="'+esc(primaryQuickUser.username)+'">'+smeAvatarMarkup(primaryQuickUser)+'<span class="sme-quick-primary-copy"><strong>'+esc(smeUserDisplayName(primaryQuickUser))+'</strong><small>@'+esc(primaryQuickUser.username)+' · '+esc(smeAreaForUser(primaryQuickUser))+'</small><em>'+esc(smeJobForUser(primaryQuickUser))+' · Tocá para ingresar →</em></span></button>':'')+
   (otherQuickUsers.length?'<section class="sme-quick-others"><p class="sme-quick-others-title">Otras cuentas guardadas</p><div class="sme-quick-user-list">'+otherQuickUsers.map(u=>'<button type="button" class="sme-quick-user" data-sme-pick-user="'+esc(u.username)+'">'+smeAvatarMarkup(u)+'<span class="sme-quick-user-copy"><strong>'+esc(smeUserDisplayName(u))+'</strong><small>'+esc(smeAreaForUser(u))+' · '+esc(smeJobForUser(u))+'</small></span></button>').join('')+'</div></section>':'')+
@@ -2293,8 +2293,9 @@ function requireLocalAdmin(){
   smeUsers=Array.isArray(stored)?stored.filter(u=>u&&typeof u==='object'&&u.username&&u.salt&&u.hash):[];
  }catch(error){console.error('No se pudieron leer los usuarios SME:',error);smeUsers=[]}
  if(!globalThis.crypto?.subtle){smeAuthScreen('setup','Este dispositivo no ofrece la función criptográfica necesaria. No se guardaron credenciales.');return}
- const hasPrimary=smeUsers.some(u=>u.isPrimary);
- let mode=hasPrimary?'login':(localStorage.getItem(SME_AUTH_KEY)?'migrate':'setup');
+ const hasPrimary=smeUsers.some(u=>u.isPrimary===true||u.role==='admin'||u.role==='owner'||u.role==='propietario');
+ const hasAnySavedAccount=smeUsers.length>0;
+ let mode=hasPrimary?'login':(hasAnySavedAccount||localStorage.getItem(SME_AUTH_KEY)?'migrate':'setup');
  if(mode==='login'&&!smeForcePasswordForNextLogin){
   const lastAccount=localStorage.getItem(SME_LAST_ACCOUNT_KEY);
   const lastUser=smeUsers.find(u=>u.username===lastAccount&&u.active!==false);
