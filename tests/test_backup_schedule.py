@@ -172,6 +172,9 @@ class BackupScheduleSourceTests(unittest.TestCase):
     def test_faatra_hourly_reference_is_permission_gated_and_never_sets_shop_prices(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         self.assertIn("function smeCanSeeFaatraReference()", SOURCE)
+        self.assertIn("if(!smeAuthenticated||!smeCurrentUser)return false;", SOURCE)
+        self.assertIn("if(!force&&state.lastAttemptDate===today&&!state.lastError)", SOURCE)
+        self.assertIn("terceros')+'</div></section>'+smeFaatraReferenceCardMarkup()+'<section class=\"more-group\">", SOURCE)
         self.assertIn("permissions.horaTallerFaatra", SOURCE)
         self.assertIn("permissions.horaTallerFaatra=isPrimary?'view'", SOURCE)
         self.assertIn("smeFaatraPermissionOptions", SOURCE)
