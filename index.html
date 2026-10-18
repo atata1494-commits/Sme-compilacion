@@ -108,6 +108,23 @@ form button{margin-top:10px;width:100%}
 @media(max-width:370px){header{padding:12px 10px}.header-inner{gap:8px}.brand-logo{width:92px;height:58px}.title{font-size:19px}.subtitle{font-size:12px}main{padding-left:10px;padding-right:10px}.tile{padding:12px}}
 
 .related-actions{margin:9px 0 0;padding-top:8px;border-top:1px solid #49463d}.related-actions button{font-size:12px;padding:8px 10px}
+
+.sme-faatra-reference{border-color:#806b49;background:rgba(31,44,40,.93)}
+.sme-faatra-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sme-faatra-heading h3{margin:0;color:#e5c58f;font:600 19px/1.3 Georgia,serif}
+.sme-faatra-source-tag{font-size:10px;letter-spacing:.8px;color:#e5c58f;border:1px solid #806b49;border-radius:999px;padding:4px 8px;white-space:nowrap}
+.sme-faatra-rate{display:flex;flex-direction:column;gap:3px;margin:12px 0;padding:12px;border-radius:10px;background:rgba(10,25,25,.42);border:1px solid #5a5549}
+.sme-faatra-rate span,.sme-faatra-rate small{color:var(--muted);font-size:12px}
+.sme-faatra-rate strong{font:700 clamp(24px,5vw,30px)/1.2 Georgia,serif;color:#e5c58f}
+.sme-faatra-warning{border-left:3px solid #d69a56;padding:9px 11px;background:rgba(116,69,34,.18);border-radius:5px;font-size:13px;line-height:1.45}
+.sme-faatra-disclaimer{border-top:1px solid #49463d;padding-top:10px;line-height:1.45}
+.sme-faatra-reference .quick{align-items:center}
+.sme-faatra-reference .quick a{font-size:13px;color:#e5c58f;padding:8px 0}
+.sme-faatra-update-notice{margin:0 0 12px;border-color:#a9854f;background:rgba(59,49,31,.96)}
+.sme-faatra-update-notice strong{display:block;color:#f0ce8e;font-family:Georgia,serif;font-size:18px}
+.sme-faatra-update-notice p{margin:7px 0 0;line-height:1.5;font-size:13px}
+.sme-faatra-notice-copy{min-width:0}
+
 /* Inicio SME: jerarquía visual, asimetría útil y calma. */
 .home-intro{margin:2px 0 12px}.home-intro .section-title{margin:2px 0 4px;font-size:28px}.home-eyebrow{font-size:10px;letter-spacing:1.7px;color:#c6a16a;margin:0 0 5px;font-weight:700}.home-overview{margin:12px 0 16px}.home-overview-label{font-size:12px;color:var(--muted);margin-bottom:7px}.home-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.home-metrics .dashboard-stat{min-height:84px;padding:10px;background:rgba(39,43,38,.66);box-shadow:none}.home-metrics .dashboard-stat .stat-icon{height:23px}.home-metrics .dashboard-stat .stat-icon svg{width:21px;height:21px}.home-metrics .dashboard-stat .stat-value{font-size:22px}.home-metrics .dashboard-stat .stat-label{font-size:11px;line-height:1.3}
 .home-feature{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;margin:12px 0 16px;padding:19px;border-radius:15px;border:1px solid #92744c;background:linear-gradient(135deg,#273b38,#182725 76%);color:#f0e4ce;min-height:145px}.home-feature-kicker{font-size:10px;letter-spacing:1.4px;color:#e2bd7a;font-weight:750;margin-bottom:10px}.home-feature strong{font:600 23px/1.2 Georgia,serif;overflow-wrap:anywhere}.home-feature-meta{font-size:13px;color:#d2c7b3;margin-top:7px}.home-feature-action{font-size:13px;font-weight:700;color:#e2bd7a;margin-top:17px}.home-feature-action b{font-size:18px}
@@ -833,7 +850,7 @@ function listPage(title,key,fields,submit){
   const orientativeMarkup='<section class="panel" id="smeOrientativeBudgetPanel"><p class="muted">Para consultas informales con pocos datos. No requiere registrar cliente ni vehículo. Es una referencia, no un precio confirmado.</p><button type="button" class="secondary" id="smeToggleOrientativeBudget" aria-expanded="false">＋ Crear consulta orientativa</button><div id="smeOrientativeBudgetBody" hidden><form id="smeOrientativeBudgetForm"><label>Vehículo / referencia<input name="vehiculoReferencia" maxlength="120" required placeholder="Ej.: Volkswagen Fox, motor por confirmar"></label><label>Trabajo consultado<input name="trabajoOrientativo" maxlength="160" required placeholder="Ej.: cambio de junta de tapa de cilindros"></label><div class="form-grid"><label>Desde ($)<input name="estimacionMinima" inputmode="numeric" required placeholder="Importe mínimo"></label><label>Hasta ($)<input name="estimacionMaxima" inputmode="numeric" required placeholder="Importe máximo"></label></div><label>Qué podría incluir / qué falta confirmar<textarea name="alcanceOrientativo" rows="2" maxlength="1000" placeholder="Repuestos, mano de obra, rectificadora y verificaciones; sujeto a diagnóstico."></textarea></label><div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar y compartir consulta</button><button type="button" class="secondary" id="smeCancelOrientativeBudget">Cancelar</button></form></div></section>';
   const internalCostsMarkup='<section class="panel sme-budget-private" id="smeInternalCostingPanel"><div class="sme-budget-private-heading"><h3>Costos internos y rentabilidad</h3><span>SOLO USO INTERNO</span></div><p class="muted">Esta información no se agrega al presupuesto que se imprime o comparte con el cliente. Guardar un análisis no modifica el precio ni el estado acordado.</p><form id="smeInternalCostForm"><label for="smeBudgetCostQuote">Presupuesto formal</label><select id="smeBudgetCostQuote" name="quoteId"><option value="">Elegí un presupuesto</option>'+quoteOptions+'</select><div class="sme-budget-cost-grid"><label>Horas de mano de obra<input name="hours" inputmode="decimal" placeholder="0"></label><label>Costo interno por hora ($)<input name="hourlyCost" inputmode="numeric" placeholder="0"></label><label>Costo de compra de repuestos ($)<input name="partsCost" inputmode="numeric" placeholder="0"></label><label>Trabajos de terceros ($)<input name="externalCost" inputmode="numeric" placeholder="0"></label><label>Insumos y consumibles ($)<input name="consumablesCost" inputmode="numeric" placeholder="0"></label><label>Flete y logística ($)<input name="shippingCost" inputmode="numeric" placeholder="0"></label><label>Costos indirectos asignados ($)<input name="overheadCost" inputmode="numeric" placeholder="0"></label><label>Contingencia estimada (%)<input name="contingencyPct" type="number" min="0" max="100" step="0.5" value="5"></label><label>Margen objetivo (%)<input name="targetMarginPct" type="number" min="0" max="90" step="0.5" value="25"></label><label>Impuesto estimado sobre la venta (%)<input name="taxRatePct" type="number" min="0" max="100" step="0.5" value="0"></label><label>Tratamiento del impuesto<select name="taxMode"><option value="included">Incluido en el precio informado</option><option value="added">Se suma al precio informado</option></select></label></div><details class="sme-budget-actual-costs"><summary>Agregar costos reales al finalizar el trabajo</summary><p class="muted">Se comparan con el costo previsto para detectar desvíos.</p><div class="sme-budget-cost-grid"><label>Costo real de mano de obra ($)<input name="actualLaborCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Costo real de repuestos ($)<input name="actualPartsCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Terceros y otros costos reales ($)<input name="actualOtherCost" inputmode="numeric" placeholder="Sin cargar"></label></div></details><div id="smeBudgetInternalSummary" class="sme-budget-cost-summary" aria-live="polite"><p class="muted">Elegí un presupuesto para calcular costos y margen.</p></div><button type="submit" id="smeSaveInternalCostAnalysis">Guardar análisis interno</button></form></section>';
   budgetInitialView=canEditBudget?'formal':canReadCosts?'costs':'records';
-  html='<section class="sme-budget-module"><h2 class="section-title">Presupuestos</h2><p class="muted">Prepará una cotización clara para el cliente y evaluá la rentabilidad por separado.</p>'+relatedIntro+
+  html='<section class="sme-budget-module"><h2 class="section-title">Presupuestos</h2><p class="muted">Prepará una cotización clara para el cliente y evaluá la rentabilidad por separado.</p>'+relatedIntro+smeFaatraReferenceCardMarkup()+
    '<div class="sme-budget-tabs" role="tablist" aria-label="Secciones de presupuestos">'+tabs+'</div>'+
    (canEditBudget?'<section class="sme-budget-pane" data-budget-pane="quick" hidden>'+orientativeMarkup+'</section><section class="sme-budget-pane" data-budget-pane="formal" hidden>'+clientHint+formalFormMarkup+'</section>':'')+
    (canReadCosts?'<section class="sme-budget-pane" data-budget-pane="costs" hidden>'+internalCostsMarkup+'</section>':'')+
@@ -1374,9 +1391,11 @@ function smeUserPreviewDialog(user,mode='view'){
   const backup=user&&user.isPrimary?'Acceso completo':permissions.backup===true||permissions.backup==='edit'?'Consultar y modificar':permissions.backup==='view'?'Solo consultar':'Sin acceso';
   const active=user&&user.active===false?'Deshabilitado':'Habilitado';
   const costPermission=user&&user.isPrimary?'Consultar y modificar':(permissions.presupuestosCostos==='edit'?'Consultar y modificar':permissions.presupuestosCostos==='view'?'Solo consultar':'Sin acceso');
+  const faatraPermission=user&&user.isPrimary?'Puede consultar':(permissions.horaTallerFaatra==='view'||permissions.horaTallerFaatra==='edit'?'Puede consultar':'Sin acceso');
   const permissionsMarkup=(permissionItems||'<li><span>Sin acceso a módulos</span><small>Sin acceso</small></li>')+
    '<li><span>Respaldos e importación</span><small>'+backup+'</small></li>'+
-   '<li><span>Costos internos y márgenes de presupuestos</span><small>'+costPermission+'</small></li>';
+   '<li><span>Costos internos y márgenes de presupuestos</span><small>'+costPermission+'</small></li>'+
+   '<li><span>Referencia de hora taller FAATRA</span><small>'+faatraPermission+'</small></li>';
   const isSave=mode==='save';
   overlay.innerHTML='<section class="sme-review-dialog" role="dialog" aria-modal="true" aria-labelledby="smeReviewTitle">'+
    '<h2 id="smeReviewTitle">'+(isSave?'Revisá el usuario antes de guardar':'Perfil del usuario')+'</h2>'+
@@ -1553,6 +1572,117 @@ function smeHashPassword(password,salt){
 }
 function smeNewSalt(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('')}
 function smeModuleKey(value){return ({movimientos:'caja',eventos:'agenda'})[value]||value}
+
+const SME_FAATRA_REFERENCE_KEY='sme_faatra_hourly_reference_v1';
+const SME_FAATRA_SOURCE_URL='https://www.faatra.org.ar/servicios/costo-hora/';
+function smeReadFaatraState(){
+ try{const raw=localStorage.getItem(SME_FAATRA_REFERENCE_KEY);const value=raw?JSON.parse(raw):null;return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
+ catch(error){console.warn('No se pudo leer el estado de la referencia FAATRA:',error);return {}}
+}
+function smeStoreFaatraState(state){
+ try{localStorage.setItem(SME_FAATRA_REFERENCE_KEY,JSON.stringify(state));return true}
+ catch(error){console.warn('No se pudo guardar el estado de la referencia FAATRA:',error);return false}
+}
+function smeCanSeeFaatraReference(){
+ if(!smeAuthenticated||!smeCurrentUser||!smeCan('presupuestos','view'))return false;
+ if(smeCurrentUser.isPrimary===true)return true;
+ const level=smeCurrentUser.permissions&&smeCurrentUser.permissions.horaTallerFaatra;
+ return level==='view'||level==='edit';
+}
+function smeFaatraPermissionOptions(selected){
+ return [['none','Sin acceso'],['view','Puede consultar']].map(([value,label])=>'<option value="'+value+'" '+(selected===value?'selected':'')+'>'+label+'</option>').join('');
+}
+function smeFaatraMoney(value){
+ const amount=Number(value);
+ return Number.isFinite(amount)?new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(amount):'Sin dato';
+}
+function smeFaatraDateLabel(value){
+ if(!value)return 'Sin comprobar';
+ const date=new Date(value);
+ return Number.isNaN(date.getTime())?'Sin comprobar':date.toLocaleString('es-AR',{dateStyle:'short',timeStyle:'short'});
+}
+function smeFaatraPeriodExpiry(period){
+ const clean=String(period||'').trim().replace(/[.,;:]+$/,'');
+ const match=clean.match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)(?:\s+de)?\s+(20\d{2})$/i);
+ if(!match)return null;
+ const months={enero:0,febrero:1,marzo:2,abril:3,mayo:4,junio:5,julio:6,agosto:7,septiembre:8,setiembre:8,octubre:9,noviembre:10,diciembre:11};
+ const month=months[match[1].toLocaleLowerCase('es-AR')],year=Number(match[2]),now=new Date();
+ return year<now.getFullYear()||(year===now.getFullYear()&&month<now.getMonth());
+}
+function smeFaatraReferenceCardMarkup(){
+ if(!smeCanSeeFaatraReference())return '';
+ const state=smeReadFaatraState(),current=state.current&&typeof state.current==='object'?state.current:null;
+ const expired=current?smeFaatraPeriodExpiry(current.period):null;
+ const valueMarkup=current
+  ?'<div class="sme-faatra-rate"><span>Último valor publicado por FAATRA</span><strong>$ '+smeFaatraMoney(current.value)+' + IVA</strong><small>por hora de taller</small></div>'
+  :'<p class="muted">Todavía no hay un valor de FAATRA guardado en este dispositivo. La consulta necesita conexión a internet.</p>';
+ const periodMarkup=current
+  ?'<p class="muted">Período publicado: <strong>'+esc(current.period||'No identificado')+'</strong> · Última comprobación correcta: '+esc(smeFaatraDateLabel(current.checkedAt))+'</p>'
+  :'<p class="muted">Última comprobación: '+esc(state.lastAttemptDate||'sin realizar')+'</p>';
+ const expiryMarkup=expired===true
+  ?'<p class="sme-faatra-warning" role="status">Atención: el período publicado ya venció. FAATRA todavía no muestra un período posterior en esta consulta; confirmá su vigencia antes de tomarlo como referencia actual.</p>'
+  :current&&!current.period
+   ?'<p class="sme-faatra-warning" role="status">No se pudo identificar el período de vigencia; verificá la publicación original antes de usar este dato.</p>':'';
+ const errorMarkup=state.lastError
+  ?'<p class="muted" role="status">No se pudo comprobar FAATRA en el último intento. Se conserva el dato anterior sin marcarlo como actualizado.</p>':'';
+ return '<section class="panel sme-faatra-reference" id="smeFaatraReferenceCard"><div class="sme-faatra-heading"><div><h3>Referencia de hora taller · FAATRA</h3><p class="muted">Consulta orientativa para el personal autorizado.</p></div><span class="sme-faatra-source-tag">FUENTE EXTERNA</span></div>'+
+  valueMarkup+periodMarkup+expiryMarkup+errorMarkup+
+  '<p class="muted sme-faatra-disclaimer">Este dato no modifica ninguna tarifa, presupuesto ni cálculo de SME. El precio del taller lo decide únicamente la persona autorizada por el taller.</p>'+
+  '<div class="quick"><button type="button" class="secondary" id="smeRefreshFaatraReference">Comprobar ahora</button><a href="'+SME_FAATRA_SOURCE_URL+'" target="_blank" rel="noopener noreferrer">Ver publicación oficial de FAATRA</a></div></section>';
+}
+function smeRefreshFaatraReferenceCard(){
+ const existing=document.getElementById('smeFaatraReferenceCard');
+ if(!existing)return;
+ const holder=document.createElement('div');holder.innerHTML=smeFaatraReferenceCardMarkup();
+ const next=holder.firstElementChild;
+ if(next)existing.replaceWith(next);else existing.remove();
+}
+function smeRenderFaatraUpdateNotice(){
+ const existing=document.getElementById('smeFaatraUpdateNotice');
+ if(!smeCanSeeFaatraReference()){existing?.remove();return}
+ const state=smeReadFaatraState(),notice=state.notification;
+ const userId=String(smeCurrentUser.id);
+ if(!notice||!notice.id||(Array.isArray(notice.acknowledgedBy)&&notice.acknowledgedBy.includes(userId))){existing?.remove();return}
+ const before=notice.before||{},after=notice.after||state.current||{};
+ const message='FAATRA informó un cambio en su referencia de hora taller. Antes: $ '+smeFaatraMoney(before.value)+' + IVA ('+(before.period||'período anterior')+'). Ahora: $ '+smeFaatraMoney(after.value)+' + IVA ('+(after.period||'período publicado no identificado')+'). No se cambió ningún precio de SME.';
+ const banner=existing||document.createElement('section');
+ banner.id='smeFaatraUpdateNotice';banner.className='panel sme-faatra-update-notice';banner.setAttribute('role','status');
+ banner.innerHTML='<div class="sme-faatra-notice-copy"><strong>Actualización detectada en FAATRA</strong><p>'+esc(message)+'</p></div><div class="quick"><button type="button" class="accent" data-faatra-open>Ver referencia</button><button type="button" class="secondary" data-faatra-ack>Entendido</button></div>';
+ const root=document.getElementById('app');
+ if(root&&!banner.isConnected)root.prepend(banner);
+}
+async function smeCheckFaatraReference(force=false){
+ if(!smeCanSeeFaatraReference()||!Capacitor.isNativePlatform())return;
+ const today=smeBackupDateKey(new Date());
+ const state=smeReadFaatraState();
+ if(!force&&state.lastAttemptDate===today){smeRefreshFaatraReferenceCard();smeRenderFaatraUpdateNotice();return}
+ state.lastAttemptDate=today;state.lastError='';
+ smeStoreFaatraState(state);
+ try{
+  const result=await SmeBackup.fetchFaatraHourlyReference();
+  const value=Number(result&&result.value),period=String(result&&result.period||'').trim();
+  if(!Number.isFinite(value)||value<=0||!period)throw new Error('La respuesta no incluyó un valor y un período de publicación reconocibles.');
+  const current={value,period,sourceUrl:String(result.sourceUrl||SME_FAATRA_SOURCE_URL),checkedAt:new Date().toISOString()};
+  const previous=state.current&&typeof state.current==='object'?state.current:null;
+  const changed=!!previous&&(Number(previous.value)!==value||String(previous.period||'').trim().toLocaleLowerCase('es-AR')!==period.toLocaleLowerCase('es-AR'));
+  const next={...state,current,lastAttemptDate:today,lastError:''};
+  if(changed){
+   next.notification={id:String(Date.now())+'-'+String(value)+'-'+period,before:{value:previous.value,period:previous.period||''},after:current,detectedAt:current.checkedAt,acknowledgedBy:[]};
+  }
+  smeStoreFaatraState(next);
+  smeRefreshFaatraReferenceCard();
+  smeRenderFaatraUpdateNotice();
+ }catch(error){
+  const latest=smeReadFaatraState();
+  latest.lastAttemptDate=today;
+  latest.lastError=String(error&&error.message||error||'Error de conexión');
+  smeStoreFaatraState(latest);
+  console.warn('No se pudo comprobar la referencia FAATRA:',error);
+  smeRefreshFaatraReferenceCard();
+  smeRenderFaatraUpdateNotice();
+ }
+}
+
 function smeCan(key,action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
  key=smeModuleKey(key);
@@ -1638,6 +1768,7 @@ function smeApplyPermissions(){
  if(restoreInput)restoreInput.oncancel=()=>smeFinishFilePicker();
  if(restoreButton&&!smeCanBackup('edit'))restoreButton.hidden=true;
  if(restoreInput&&!smeCanBackup('edit'))restoreInput.hidden=true;
+ smeRenderFaatraUpdateNotice();
 }
 const SME_IDLE_TIMEOUT_KEY='sme_idle_timeout_seconds_v1';
 const SME_IDLE_TIMEOUT_OPTIONS=[15,30,45,60,75];
@@ -1733,6 +1864,7 @@ let SME_IDLE_TIMEOUT_MS=SME_IDLE_TIMEOUT_SECONDS*1000;
    localStorage.setItem(SME_LAST_ACCOUNT_KEY,user.username);smeRequirePasswordForSwitch(false);
    if(smeAuthOverlay){smeAuthOverlay.remove();smeAuthOverlay=null}
    page='inicio';smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();
+  if(smeCanSeeFaatraReference()){smeRenderFaatraUpdateNotice();void smeCheckFaatraReference()}
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){console.info('Autenticación biométrica cancelada o fallida:',error);const code=error&&error.code;if(code&&/userCancel|systemCancel/i.test(String(code)))return;smeAuthShowInlineError('No se pudo validar la huella. Podés ingresar la contraseña de esta cuenta.','password')}
  }
@@ -2008,6 +2140,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
    render();
    smeResetIdleTimer();
    smeShowWelcomeIfNeeded();
+  if(smeCanSeeFaatraReference()){smeRenderFaatraUpdateNotice();void smeCheckFaatraReference()}
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){
    console.error('Error configurando acceso SME:',error);
@@ -2090,6 +2223,7 @@ function smeApplyRecommendedPermissions(form){
  for(const m of SME_MODULES){const select=form.elements['perm_'+m.key];if(select)select.value=recommended[m.key]||'none'}
  const backup=form.elements.perm_backup;if(backup)backup.value='none';
  const costs=form.elements.perm_presupuestosCostos;if(costs)costs.value='none';
+ const faatra=form.elements.perm_horaTallerFaatra;if(faatra)faatra.value='none';
  const note=form.querySelector('[data-permission-preset-note]');if(note)note.textContent='Perfil recomendado aplicado. Podés cambiar cualquier permiso antes de guardar.';
 }
 function smeUserPage(editId){
@@ -2105,6 +2239,8 @@ function smeUserPage(editId){
   const profilePhotoField='<div class="sme-profile-editor"><div id="smePhotoPreview">'+smeAvatarMarkup(editing||{area:selectedArea||'Área de Mecánica'},'sme-profile-preview')+'</div><div class="sme-profile-fields"><label for="smeUserPhoto">Foto de perfil (opcional)</label><input id="smeUserPhoto" name="profilePhoto" type="file" accept="image/*"><label class="sme-remove-photo"><input type="checkbox" name="removeProfilePhoto" '+(editing&&editing.profilePhoto?'':'disabled')+'> Quitar foto guardada</label><small class="muted">Si no cargás una foto, se muestra el icono del área.</small></div></div>';
   const permissionRows=isPrimary?'<div class="panel muted">El administrador principal conserva acceso completo a todas las secciones.</div>':SME_MODULES.map(m=>'<div class="permission-row"><label for="smePerm_'+m.key+'">'+m.label+'</label><select id="smePerm_'+m.key+'" name="perm_'+m.key+'">'+smePermissionOptions(permissions[m.key]||'none')+'</select></div>').join('')+
  '<h4 style="margin:18px 0 6px;color:#e5c58f">Permisos sensibles de presupuestos</h4><p class="muted">Estos permisos son independientes del acceso general a presupuestos.</p><div class="permission-row"><label for="smePerm_presupuestosCostos">Costos internos y márgenes</label><select id="smePerm_presupuestosCostos" name="perm_presupuestosCostos">'+smePermissionOptions(permissions.presupuestosCostos||'none')+'</select></div>'+
+ '<div class="permission-row"><label for="smePerm_horaTallerFaatra">Referencia de hora taller FAATRA</label><select id="smePerm_horaTallerFaatra" name="perm_horaTallerFaatra">'+smeFaatraPermissionOptions(permissions.horaTallerFaatra||'none')+'</select></div>'+
+ '<p class="muted">Este permiso solo habilita la consulta. No permite ni provoca cambios automáticos en los precios del taller.</p>'+
  '<div class="permission-row"><label for="smePerm_backup">Respaldos e importación</label><select id="smePerm_backup" name="perm_backup">'+smePermissionOptions(permissions.backup===true?'edit':permissions.backup||'none')+'</select></div>';
  app.innerHTML='<h2 class="section-title">Administración de usuarios</h2><p class="muted">Creá cuentas individuales, elegí a qué secciones puede entrar cada persona y deshabilitá el acceso cuando corresponda. Los cambios se guardan en este dispositivo.</p>'+'<section class="panel" id="smeIdleSettingsPanel"><h3>Seguridad de sesión</h3><p class="muted">Bloquear automáticamente después de cuánto tiempo sin actividad.</p><label for="smeIdleTimeoutSelect">Tiempo de inactividad</label><select id="smeIdleTimeoutSelect">'+SME_IDLE_TIMEOUT_OPTIONS.map(seconds=>'<option value="'+seconds+'" '+(seconds===SME_IDLE_TIMEOUT_SECONDS?'selected':'')+'>'+seconds+' segundos</option>').join('')+'</select><p class="muted">El cambio se aplica a esta instalación. El contador se reinicia al interactuar con la aplicación.</p><div class="quick"><button type="button" id="smeSaveIdleTimeout">Guardar configuración</button></div></section>'+'<div class="panel"><form id="smeUserForm"><h3>'+(editing?'Modificar usuario':'Crear usuario')+'</h3><div class="form-grid sme-name-grid"><label for="smeUserFirstName">Nombre<input id="smeUserFirstName" name="firstName" required maxlength="50" value="'+esc(nameParts.firstName)+'" placeholder="Nombre"></label><label for="smeUserLastName">Apellido<input id="smeUserLastName" name="lastName" required maxlength="50" value="'+esc(nameParts.lastName)+'" placeholder="Apellido"></label></div><label for="smeUserDni">DNI</label><input id="smeUserDni" name="dni" required inputmode="numeric" maxlength="12" value="'+esc(editing&&editing.dni||'')+'" placeholder="DNI de 7 u 8 números"><label for="smeUserPhone">Número de celular</label><input id="smeUserPhone" name="phone" type="tel" required maxlength="22" value="'+esc(editing&&editing.phone||'')+'" placeholder="Ej.: +54 9 297 ..."><label for="smeUserArea">Área de trabajo</label><select id="smeUserArea" name="area" required '+(isPrimary?'disabled':'')+'><option value="" '+(!selectedArea?'selected':'')+'>Elegí el área</option>'+SME_AREAS.map(a=>'<option value="'+esc(a.value)+'" '+(selectedArea===a.value?'selected':'')+'>'+esc(a.value)+'</option>').join('')+'</select><label for="smeUserJobTitle">Puesto de trabajo</label><select id="smeUserJobTitle" name="jobTitle" required>'+smeJobOptions(selectedArea,selectedJobValue)+'</select><label for="smeUserJobCustom">Otro puesto (si corresponde)</label><input id="smeUserJobCustom" name="jobCustom" maxlength="50" value="'+esc(editCustomJob)+'" placeholder="Ej.: Electricista automotor"><label for="smeUserLogin">Nombre de usuario</label><input id="smeUserLogin" name="username" required minlength="3" maxlength="32" value="'+esc(editing&&editing.username||'')+'" placeholder="Ej.: mecanico1"><label for="smeUserPassword">Contraseña '+(editing?'nueva (opcional)':'')+'</label><input id="smeUserPassword" name="password" type="password" minlength="10" autocomplete="new-password" '+(editing?'':'required')+' placeholder="'+(editing?'Dejá vacío para conservar la actual':'Mínimo 10 caracteres')+'"><label for="smeUserPassword2">Repetir contraseña '+(editing?'nueva (si la cambiás)':'')+'</label><input id="smeUserPassword2" name="password2" type="password" minlength="10" autocomplete="new-password" '+(editing?'':'required')+' placeholder="Repetí la contraseña">'+profilePhotoField+(isPrimary?'':'<label><input type="checkbox" name="active" value="yes" '+(!(editing&&editing.active===false)?'checked':'')+'> Usuario habilitado</label>')+
  '<h3 style="margin-top:22px">Permisos por sección</h3><p class="muted">Perfil recomendado según área y puesto; podés cambiar cada permiso antes de guardar. “Solo consultar” permite ver e imprimir. “Consultar y modificar” permite cargar, editar y eliminar registros.</p><p class="muted" data-permission-preset-note>'+(editing?'Revisá los permisos actuales de esta cuenta.':'Elegí el puesto para aplicar una recomendación inicial.')+'</p>'+permissionRows+'<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit" class="accent">'+(editing?'Guardar cambios':'Crear usuario')+'</button><button type="button" class="secondary" id="smeCancelUserEdit" '+(editing?'':'hidden')+'>Cancelar edición</button></form></div><h3 class="section-title" style="font-size:20px;margin-top:22px">Usuarios registrados</h3><div class="list" id="smeUsersList">'+smeUsers.map(u=>'<div class="item"><div class="sme-user-row-head">'+smeAvatarMarkup(u,'sme-user-avatar')+'<div class="sme-user-row-copy"><strong>'+esc(smeUserDisplayName(u))+(u.isPrimary?' · Administrador principal':'')+'</strong><div class="muted">Área: '+esc(smeAreaForUser(u))+'<br>Puesto: '+esc(smeJobForUser(u))+'<br>Usuario: '+esc(u.username)+'<br>DNI: '+esc(u.dni||'Sin cargar')+'<br>Celular: '+esc(u.phone||'Sin cargar')+'<br>Estado: '+(u.active===false?'Deshabilitado':'Habilitado')+(u.isPrimary?'<br>Permisos: acceso completo':'<br>Secciones con acceso: '+SME_MODULES.filter(m=>(u.permissions||{})[m.key]&&u.permissions[m.key]!=='none').length+(u.permissions&&(u.permissions.backup===true||(u.permissions.backup&&u.permissions.backup!=='none'))?' · Respaldos':'') )+'</div></div></div><div class="user-actions"><button type="button" class="secondary" data-user-view="'+esc(u.id)+'">Ver perfil</button><button type="button" class="secondary" data-user-edit="'+esc(u.id)+'">Modificar</button>'+(u.isPrimary?'':'<button type="button" class="secondary" data-user-open="'+esc(u.id)+'" '+(u.active===false?'disabled':'')+'>Cambiar de cuenta</button><button type="button" class="secondary" data-user-toggle="'+esc(u.id)+'">'+(u.active===false?'Habilitar':'Deshabilitar')+'</button>')+'</div></div>').join('')+'</div>';
@@ -2174,6 +2310,7 @@ const form=app.querySelector('#smeUserForm');
   const permissions=isPrimary?Object.fromEntries(SME_MODULES.map(m=>[m.key,'edit'])):Object.fromEntries(SME_MODULES.map(m=>[m.key,form.elements['perm_'+m.key]?.value||'none']));
   permissions.backup=isPrimary?'edit':(form.elements.perm_backup?.value||'none');
   permissions.presupuestosCostos=isPrimary?'edit':(form.elements.perm_presupuestosCostos?.value||'none');
+  permissions.horaTallerFaatra=isPrimary?'view':(form.elements.perm_horaTallerFaatra?.value||'none');
   const profilePhoto=photoFile?await fileToDataURL(photoFile,240,0.58):(removeProfilePhoto?'':(editing&&editing.profilePhoto||''));
   const next={...(editing||{}),id:editing?editing.id:'sme-user-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),username,firstName,lastName,name,dni,phone,area,jobTitle,jobCustom:selectedJob==='__custom__'?jobCustom:'',profilePhoto,role:isPrimary?'admin':'usuario',isPrimary,active:isPrimary?true:!!form.elements.active?.checked,permissions,updatedAt:new Date().toISOString()};
   if(!editing)next.createdAt=next.updatedAt;
@@ -2565,6 +2702,40 @@ if(Capacitor.isNativePlatform()){
   console.error('No se pudo activar la navegación del botón Atrás:',error);
  });
 }
+
+document.addEventListener('click',event=>{
+ const refresh=event.target.closest('#smeRefreshFaatraReference');
+ if(refresh){
+  event.preventDefault();
+  if(!smeCanSeeFaatraReference()){alert('Tu usuario no tiene permiso para consultar esta referencia.');return}
+  if(refresh.disabled)return;
+  refresh.disabled=true;refresh.textContent='Consultando FAATRA…';
+  void smeCheckFaatraReference(true);
+  return;
+ }
+ const ack=event.target.closest('[data-faatra-ack]');
+ if(ack){
+  if(!smeCanSeeFaatraReference())return;
+  const state=smeReadFaatraState(),notice=state.notification;
+  if(!notice)return;
+  const userId=String(smeCurrentUser.id);
+  notice.acknowledgedBy=Array.from(new Set([...(Array.isArray(notice.acknowledgedBy)?notice.acknowledgedBy:[]),userId]));
+  state.notification=notice;smeStoreFaatraState(state);smeRenderFaatraUpdateNotice();return;
+ }
+ const open=event.target.closest('[data-faatra-open]');
+ if(open){
+  event.preventDefault();
+  if(!smeCanSeeFaatraReference()){alert('Tu usuario no tiene permiso para consultar esta referencia.');return}
+  smeNavigateTo('presupuestos');
+ }
+});
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&smeAuthenticated&&smeCanSeeFaatraReference()){
+  smeRenderFaatraUpdateNotice();
+  void smeCheckFaatraReference();
+ }
+});
+
 requireLocalAdmin();
 
 </script>
