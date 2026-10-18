@@ -2265,7 +2265,7 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
 
 // Mantiene visible el campo activo cuando Android abre o redimensiona el teclado.
 (function installKeyboardViewportFix(){
- let lastKeyboardState=false,scheduled=false;
+ let scheduled=false;
  const vv=window.visualViewport;
  const adjust=()=>{
   if(scheduled)return;scheduled=true;
@@ -2273,13 +2273,23 @@ document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContex
    scheduled=false;
    const active=document.activeElement;
    const editable=active&&(/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))&&!active.readOnly&&active.type!=='checkbox'&&active.type!=='radio';
-   const keyboardOpen=!!(vv&&window.innerHeight-vv.height>140);
+   const keyboardOpen=!!(vv&&(window.innerHeight-vv.height>120||vv.height<window.innerHeight*.78));
    document.body.classList.toggle('sme-keyboard-open',keyboardOpen);
    if(editable&&keyboardOpen){
-    const r=active.getBoundingClientRect(),bottom=(vv?vv.height:window.innerHeight)-24;
-    if(r.bottom>bottom||r.top<8)active.scrollIntoView({block:'center',behavior:'smooth'});
+    const r=active.getBoundingClientRect();
+    const visibleTop=vv?vv.offsetTop:0;
+    const visibleBottom=vv?vv.offsetTop+vv.height:window.innerHeight;
+    if(r.bottom>visibleBottom-28||r.top<visibleTop+8){
+     active.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});
+     requestAnimationFrame(()=>{
+      const after=active.getBoundingClientRect();
+      if(after.bottom>visibleBottom-20||after.top<visibleTop+4){
+       const scrollDelta=after.bottom>visibleBottom-20?after.bottom-(visibleBottom-20):after.top-(visibleTop+4);
+       window.scrollBy({top:scrollDelta,behavior:'auto'});
+      }
+     });
+    }
    }
-   lastKeyboardState=keyboardOpen;
   });
  };
  document.addEventListener('focusin',e=>{if(e.target&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))setTimeout(adjust,120)});
