@@ -54,7 +54,7 @@ class WelcomeTourTests(unittest.TestCase):
     def test_tour_is_permission_filtered_and_can_have_up_to_five_steps(self):
         index = INDEX.read_text(encoding="utf-8")
         builder = index.split("function smeBuildVisualTour(){", 1)[1].split(
-            "\\nfunction smeShowWelcomeTourStep", 1
+            "function smeShowWelcomeTourStep", 1
         )[0]
         self.assertIn(".filter(item=>smeCan(item.key,'view'))", builder)
         self.assertIn("return steps.slice(0,5)", builder)
@@ -64,7 +64,7 @@ class WelcomeTourTests(unittest.TestCase):
     def test_final_reminder_warns_and_confirms_permanent_decline(self):
         index = INDEX.read_text(encoding="utf-8")
         reminder = index.split("function smeShowWelcomeReminder(){", 1)[1].split(
-            "\\nfunction smeShowWelcomeIfNeeded", 1
+            "function smeShowWelcomeIfNeeded", 1
         )[0]
         self.assertIn("Este es el último recordatorio", reminder)
         self.assertIn("¿Descartar el recorrido definitivamente?", reminder)
