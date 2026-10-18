@@ -2086,43 +2086,46 @@ function smeCloseVisualTour(){
  document.getElementById('smeVisualTourStyles')?.remove()
 }
 function smeBuildVisualTour(){
- const available=[
+ const candidates=[
   {key:'tareas',label:'Tareas',page:'mas',title:'Tareas',text:'Consultá las tareas que tenés asignadas y revisá qué queda pendiente.'},
-  {key:'asistencias',label:'Control horario',page:'mas',title:'Control horario',text:'Consultá registros horarios y, según tus permisos, revisá fichajes y alertas del equipo.'},
+  {key:'asistencias',label:'Control horario',page:'mas',title:'Control horario',text:'Consultá los registros horarios y, según tus permisos, revisá fichajes y alertas del equipo.'},
   {key:'recepciones',label:'Recepción',page:'mas',title:'Recepción',text:'Consultá o registrá la recepción de vehículos según las acciones autorizadas.'},
   {key:'diagnosticos',label:'Diagnósticos',page:'mas',title:'Diagnósticos',text:'Revisá los diagnósticos que tu cuenta puede consultar o registrar.'},
   {key:'presupuestos',label:'Presupuestos',page:'mas',title:'Presupuestos',text:'Consultá o prepará presupuestos según los permisos de tu cuenta.'},
-  {key:'caja',label:'Caja',page:'mas',title:'Caja',text:'Consultá los movimientos de caja si tenés acceso a este módulo.'},
   {key:'agenda',label:'Agenda',page:'mas',title:'Agenda',text:'Consultá los turnos y recordatorios disponibles para tu cuenta.'},
+  {key:'caja',label:'Caja',page:'mas',title:'Caja',text:'Consultá los movimientos de caja si tenés acceso a este módulo.'},
   {key:'terceros',label:'Trabajos externos',page:'mas',title:'Trabajos externos',text:'Consultá proveedores, permanencias y costos externos autorizados.'},
   {key:'cuentas',label:'Cuentas corrientes',page:'mas',title:'Cuentas corrientes',text:'Consultá saldos y deudas a los que tu cuenta tiene acceso.'},
   {key:'gastos',label:'Autorizaciones de gastos',page:'mas',title:'Autorizaciones de gastos',text:'Revisá los gastos que requieren autorización si esta función está habilitada.'}
  ].filter(item=>smeCan(item.key,'view'));
  const selected=[];
- const add=(item)=>{if(item&&!selected.some(x=>x.key===item.key))selected.push(item)};
- add(available.find(x=>x.key==='tareas'));
- add(available.find(x=>x.key==='asistencias'));
- if(selected.length<2)add(available.find(x=>x.key==='recepciones'));
- if(selected.length<2)add(available.find(x=>x.key==='diagnosticos'));
- if(selected.length<2)add(available.find(x=>x.key==='presupuestos'));
- if(selected.length<2)add(available.find(x=>x.key==='agenda'));
- if(selected.length<2)add(available[0]);
+ const add=item=>{if(item&&!selected.some(x=>x.key===item.key))selected.push(item)};
+ // La selección prioriza el trabajo cotidiano y luego las funciones útiles habilitadas.
+ add(candidates.find(x=>x.key==='tareas'));
+ add(candidates.find(x=>x.key==='asistencias'));
+ add(candidates.find(x=>x.key==='recepciones'));
+ add(candidates.find(x=>x.key==='diagnosticos'));
+ add(candidates.find(x=>x.key==='presupuestos'));
+ add(candidates.find(x=>x.key==='agenda'));
+ add(candidates.find(x=>x.key==='caja'));
+ add(candidates.find(x=>x.key==='terceros'));
+ add(candidates.find(x=>x.key==='cuentas'));
+ add(candidates.find(x=>x.key==='gastos'));
+ const steps=[{
+  key:'inicio',page:'inicio',title:'Inicio: lo principal del día',
+  text:'Acá ves el resumen del taller y los avisos. El signo ? abre la ayuda contextual. “Mi jornada” permite acceder a tu horario personal si está habilitado.',
+  selectors:['.home-overview','#smeHelpButton',...(smeCan('asistencias','view')?['.home-shift']:[])]
+ }];
  const workAccess=smeCan('trabajos','view');
- const alternate=available.find(x=>!selected.slice(0,1).some(chosen=>chosen.key===x.key));
- const workStep=workAccess?{key:'trabajos',page:'trabajos',title:'Trabajos y órdenes',text:'Consultá y continuá las órdenes del taller que tu cuenta tiene autorizadas.',selectors:['#app .section-title','#nav [data-page="trabajos"]']}:
-  (alternate||null);
- const steps=[
-  {key:'inicio',page:'inicio',title:'Inicio: lo principal del día',text:'Acá ves el resumen del taller. El signo ? abre la ayuda. “Mi jornada” es el acceso rápido a tu horario personal, si está habilitado.',selectors:['.home-overview','#smeHelpButton',...(smeCan('asistencias','view')?['.home-shift']:[])]},
-  ...selected.slice(0,1).map(item=>({key:item.key,page:item.page,title:item.label,text:item.text,selectors:['#app [data-go="'+item.key+'"]']})),
-  workStep?{key:workStep.key,page:workStep.page,title:workStep.title,text:workStep.text,selectors:workStep.selectors||['#app [data-go="'+workStep.key+'"]']}:null
- ].filter(Boolean);
- // Siempre se presentan tres pasos; si no hay órdenes ni módulos alternativos,
- // se usa otra función habilitada, sin inventar permisos.
- if(steps.length<3){
-  const fallback=available.find(x=>!steps.some(s=>s.key===x.key));
-  if(fallback)steps.push({key:fallback.key,page:fallback.page,title:fallback.label,text:fallback.text,selectors:['#app [data-go="'+fallback.key+'"]']});
+ if(workAccess)steps.push({key:'trabajos',page:'trabajos',title:'Trabajos y órdenes',text:'Consultá y continuá las órdenes del taller que tu cuenta tiene autorizadas.',selectors:['#app .section-title','#nav [data-page="trabajos"]']});
+ // Completar entre 3 y 5 pasos como máximo, sin repetir funciones ni mostrar módulos sin permiso.
+ const maxSteps=Math.min(5,Math.max(3,2+Math.min(3,candidates.length)));
+ for(const item of selected){
+  if(steps.length>=maxSteps)break;
+  steps.push({key:item.key,page:item.page,title:item.label,text:item.text,selectors:['#app [data-go="'+item.key+'"]']});
  }
- return steps.slice(0,3);
+ // Si la cuenta tiene muy pocos módulos, no inventar accesos ni mostrar módulos no autorizados.
+ return steps.slice(0,5);
 }
 function smeShowWelcomeTourStep(step){
  smeCloseInfoDialog();smeCloseVisualTour();
@@ -2239,18 +2242,18 @@ function smeRenderVisualTourStep(){
    note.remove();
   }
  });
- const hint=document.createElement('div');hint.className='sme-tour-hint';hint.textContent=(smeVisualTourIndex+1)+' / 3  ·  Deslizá a la izquierda para seguir';document.body.appendChild(hint);
+ const hint=document.createElement('div');hint.className='sme-tour-hint';hint.textContent=(smeVisualTourIndex+1)+' / '+smeVisualTourSteps.length+'  ·  Deslizá a la izquierda para seguir';document.body.appendChild(hint);
  let touchStartX=0,touchStartY=0,touchActive=false;
  const blockEvent=e=>{if(e.cancelable)e.preventDefault();e.stopPropagation()};
  ['pointerdown','pointerup','click','dblclick','wheel','contextmenu'].forEach(type=>svg.addEventListener(type,blockEvent,{passive:false}));
  svg.addEventListener('touchstart',e=>{blockEvent(e);if(e.touches&&e.touches.length){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;touchActive=true}},{passive:false});
  svg.addEventListener('touchmove',blockEvent,{passive:false});
- svg.addEventListener('touchend',e=>{blockEvent(e);if(!touchActive||!e.changedTouches||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;touchActive=false;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25){if(dx<0){if(smeVisualTourIndex===2)smeFinishWelcome();else smeShowWelcomeTourStep(smeVisualTourIndex+1)}else if(smeVisualTourIndex>0)smeShowWelcomeTourStep(smeVisualTourIndex-1)}},{passive:false});
+ svg.addEventListener('touchend',e=>{blockEvent(e);if(!touchActive||!e.changedTouches||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;touchActive=false;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25){if(dx<0){if(smeVisualTourIndex>=smeVisualTourSteps.length-1)smeFinishWelcome();else smeShowWelcomeTourStep(smeVisualTourIndex+1)}else if(smeVisualTourIndex>0)smeShowWelcomeTourStep(smeVisualTourIndex-1)}},{passive:false});
  svg.addEventListener('touchcancel',()=>{touchActive=false},{passive:true});
  const onKey=e=>{if(e.key==='ArrowLeft'){e.preventDefault();if(smeVisualTourIndex===2)smeFinishWelcome();else smeShowWelcomeTourStep(smeVisualTourIndex+1)}else if(e.key==='ArrowRight'&&smeVisualTourIndex>0){e.preventDefault();smeShowWelcomeTourStep(smeVisualTourIndex-1)}else if(e.key==='Escape'){e.preventDefault();smeSkipWelcome()}};
  document.addEventListener('keydown',onKey);svg.dataset.keyHandler='smeTourKeyHandler';window.smeTourKeyHandler=onKey;
 }
-function smeShowWelcomeReminder(){smeShowInfoDialog('¿Querés hacer el recorrido?','<p>Cuando tengas un momento, podés recorrer las partes más útiles de SME.</p>','Ver recorrido','Ahora no');const overlay=document.querySelector('.sme-info-overlay');overlay?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));overlay?.querySelector('[data-info-secondary]')?.addEventListener('click',()=>{const state=smeReadWelcomeState();state.reminderDismissed=true;smeWriteWelcomeState(state);smeCloseInfoDialog()})}
+function smeShowWelcomeReminder(){smeShowInfoDialog('¿Querés hacer el recorrido?','<p>Podés conocer las funciones más útiles de SME en unos pocos pasos.</p><p><strong>Este es el último recordatorio.</strong> Si lo rechazás, no volveremos a ofrecerte el recorrido.</p>','Ver recorrido','Ahora no');const overlay=document.querySelector('.sme-info-overlay');overlay?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));overlay?.querySelector('[data-info-secondary]')?.addEventListener('click',()=>{smeCloseInfoDialog();smeShowInfoDialog('¿Descartar el recorrido definitivamente?','<p>Esta es la última oportunidad de iniciar el recorrido guiado. Si confirmás, no volverá a aparecer.</p>','Volver al recorrido','No, gracias');const confirm=document.querySelector('.sme-info-overlay');confirm?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));confirm?.querySelector('[data-info-secondary]')?.addEventListener('click',()=>{const state=smeReadWelcomeState();state.reminderDismissed=true;state.completed=true;state.skipped=false;smeWriteWelcomeState(state);smeCloseInfoDialog()})})}
 function smeShowWelcomeIfNeeded(){if(!smeAuthenticated||!smeCurrentUser)return;const state=smeReadWelcomeState();state.loginCount=(Number(state.loginCount)||0)+1;smeWriteWelcomeState(state);if(state.completed)return;if(!state.skipped){smeShowInfoDialog('Bienvenido a SME','<p><strong>Servicios Mecánicos Enzo</strong></p><p>Un espacio para organizar el trabajo, cuidar los detalles y tener cada cosa en su lugar.</p><p>¿Querés hacer un recorrido rápido para conocer las partes más útiles de SME?</p>','Comenzar','Omitir por ahora');const overlay=document.querySelector('.sme-info-overlay');overlay?.querySelector('[data-info-primary]')?.addEventListener('click',()=>smeShowWelcomeTourStep(0));overlay?.querySelector('[data-info-secondary]')?.addEventListener('click',smeSkipWelcome);return}if(state.skipped&&state.loginCount>=((Number(state.skippedAt)||1)+2)&&!state.reminderShown&&!state.reminderDismissed){state.reminderShown=true;smeWriteWelcomeState(state);smeShowWelcomeReminder()}}
 document.getElementById('smeHelpButton')?.addEventListener('click',smeShowContextHelp);document.addEventListener('keydown',e=>{if(e.key==='Escape')smeCloseInfoDialog()});
 
