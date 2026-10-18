@@ -1109,22 +1109,39 @@ app.addEventListener('click',async e=>{
   selected=await SmeBackup.pickAndValidateRestore();
   if(!selected||selected.cancelled)return;
   const sizeMB=(Number(selected.sizeBytes||0)/1048576).toLocaleString('es-AR',{maximumFractionDigits:1});
-  const message='La copia pasó la validación inicial.\n\nClientes: '+selected.clientCount+'\nVehículos: '+selected.vehicleCount+'\nTrabajos: '+selected.workCount+'\nAdjuntos verificados: '+selected.attachmentCount+'\nTamaño: '+sizeMB+' MB\n\nSe reemplazará la base actual por esta copia. SME conservará primero una copia interna de seguridad y comprobará la base restaurada antes de terminar. Cerrá esta operación si el archivo no corresponde al taller correcto. ¿Continuar?';
-  if(!await smeStyledConfirm('Restaurar copia completa',message)){
+  const message='RESUMEN ANTES DE RESTAURAR\n\nCopia seleccionada: '+String(selected.filename||'SME-copia-completa.db')+'\nClientes: '+selected.clientCount+'\nVehículos: '+selected.vehicleCount+'\nTrabajos: '+selected.workCount+'\nAdjuntos verificados: '+selected.attachmentCount+'\nTamaño: '+sizeMB+' MB\n\nQUÉ VA A PASAR\nSME cerrará la base actual, guardará una copia interna de seguridad y reemplazará la base por el archivo seleccionado. Después comprobará la base instalada. Durante el proceso puede pedirte ingresar nuevamente. No cierres la aplicación ni retires el archivo.\n\nSi algo falla, SME intentará conservar o recuperar la base anterior. ¿Autorizás iniciar este proceso?';
+  if(!await smeStyledConfirm('Confirmar restauración completa',message)){
    await SmeBackup.discardRestore({token:selected.token});
    selected=null;
    return;
   }
+  if(!smeCurrentUser||smeCurrentUser.isPrimary!==true){
+   await smeShowMessage('Restauración no autorizada','Solo el administrador principal puede restaurar una copia SQLite completa. No se modificó la base actual.','error');
+   await SmeBackup.discardRestore({token:selected.token});selected=null;return;
+  }
+  const enteredPassword=await smeAskPassword('Autorizar restauración','Ingresá la contraseña del administrador principal para autorizar el reemplazo de la base de datos.');
+  if(enteredPassword===null){
+   await SmeBackup.discardRestore({token:selected.token});selected=null;return;
+  }
+  const enteredHash=await smeHashPassword(enteredPassword,smeCurrentUser.salt);
+  if(enteredHash!==smeCurrentUser.hash){
+   await smeShowMessage('Restauración cancelada','La contraseña no es correcta. No se modificó la base de datos actual.','error');
+   await SmeBackup.discardRestore({token:selected.token});selected=null;return;
+  }
+  await smeShowMessage('Autorización confirmada','La contraseña fue validada. SME comenzará ahora la restauración y te mostrará el resultado final.','info');
   await storage.close();
   storageClosed=true;
-  await SmeBackup.commitRestore({token:selected.token});
+  const restoreResult=await SmeBackup.commitRestore({token:selected.token});
   selected=null;
-  alert('La restauración completa terminó y la base superó la validación. SME se reiniciará para volver a abrir los datos restaurados.');
+  const report='RESULTADO: RESTAURACIÓN COMPLETADA\n\nLa base instalada superó la validación final de SQLite.\n\nRegistros en la copia restaurada:\n• Clientes: '+Number(restoreResult.clientCount??0)+'\n• Vehículos: '+Number(restoreResult.vehicleCount??0)+'\n• Trabajos: '+Number(restoreResult.workCount??0)+'\n• Adjuntos verificados: '+Number(restoreResult.attachmentCount??0)+'\n\nCopia interna previa: '+(restoreResult.safetyCopyKept?'conservada':'no confirmada')+'\nValidación final: aprobada\n\nSME volverá a abrirse para cargar los datos restaurados.';
+  await smeShowMessage('Informe de restauración',report,'success');
   location.reload();
  }catch(error){
   console.error('No se pudo restaurar la base SQLite:',error);
   if(selected?.token){try{await SmeBackup.discardRestore({token:selected.token})}catch(_){}}
-  alert('No se completó la restauración. Conservá el archivo original. Detalle: '+String(error?.message||error));
+  const detail=String(error?.message||error);
+  const report='RESULTADO: RESTAURACIÓN NO COMPLETADA\n\nSME no confirmó una restauración exitosa. La operación se detuvo o falló durante el proceso.\n\nDetalle técnico: '+detail+'\n\nLa aplicación intentará volver a abrir la base disponible. Al ingresar, verificá clientes, vehículos y trabajos antes de continuar. Conservá el archivo original y no repitas la restauración hasta revisar el resultado.';
+  await smeShowMessage('Informe de restauración',report,'error');
   if(storageClosed)location.reload();
  }finally{
   button.disabled=false;
