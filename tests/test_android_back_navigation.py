@@ -58,6 +58,10 @@ class WelcomeTourTests(unittest.TestCase):
         )[0]
         self.assertIn(".filter(item=>smeCan(item.key,'view'))", builder)
         self.assertIn("return steps.slice(0,5)", builder)
+        self.assertIn("{key:'avisos',label:'Avisos internos'", builder)
+        self.assertIn("const managementPriority=['avisos','caja','cuentas'", builder)
+        self.assertIn("key:'gestion',page:'mas',title:'Gestión: herramientas según tus permisos'", builder)
+        self.assertIn("managementTargets.map(item=>'#app [data-go=\"'+item.key+'\"]')", builder)
         self.assertIn("smeVisualTourSteps.length-1", index)
         self.assertIn("' / '+smeVisualTourSteps.length", index)
 
