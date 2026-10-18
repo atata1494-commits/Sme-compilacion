@@ -125,6 +125,9 @@ form button{margin-top:10px;width:100%}
 #smeHelpButton{margin-left:auto;flex:0 0 auto;padding:5px;border:1px solid #786548;border-radius:50%;width:40px;height:40px;background:#163438;color:#e6c68e;font-size:18px}.sme-info-overlay{position:fixed;inset:0;z-index:12000;background:#0009;display:flex;align-items:center;justify-content:center;padding:18px}.sme-info-dialog{width:min(100%,430px);max-height:82vh;overflow:auto;background:#222925;color:#eee4d1;border:1px solid #806b49;border-radius:17px;padding:21px;box-shadow:0 16px 50px #0008}.sme-info-dialog h2{font:600 24px Georgia,serif;color:#e5c58f;margin:0 0 10px}.sme-info-dialog p{font-size:14px;line-height:1.55;color:#d0c6b4}.sme-info-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}.sme-info-actions button{flex:1}
 @media(max-width:520px){.home-layout{grid-template-columns:minmax(0,1fr)}.home-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.home-side .home-widget{margin:0}.home-metrics{gap:6px}.home-metrics .dashboard-stat{padding:8px;min-height:80px}.home-metrics .dashboard-stat .stat-label{font-size:10px}.home-metrics .dashboard-stat .stat-value{font-size:20px}.home-feature{min-height:135px;padding:16px}.home-feature strong{font-size:21px}.home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.home-side .home-shift{grid-column:1/-1}}
 @media(max-width:360px){.home-side{grid-template-columns:minmax(0,1fr)}.home-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#smeHelpButton{width:34px;height:34px}}
+/* Módulo de presupuestos: acciones compactas, datos privados visualmente diferenciados. */
+.sme-budget-module{min-width:0}.sme-budget-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.sme-budget-tab{background:rgba(39,43,38,.72);border:1px solid #615641;color:#d8c8aa;padding:10px 12px;font-size:13px}.sme-budget-tab[aria-pressed="true"]{background:#c6a16a;color:#211b13;border-color:#e5c58f;font-weight:750}.sme-budget-pane[hidden]{display:none!important}.sme-budget-private{border-color:#92744c;background:linear-gradient(145deg,rgba(35,48,43,.98),rgba(31,35,31,.98))}.sme-budget-private-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap}.sme-budget-private-heading h3{margin:0;color:#e5c58f;font-family:Georgia,serif;font-size:20px}.sme-budget-private-heading span{font-size:10px;font-weight:800;letter-spacing:1px;color:#f0c98a;border:1px solid #92744c;border-radius:999px;padding:5px 8px}.sme-budget-cost-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px}.sme-budget-cost-grid label{min-width:0}.sme-budget-actual-costs{margin:12px 0;border-top:1px solid #5a5549;border-bottom:1px solid #5a5549;padding:10px 0}.sme-budget-actual-costs summary{cursor:pointer;color:#e5c58f;font-weight:700}.sme-budget-cost-summary{margin:14px 0 4px;padding:12px;border:1px solid #5c594d;border-radius:10px;background:rgba(11,22,20,.52)}.sme-budget-cost-summary h4{margin:0 0 10px;color:#e5c58f;font-size:16px}.sme-budget-cost-summary p{margin:7px 0;font-size:13px;line-height:1.45}.sme-budget-cost-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sme-budget-cost-metric{padding:9px;border:1px solid #4e5246;border-radius:8px}.sme-budget-cost-metric small{display:block;color:#bdb29e;font-size:11px}.sme-budget-cost-metric strong{display:block;margin-top:3px;font-size:16px;color:#ead5ad;overflow-wrap:anywhere}.sme-budget-cost-warning{border-left:3px solid #d6a24b;padding:8px 10px;background:rgba(160,94,39,.12);color:#f0cf9b}.sme-budget-cost-good{border-left:3px solid #719a83;padding:8px 10px;background:rgba(70,116,82,.12);color:#c8e1c8}.sme-budget-history{margin-top:10px}.sme-budget-history li{margin:7px 0;font-size:12px;color:#d7c7a9}.sme-budget-module form button{width:100%}
+@media(max-width:430px){.sme-budget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sme-budget-tab{padding:10px 7px}.sme-budget-cost-grid{grid-template-columns:1fr}.sme-budget-cost-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -813,10 +816,120 @@ function listPage(title,key,fields,submit){
  for(const [name,label,type] of fields)html+=fieldHTML(key,name,label,type,'');
  html+='<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit">'+submit+'</button><button type="button" class="secondary" id="cancelEdit" hidden>Cancelar edición</button></form></div><label>Buscar en '+title.toLowerCase()+'<input id="searchRecords" type="search" placeholder="Buscar por nombre, patente, estado..."></label><div class="list" id="recordsList"></div>';
  if(key==='presupuestos'){
-  html='<section class="panel" id="smeOrientativeBudgetPanel"><button type="button" class="secondary" id="smeToggleOrientativeBudget" aria-expanded="false">＋ Consulta orientativa rápida</button><div id="smeOrientativeBudgetBody" hidden><p class="muted">Para consultas informales con pocos datos. No requiere registrar un cliente ni un vehículo. El importe es una referencia, no un precio confirmado.</p><form id="smeOrientativeBudgetForm"><label>Vehículo / referencia<input name="vehiculoReferencia" maxlength="120" required placeholder="Ej.: Volkswagen Fox, motor por confirmar"></label><label>Trabajo consultado<input name="trabajoOrientativo" maxlength="160" required placeholder="Ej.: cambio de junta de tapa de cilindros"></label><div class="form-grid"><label>Desde ($)<input name="estimacionMinima" inputmode="numeric" required placeholder="Importe mínimo"></label><label>Hasta ($)<input name="estimacionMaxima" inputmode="numeric" required placeholder="Importe máximo"></label></div><label>Qué podría incluir / qué falta confirmar<textarea name="alcanceOrientativo" rows="2" maxlength="1000" placeholder="Repuestos, mano de obra, rectificadora y verificaciones; sujeto a diagnóstico."></textarea></label><div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar y compartir consulta</button><button type="button" class="secondary" id="smeCancelOrientativeBudget">Cancelar</button></form></div></section>'+html;
- }
- app.innerHTML=html;
+  const formStart=html.indexOf('<div class="panel"><form id="entry"');
+  const recordsStart=html.indexOf('<label>Buscar en ');
+  if(formStart<0||recordsStart<formStart)throw new Error('No se pudo separar el formulario formal y el historial.');
+  const formalFormMarkup=html.slice(formStart,recordsStart);
+  const recordsMarkup=html.slice(recordsStart);
+  const relatedIntro=smeRelatedFilter?'<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>':'';
+  const clientHint=!db.clientes.length?'<div class="panel muted">Podés registrar una consulta orientativa sin cargar un cliente. Para un presupuesto formal, vinculá el cliente y el vehículo cuando corresponda.</div>':'';
+  const canEditBudget=smeCan('presupuestos','edit');
+  const canReadCosts=smeCan('presupuestos','costs');
+  const formalQuotes=db.presupuestos.filter(o=>o.tipo!=='Orientativo');
+  const quoteOptions=formalQuotes.map(o=>'<option value="'+esc(o.id)+'">'+esc(recordTitle('presupuestos',o))+' · $ '+money(o.importe)+'</option>').join('');
+  const tabs=(canEditBudget?'<button type="button" class="sme-budget-tab" data-budget-tab="quick" aria-pressed="false">Consulta rápida</button><button type="button" class="sme-budget-tab" data-budget-tab="formal" aria-pressed="false">Presupuesto formal</button>':'')+
+   (canReadCosts?'<button type="button" class="sme-budget-tab" data-budget-tab="costs" aria-pressed="false">Costos internos</button>':'')+
+   '<button type="button" class="sme-budget-tab" data-budget-tab="records" aria-pressed="false">Historial</button>';
+  const orientativeMarkup='<section class="panel" id="smeOrientativeBudgetPanel"><p class="muted">Para consultas informales con pocos datos. No requiere registrar cliente ni vehículo. Es una referencia, no un precio confirmado.</p><button type="button" class="secondary" id="smeToggleOrientativeBudget" aria-expanded="false">＋ Crear consulta orientativa</button><div id="smeOrientativeBudgetBody" hidden><form id="smeOrientativeBudgetForm"><label>Vehículo / referencia<input name="vehiculoReferencia" maxlength="120" required placeholder="Ej.: Volkswagen Fox, motor por confirmar"></label><label>Trabajo consultado<input name="trabajoOrientativo" maxlength="160" required placeholder="Ej.: cambio de junta de tapa de cilindros"></label><div class="form-grid"><label>Desde ($)<input name="estimacionMinima" inputmode="numeric" required placeholder="Importe mínimo"></label><label>Hasta ($)<input name="estimacionMaxima" inputmode="numeric" required placeholder="Importe máximo"></label></div><label>Qué podría incluir / qué falta confirmar<textarea name="alcanceOrientativo" rows="2" maxlength="1000" placeholder="Repuestos, mano de obra, rectificadora y verificaciones; sujeto a diagnóstico."></textarea></label><div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar y compartir consulta</button><button type="button" class="secondary" id="smeCancelOrientativeBudget">Cancelar</button></form></div></section>';
+  const internalCostsMarkup='<section class="panel sme-budget-private" id="smeInternalCostingPanel"><div class="sme-budget-private-heading"><h3>Costos internos y rentabilidad</h3><span>SOLO USO INTERNO</span></div><p class="muted">Esta información no se agrega al presupuesto que se imprime o comparte con el cliente. Guardar un análisis no modifica el precio ni el estado acordado.</p><form id="smeInternalCostForm"><label for="smeBudgetCostQuote">Presupuesto formal</label><select id="smeBudgetCostQuote" name="quoteId"><option value="">Elegí un presupuesto</option>'+quoteOptions+'</select><div class="sme-budget-cost-grid"><label>Horas de mano de obra<input name="hours" inputmode="decimal" placeholder="0"></label><label>Costo interno por hora ($)<input name="hourlyCost" inputmode="numeric" placeholder="0"></label><label>Costo de compra de repuestos ($)<input name="partsCost" inputmode="numeric" placeholder="0"></label><label>Trabajos de terceros ($)<input name="externalCost" inputmode="numeric" placeholder="0"></label><label>Insumos y consumibles ($)<input name="consumablesCost" inputmode="numeric" placeholder="0"></label><label>Flete y logística ($)<input name="shippingCost" inputmode="numeric" placeholder="0"></label><label>Costos indirectos asignados ($)<input name="overheadCost" inputmode="numeric" placeholder="0"></label><label>Contingencia estimada (%)<input name="contingencyPct" type="number" min="0" max="100" step="0.5" value="5"></label><label>Margen objetivo (%)<input name="targetMarginPct" type="number" min="0" max="90" step="0.5" value="25"></label><label>Impuesto estimado sobre la venta (%)<input name="taxRatePct" type="number" min="0" max="100" step="0.5" value="0"></label><label>Tratamiento del impuesto<select name="taxMode"><option value="included">Incluido en el precio informado</option><option value="added">Se suma al precio informado</option></select></label></div><details class="sme-budget-actual-costs"><summary>Agregar costos reales al finalizar el trabajo</summary><p class="muted">Se comparan con el costo previsto para detectar desvíos.</p><div class="sme-budget-cost-grid"><label>Costo real de mano de obra ($)<input name="actualLaborCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Costo real de repuestos ($)<input name="actualPartsCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Terceros y otros costos reales ($)<input name="actualOtherCost" inputmode="numeric" placeholder="Sin cargar"></label></div></details><div id="smeBudgetInternalSummary" class="sme-budget-cost-summary" aria-live="polite"><p class="muted">Elegí un presupuesto para calcular costos y margen.</p></div><button type="submit" id="smeSaveInternalCostAnalysis">Guardar análisis interno</button></form></section>';
+  budgetInitialView=canEditBudget?'formal':canReadCosts?'costs':'records';
+  html='<section class="sme-budget-module"><h2 class="section-title">Presupuestos</h2><p class="muted">Prepará una cotización clara para el cliente y evaluá la rentabilidad por separado.</p>'+relatedIntro+
+   '<div class="sme-budget-tabs" role="tablist" aria-label="Secciones de presupuestos">'+tabs+'</div>'+
+   (canEditBudget?'<section class="sme-budget-pane" data-budget-pane="quick" hidden>'+orientativeMarkup+'</section><section class="sme-budget-pane" data-budget-pane="formal" hidden>'+clientHint+formalFormMarkup+'</section>':'')+
+   (canReadCosts?'<section class="sme-budget-pane" data-budget-pane="costs" hidden>'+internalCostsMarkup+'</section>':'')+
+   '<section class="sme-budget-pane" data-budget-pane="records" hidden><h3 class="section-title" style="font-size:20px">Historial de presupuestos</h3>'+recordsMarkup+'</section></section>';
+}
+app.innerHTML=html;
  if(key==='presupuestos'){
+  let activeView=budgetInitialView;
+  const tabButtons=[...app.querySelectorAll('[data-budget-tab]')];
+  const chooseView=view=>{
+   if(!tabButtons.some(button=>button.dataset.budgetTab===view))view=tabButtons[0]?.dataset.budgetTab||'records';
+   activeView=view;
+   app.querySelectorAll('[data-budget-pane]').forEach(pane=>pane.hidden=pane.dataset.budgetPane!==view);
+   tabButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.budgetTab===view)));
+  };
+  tabButtons.forEach(button=>button.addEventListener('click',()=>chooseView(button.dataset.budgetTab)));
+  chooseView(activeView);
+  const costForm=document.getElementById('smeInternalCostForm');
+  if(costForm){
+   const canEditCosts=smeCan('presupuestos','costs-edit');
+   costForm.querySelectorAll('input:not([name="quoteId"]),select:not([name="quoteId"])').forEach(field=>field.disabled=!canEditCosts);
+   const saveCostsButton=document.getElementById('smeSaveInternalCostAnalysis');
+   if(saveCostsButton)saveCostsButton.hidden=!canEditCosts;
+   const quoteSelector=costForm.elements.quoteId;
+   const summary=document.getElementById('smeBudgetInternalSummary');
+   const fields=['hours','hourlyCost','partsCost','externalCost','consumablesCost','shippingCost','overheadCost','contingencyPct','targetMarginPct','taxRatePct','taxMode','actualLaborCost','actualPartsCost','actualOtherCost'];
+   const readCostNumber=name=>{
+    const raw=String(costForm.elements[name]?.value??'').trim();
+    if(!raw)return 0;
+    const n=['hours','contingencyPct','targetMarginPct','taxRatePct'].includes(name)?Number(raw.replace(',','.')):parseMoneyInput(raw);
+    return Number.isFinite(n)?Math.max(0,n):0;
+   };
+   const currentQuote=()=>db.presupuestos.find(item=>String(item.id)===String(quoteSelector?.value||'')&&item.tipo!=='Orientativo')||null;
+   const currency=value=>'$ '+money(Math.max(0,Number(value)||0));
+   const getCostCalc=quote=>{
+    const hours=readCostNumber('hours'),hourly=readCostNumber('hourlyCost');
+    const labor=hours*hourly,parts=readCostNumber('partsCost'),external=readCostNumber('externalCost'),consumables=readCostNumber('consumablesCost'),shipping=readCostNumber('shippingCost'),overhead=readCostNumber('overheadCost');
+    const baseCost=labor+parts+external+consumables+shipping+overhead;
+    const contingencyPct=Math.min(100,readCostNumber('contingencyPct')),contingency=baseCost*contingencyPct/100,estimatedCost=baseCost+contingency;
+    const targetMarginPct=Math.min(90,readCostNumber('targetMarginPct')),taxRatePct=Math.min(100,readCostNumber('taxRatePct')),taxMode=costForm.elements.taxMode.value==='added'?'added':'included';
+    const salePrice=Math.max(0,parseMoneyInput(String(quote?.importe??'0')));
+    const taxAmount=taxMode==='included'?salePrice*taxRatePct/(100+taxRatePct||100):salePrice*taxRatePct/100;
+    const netRevenue=taxMode==='included'?salePrice-taxAmount:salePrice;
+    const profit=netRevenue-estimatedCost,margin=netRevenue>0?profit/netRevenue*100:null;
+    const minimumBasePrice=estimatedCost/(1-targetMarginPct/100);
+    const minimumCustomerTotal=minimumBasePrice*(1+taxRatePct/100);
+    const suggestedMinimum=taxMode==='included'?minimumCustomerTotal:minimumBasePrice;
+    const customerTotal=taxMode==='added'?salePrice*(1+taxRatePct/100):salePrice;
+    const actualValues=['actualLaborCost','actualPartsCost','actualOtherCost'].map(name=>String(costForm.elements[name]?.value??'').trim());
+    const actualEntered=actualValues.some(value=>value!=='');
+    const actualCost=readCostNumber('actualLaborCost')+readCostNumber('actualPartsCost')+readCostNumber('actualOtherCost');
+    const actualProfit=netRevenue-actualCost,actualMargin=netRevenue>0?actualProfit/netRevenue*100:null;
+    return {hours,hourly,labor,parts,external,consumables,shipping,overhead,baseCost,contingencyPct,contingency,estimatedCost,targetMarginPct,taxRatePct,taxMode,salePrice,taxAmount,netRevenue,profit,margin,minimumBasePrice,minimumCustomerTotal,suggestedMinimum,customerTotal,actualEntered,actualCost,actualProfit,actualMargin};
+   };
+   const paintSummary=(savedMessage='')=>{
+    const quote=currentQuote();
+    if(!quote){summary.innerHTML='<p class="muted">Primero guardá un presupuesto formal. Después elegilo acá para analizar su rentabilidad.</p>';return null}
+    const result=getCostCalc(quote),analysis=quote.analisisInterno||{},history=Array.isArray(analysis.historial)?analysis.historial:[];
+    const hasSaved=!!analysis.updatedAt,priceChanged=hasSaved&&Number(analysis.precioClienteAlAnalizar)!==Number(parseMoneyInput(String(quote.importe??'0')));
+    const warnings=[];
+    if(result.margin!==null&&result.margin<result.targetMarginPct)warnings.push('El margen calculado está por debajo del objetivo configurado. Revisá costos, alcance y precio.');
+    if(result.actualEntered&&result.actualCost>result.estimatedCost)warnings.push('Los costos reales ingresados superan el costo previsto. Revisá el desvío y su impacto.');
+    if(priceChanged)warnings.push('El precio formal cambió desde el último análisis interno. Conviene recalcular; no se modificó automáticamente.');
+    if(['Aprobado','En ejecución','Entregado','Pendiente de pago','Finalizado'].includes(String(quote.estado||'')))warnings.push('El presupuesto tiene estado “'+quote.estado+'”. Este análisis no modifica el importe acordado, la autorización ni el estado del trabajo.');
+    const warningMarkup=warnings.map(w=>'<p class="sme-budget-cost-warning">'+esc(w)+'</p>').join('')||'<p class="sme-budget-cost-good">No se detecta una alerta de margen con los datos cargados. Verificá que los costos estén completos.</p>';
+    const metrics=[['Precio base del presupuesto',result.salePrice],['Costo estimado total',result.estimatedCost],['Precio mínimo sugerido',result.suggestedMinimum],['Total estimado para el cliente',result.customerTotal],['Ganancia estimada después de costos e impuesto',result.profit]];
+    const metricMarkup=metrics.map(([label,value])=>'<div class="sme-budget-cost-metric"><small>'+esc(label)+'</small><strong>'+currency(value)+'</strong></div>').join('')+'<div class="sme-budget-cost-metric"><small>Margen estimado sobre venta neta</small><strong>'+(result.margin===null?'—':money(result.margin)+' %')+'</strong></div>'+(result.actualEntered?'<div class="sme-budget-cost-metric"><small>Costo real cargado</small><strong>'+currency(result.actualCost)+'</strong></div><div class="sme-budget-cost-metric"><small>Margen real estimado</small><strong>'+(result.actualMargin===null?'—':money(result.actualMargin)+' %')+'</strong></div>':'');
+    const versionMarkup=history.length?'<details class="sme-budget-history"><summary>Versiones guardadas del análisis ('+history.length+')</summary><ol>'+history.slice().reverse().map(item=>'<li>'+esc(item.fecha||'Fecha no registrada')+' · '+esc(item.usuario||'Usuario')+' — Costo: '+currency(item.costoEstimado)+' · Precio mínimo: '+currency(item.precioMinimo)+' · Margen: '+(item.margen===null?'—':money(item.margen)+' %')+'</li>').join('')+'</ol></details>':'';
+    summary.innerHTML='<h4>Resultado privado · '+esc(recordTitle('presupuestos',quote))+'</h4><div class="sme-budget-cost-metrics">'+metricMarkup+'</div><p class="muted">Base estimada: mano de obra $ '+money(result.labor)+'; repuestos $ '+money(result.parts)+'; terceros $ '+money(result.external)+'; insumos $ '+money(result.consumables)+'; logística $ '+money(result.shipping)+'; indirectos $ '+money(result.overhead)+'; contingencia $ '+money(result.contingency)+'. Impuesto estimado: '+money(result.taxRatePct)+' % ('+(result.taxMode==='included'?'incluido en el precio':'sumado al precio')+'). No reemplaza la determinación fiscal que corresponda.</p>'+warningMarkup+(hasSaved?'<p class="muted">Último guardado: '+esc(analysis.updatedAt)+' · Versiones: '+history.length+'</p>':'<p class="muted">Todavía no hay un análisis guardado. Los resultados son preliminares hasta guardar.</p>')+versionMarkup+(savedMessage?'<p class="sme-budget-cost-good">'+esc(savedMessage)+'</p>':'');
+    return result;
+   };
+   const loadQuoteAnalysis=()=>{
+    const quote=currentQuote(),saved=quote?.analisisInterno||{};
+    const defaults={hours:'',hourlyCost:'',partsCost:'',externalCost:'',consumablesCost:'',shippingCost:'',overheadCost:'',contingencyPct:'5',targetMarginPct:'25',taxRatePct:'0',taxMode:'included',actualLaborCost:'',actualPartsCost:'',actualOtherCost:''};
+    fields.forEach(name=>{if(costForm.elements[name])costForm.elements[name].value=saved[name]!==undefined?String(saved[name]):defaults[name]});
+    if(!quote)fields.forEach(name=>{if(costForm.elements[name]&&!['contingencyPct','targetMarginPct','taxRatePct','taxMode'].includes(name))costForm.elements[name].value=''});
+    paintSummary();
+   };
+   costForm.addEventListener('input',()=>paintSummary());
+   costForm.addEventListener('change',event=>{if(event.target===quoteSelector)loadQuoteAnalysis();else paintSummary()});
+   costForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    if(!smeCan('presupuestos','costs-edit')){alert('Tu usuario puede consultar, pero no modificar, el análisis privado de costos.');return}
+    const quote=currentQuote();
+    if(!quote){alert('Elegí un presupuesto formal válido antes de guardar el análisis.');return}
+    const targetMargin=readCostNumber('targetMarginPct'),taxPct=readCostNumber('taxRatePct');
+    if(targetMargin<0||targetMargin>90||taxPct<0||taxPct>100){alert('Revisá el margen objetivo (0–90 %) y el impuesto estimado (0–100 %).');return}
+    const before=JSON.stringify(db),result=getCostCalc(quote),now=new Date().toISOString(),actor=smeCurrentUser?.name||smeCurrentUser?.username||'Usuario',previous=quote.analisisInterno||{},history=Array.isArray(previous.historial)?previous.historial.slice():[];
+    history.push({fecha:now,usuario:actor,costoEstimado:result.estimatedCost,precioMinimo:result.suggestedMinimum,margen:result.margin,precioClienteAlAnalizar:result.salePrice});
+    quote.analisisInterno={hours:String(costForm.elements.hours.value||''),hourlyCost:String(costForm.elements.hourlyCost.value||''),partsCost:String(costForm.elements.partsCost.value||''),externalCost:String(costForm.elements.externalCost.value||''),consumablesCost:String(costForm.elements.consumablesCost.value||''),shippingCost:String(costForm.elements.shippingCost.value||''),overheadCost:String(costForm.elements.overheadCost.value||''),contingencyPct:String(costForm.elements.contingencyPct.value||'5'),targetMarginPct:String(costForm.elements.targetMarginPct.value||'25'),taxRatePct:String(costForm.elements.taxRatePct.value||'0'),taxMode:costForm.elements.taxMode.value,actualLaborCost:String(costForm.elements.actualLaborCost.value||''),actualPartsCost:String(costForm.elements.actualPartsCost.value||''),actualOtherCost:String(costForm.elements.actualOtherCost.value||''),costoEstimado:result.estimatedCost,precioMinimo:result.suggestedMinimum,precioClienteAlAnalizar:result.salePrice,updatedAt:now,updatedByUserId:smeCurrentUser?.id||'',updatedBy:actor,historial:history.slice(-50)};
+    if(!(await save())){db=JSON.parse(before);loadQuoteAnalysis();return}
+    loadQuoteAnalysis();
+    paintSummary('Análisis guardado. El precio del presupuesto y su estado quedaron sin cambios.');
+   });
+   loadQuoteAnalysis();
+  }
   const toggle=document.getElementById('smeToggleOrientativeBudget'),body=document.getElementById('smeOrientativeBudgetBody'),quickForm=document.getElementById('smeOrientativeBudgetForm');
   toggle?.addEventListener('click',()=>{const opening=body.hidden;body.hidden=!opening;toggle.setAttribute('aria-expanded',String(opening));toggle.textContent=opening?'− Ocultar consulta orientativa':'＋ Consulta orientativa rápida';if(opening)quickForm.elements.vehiculoReferencia.focus()});
   document.getElementById('smeCancelOrientativeBudget')?.addEventListener('click',()=>{quickForm.reset();body.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.textContent='＋ Consulta orientativa rápida'});
@@ -2126,6 +2239,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='restoreFile'){smeFinishFilePicker();if(!smeCanBackup('edit')){e.preventDefault();e.stopImmediatePropagation();e.target.value='';alert('La sesión no está autorizada para importar respaldos. El archivo no se modificó. Ingresá con la cuenta propietaria y volvé a intentarlo.')}}},true);
 document.addEventListener('submit',e=>{
  if(['smeAuthForm','smeUserForm'].includes(e.target&&e.target.id))return;
+ if(e.target&&e.target.id==='smeInternalCostForm'){if(!smeCan('presupuestos','costs-edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario no tiene permiso para modificar costos internos.')}return}
  if(!smeCan(page,'edit')){e.preventDefault();e.stopImmediatePropagation();alert('Tu usuario puede consultar esta sección, pero no modificar sus datos.')}
 },true);
 function smeCloseInfoDialog(){document.querySelectorAll('.sme-info-overlay').forEach(el=>el.remove())}
