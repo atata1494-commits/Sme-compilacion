@@ -107,6 +107,55 @@ public final class SmeBackupPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void saveFullDatabaseBackup(PluginCall call) {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/octet-stream");
+        intent.putExtra(Intent.EXTRA_TITLE, call.getString("filename", "SME-copia-completa.db"));
+        startActivityForResult(call, intent, "handleSaveFullDatabaseBackup");
+    }
+
+    @ActivityCallback
+    private void handleSaveFullDatabaseBackup(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result == null || result.getResultCode() == Activity.RESULT_CANCELED) {
+            JSObject response = new JSObject();
+            response.put("cancelled", true);
+            call.resolve(response);
+            return;
+        }
+        Uri uri = result.getData() == null ? null : result.getData().getData();
+        if (uri == null) {
+            call.reject("No se eligió dónde guardar la copia completa.");
+            return;
+        }
+        File database = getContext().getDatabasePath(DATABASE_FILE);
+        try {
+            if (!database.isFile()) throw new IllegalStateException("No se encontró la base SQLite activa de SME.");
+            checkpointDatabase(database);
+            JSObject stats = validateDatabase(database);
+            try (OutputStream output = getContext().getContentResolver().openOutputStream(uri, "wt")) {
+                if (output == null) throw new IllegalStateException("Android no pudo abrir el archivo elegido.");
+                try (InputStream input = new FileInputStream(database)) {
+                    copy(input, output);
+                    output.flush();
+                }
+            }
+            JSObject response = new JSObject();
+            response.put("cancelled", false);
+            response.put("filename", queryDisplayName(uri));
+            response.put("sizeBytes", database.length());
+            response.put("clientCount", stats.getInt("clientCount"));
+            response.put("vehicleCount", stats.getInt("vehicleCount"));
+            response.put("workCount", stats.getInt("workCount"));
+            response.put("attachmentCount", stats.getInt("attachmentCount"));
+            call.resolve(response);
+        } catch (Exception error) {
+            call.reject("No se pudo exportar la copia completa SQLite: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
     public void pickAndValidateRestore(PluginCall call) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
