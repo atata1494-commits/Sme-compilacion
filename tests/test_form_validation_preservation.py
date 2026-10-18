@@ -48,11 +48,14 @@ class FormValidationPreservationTests(unittest.TestCase):
         self.assertIn("vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);", SOURCE)
 
 
-    def test_android_back_from_subpage_goes_home_not_previous_visited_page(self):
+    def test_android_back_from_subpage_returns_to_parent_menu(self):
         handler = SOURCE.split("async function smeHandleHardwareBack(){", 1)[1].split("async function save()", 1)[0]
-        subpage_branch = handler.split("const now=Date.now();", 1)[0]
-        self.assertIn("smeNavigateTo('inicio');", subpage_branch)
-        self.assertNotIn("pageHistory.pop()", handler)
+        self.assertIn("const SME_BACK_PARENT_BY_PAGE=Object.freeze({", SOURCE)
+        self.assertIn("asistencias:'mas'", SOURCE)
+        self.assertIn("presupuestos:'mas'", SOURCE)
+        self.assertIn("const parentPage=SME_BACK_PARENT_BY_PAGE[page]||'inicio';", handler)
+        self.assertIn("smeNavigateTo(parentPage);", handler)
+        self.assertNotIn("pageHistory", SOURCE)
         self.assertIn("await CapacitorApp.exitApp();", handler)
 
 
