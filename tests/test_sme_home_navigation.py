@@ -34,8 +34,9 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("sme_welcome_state_v3_", self.html)
         self.assertIn("function smeShowWelcomeTourStep(step)", self.html)
         self.assertIn("function smeBuildVisualTour()", self.html)
-        self.assertIn("const available=[", self.html)
-        self.assertIn(".filter(item=>smeCan(item.key,'view'))", self.html)
+        self.assertIn("const candidates=[", self.html)
+        self.assertIn("].filter(item=>smeCan(item.key,'view'));", self.html)
+        self.assertIn("const maxSteps=Math.min(5", self.html)
         self.assertIn("const workAccess=smeCan('trabajos','view')", self.html)
         self.assertIn("title:'Inicio: lo principal del día'", self.html)
 
