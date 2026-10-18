@@ -168,5 +168,22 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("precio formal cambió desde el último análisis interno", SOURCE)
         self.assertNotIn("analisisInterno", SOURCE[SOURCE.index("function displayValues("):SOURCE.index("function recordTitle(")])
 
+
+    def test_faatra_hourly_reference_is_permission_gated_and_never_sets_shop_prices(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("function smeCanSeeFaatraReference()", SOURCE)
+        self.assertIn("permissions.horaTallerFaatra", SOURCE)
+        self.assertIn("permissions.horaTallerFaatra=isPrimary?'view'", SOURCE)
+        self.assertIn("smeFaatraPermissionOptions", SOURCE)
+        self.assertIn("smeCheckFaatraReference(force=false)", SOURCE)
+        self.assertIn("lastAttemptDate", SOURCE)
+        self.assertIn("FAATRA todavía no muestra un período posterior", SOURCE)
+        self.assertIn("El precio del taller lo decide únicamente la persona autorizada", SOURCE)
+        self.assertIn("fetchFaatraHourlyReference", plugin)
+        self.assertIn("https://www.faatra.org.ar/servicios/costo-hora/", plugin)
+        self.assertIn("No se modificó ningún precio de SME", plugin)
+        self.assertNotIn("hourlyCost.value=result.value", SOURCE)
+        self.assertNotIn("quote.importe=result.value", SOURCE)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
