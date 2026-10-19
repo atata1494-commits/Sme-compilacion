@@ -937,8 +937,8 @@ function smeOrientativePdfBase64(quote){
  add('Fecha: '+friendlyDate(quote.fecha||todayLocal()),{size:10,color:'muted',spaceBefore:4});
  addField('Vehículo / referencia',quote.vehiculoReferencia);
  addField('Trabajo consultado',quote.trabajoOrientativo);
- add('RANGO ESTIMADO',{size:9,bold:true,color:'gold',spaceBefore:14});
- add(smeOrientativeAmount(quote.estimacionMinima)+'  —  '+smeOrientativeAmount(quote.estimacionMaxima),{size:17,bold:true,color:'dark',spaceBefore:4});
+ add(Math.abs(parseMoneyInput(quote.estimacionMaxima)-parseMoneyInput(quote.estimacionMinima))<0.005?'PRECIO ESTIMADO':'RANGO ESTIMADO',{size:9,bold:true,color:'gold',spaceBefore:14});
+ add(smeOrientativePriceLabel(quote.estimacionMinima,quote.estimacionMaxima),{size:17,bold:true,color:'dark',spaceBefore:4});
  add('QUÉ PODRÍA INCLUIR / QUÉ FALTA CONFIRMAR',{size:9,bold:true,color:'gold',spaceBefore:16});
  addParagraph(smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.',{size:11,color:'dark',spaceBefore:3});
  add('IMPORTANTE',{size:9,bold:true,color:'gold',spaceBefore:16});
@@ -993,8 +993,8 @@ function smeOrientativeSvg(quote){
  addField('Trabajo consultado',quote.trabajoOrientativo);
  const rangeY=y+2;
  content.push('<rect x="64" y="'+rangeY+'" width="772" height="122" rx="18" fill="#e2c18b"/>');
- addText('RANGO ESTIMADO',88,rangeY+38,21,'#24302b',true);
- addText(smeOrientativeAmount(quote.estimacionMinima)+'  —  '+smeOrientativeAmount(quote.estimacionMaxima),88,rangeY+83,29,'#24302b',true);
+ addText(Math.abs(parseMoneyInput(quote.estimacionMaxima)-parseMoneyInput(quote.estimacionMinima))<0.005?'PRECIO ESTIMADO':'RANGO ESTIMADO',88,rangeY+38,21,'#24302b',true);
+ addText(smeOrientativePriceLabel(quote.estimacionMinima,quote.estimacionMaxima),88,rangeY+83,29,'#24302b',true);
  y=rangeY+154;
  addText('QUÉ PODRÍA INCLUIR / QUÉ FALTA CONFIRMAR',64,y,20,'#8b6d43',true);y+=39;
  const scope=smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.';
