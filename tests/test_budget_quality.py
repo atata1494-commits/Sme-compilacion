@@ -12,6 +12,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("obj.importe=String(m+r+other)", SOURCE)
         self.assertIn("const labor=form.elements.manoObra, parts=form.elements.repuestos, other=form.elements.otrosConceptos, total=form.elements.importe", SOURCE)
         self.assertIn("Los importes del presupuesto no pueden ser negativos.", SOURCE)
+        self.assertIn("const isMoney=['importe','manoObra','repuestos','otrosConceptos','comision','materiales','otrosGastos'].includes(name)", SOURCE)
+        self.assertIn("Se calcula automáticamente con mano de obra + repuestos + otros conceptos.", SOURCE)
 
     def test_customer_document_explains_diagnosis_solution_scope_and_exclusions(self):
         for field in ("diagnosticoCliente", "solucionRecomendada", "alcanceTrabajo", "trabajosExcluidos", "condicionesGarantia", "condicionesPago"):
@@ -20,6 +22,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("Solución recomendada", SOURCE)
         self.assertIn("Fuera del alcance de esta propuesta", SOURCE)
         self.assertIn("Nombre y firma del cliente", SOURCE)
+        self.assertIn('name="detalleOtrosConceptos"', SOURCE)
+        self.assertIn("esc(o.detalleOtrosConceptos||'Conceptos adicionales indicados en la propuesta')", SOURCE)
 
     def test_pdf_is_branded_and_has_clear_economic_summary(self):
         self.assertIn("function smeBudgetDocumentHtml(o)", SOURCE)
@@ -43,6 +47,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("Math.max(originalTotal,currentResult.suggestedMinimum)", SOURCE)
         self.assertIn("Aplicar precio recomendado", SOURCE)
         self.assertIn("Los costos internos no se mostrarán al cliente.", SOURCE)
+        self.assertIn("Cambios de precio registrados", SOURCE)
+        self.assertIn("result.salePrice<result.suggestedMinimum", SOURCE)
 
     def test_private_cost_data_is_not_in_customer_pdf_template(self):
         start = SOURCE.index("function smeBudgetDocumentHtml(o)")
