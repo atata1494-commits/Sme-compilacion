@@ -73,6 +73,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("function smeRestoreFormDrafts()", SOURCE)
         self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
         self.assertIn("form.addEventListener('input',event=>{if(['manoObra','repuestos','otrosConceptos']", SOURCE)
+        self.assertIn("[labor,parts,other].filter(Boolean).forEach(input=>['input','change','keyup','blur'].forEach(type=>input.addEventListener(type,calcTotal)))", SOURCE)
+        self.assertIn("total.setAttribute('value',total.value)", SOURCE)
         self.assertIn("function formatMoneyWhileTyping(value)", SOURCE)
         self.assertIn("input.type='text';input.inputMode='numeric';input.autocomplete='off'", SOURCE)
 
