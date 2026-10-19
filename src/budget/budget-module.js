@@ -61,9 +61,9 @@ export function renderBudgetModule(ctx) {
     add('Fecha',q.fecha || dateToday());
     if(q.tipo === 'Orientativo'){
       add('Vehículo / referencia',q.vehiculoReferencia); add('Trabajo consultado',q.trabajoOrientativo);
-      add('Precio estimado',q.usarRangoPrecio && Math.abs(parseMoney(q.estimacionMaxima)-parseMoney(q.estimacionMinima))>.005 ? amount(q.estimacionMinima)+' a '+amount(q.estimacionMaxima) : amount(q.estimacionMinima));
-      add('Qué podría incluir / qué falta confirmar',q.alcanceOrientativo);
-      add('Nota importante','Referencia orientativa. El alcance y los repuestos deben confirmarse al revisar el vehículo. No se realizarán trabajos adicionales sin autorización.');
+      add('Estimación preliminar de costo',q.usarRangoPrecio && Math.abs(parseMoney(q.estimacionMaxima)-parseMoney(q.estimacionMinima))>.005 ? amount(q.estimacionMinima)+' a '+amount(q.estimacionMaxima) : amount(q.estimacionMinima));
+      add('Alcance preliminar / puntos por confirmar',q.alcanceOrientativo);
+      add('Importante — requiere evaluación','ESTIMACIÓN ORIENTATIVA, NO DEFINITIVA. El vehículo debe ser evaluado para confirmar diagnóstico, alcance, repuestos y costo final. Toda variación o trabajo adicional será informado y requerirá autorización del cliente antes de realizarse.');
     } else {
       add('Cliente',customerName(q.clienteId)); add('Vehículo',q.vehiculoId ? vehicleName(q.vehiculoId) : q.vehiculoReferencia);
       add('Orden relacionada',q.trabajoId ? workName(q.trabajoId) : '');
@@ -80,15 +80,19 @@ export function renderBudgetModule(ctx) {
       add('Condiciones de pago',q.condicionesPago); add('Garantía / condiciones aplicables',q.condicionesGarantia);
       add('Trabajos o repuestos no incluidos',q.trabajosExcluidos);
       add('Control posterior',q.controlPosterior==='si' ? (q.condicionesControl || 'Control posterior a coordinar') : '');
-      add('Aclaraciones',q.notaCliente); add('Importante','No se realizarán trabajos adicionales sin autorización del cliente. Conservá una copia de esta propuesta.');
+      add('Aclaraciones',q.notaCliente); add('Importante','Este presupuesto corresponde al alcance detallado en este documento. Si durante la reparación se detectan necesidades adicionales, se informarán y requerirán autorización del cliente antes de ejecutarse. Conservá una copia de esta propuesta.');
     }
     return rows.join('');
   };
-  const buildDocumentHtml = q => '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
-    esc(q.tipo==='Orientativo'?'Consulta orientativa':'Presupuesto de reparación') +
-    '</title><style>@page{size:auto;margin:10mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font:12pt/1.45 Arial,sans-serif;color:#222;margin:0}header{border-bottom:3px solid #b99861;padding:0 0 12px;margin-bottom:16px;color:#173a3e}h1{font:700 23pt Georgia,serif;margin:0 0 4px}h2{font:600 18pt Georgia,serif;margin:10px 0;color:#173a3e}p{margin:6px 0 12px}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #c6c2b8;padding:9px;vertical-align:top;overflow-wrap:anywhere;white-space:pre-wrap}th{width:32%;text-align:left;background:#f4efe5}footer{border-top:1px solid #bbb;margin-top:20px;padding-top:8px;font-size:9pt;color:#555}@media print{tr{break-inside:avoid}body{font-size:12pt}}</style></head><body><header><h1>Servicios Mecánicos Enzo</h1><p>El oficio de siempre, al servicio de hoy.</p></header><h2>' +
-    esc(q.tipo==='Orientativo'?'Consulta orientativa':'Presupuesto de reparación') + '</h2><table>' + customerDocument(q) +
-    '</table><footer>Documento para el cliente. Los costos, márgenes y cálculos internos del taller no forman parte de este documento.</footer></body></html>';
+  const buildDocumentHtml = q => {
+    const orientative = q.tipo === 'Orientativo';
+    const documentTitle = orientative ? 'PRESUPUESTO ORIENTATIVO' : 'PRESUPUESTO DE REPARACIÓN';
+    return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
+    esc(documentTitle) +
+    '</title><style>@page{size:auto;margin:12mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{position:relative;font:10.5pt/1.42 Arial,sans-serif;color:#273436;margin:0}body:before{content:"SME";position:fixed;z-index:-1;top:35%;left:8%;width:84%;text-align:center;font:900 100pt Georgia,serif;letter-spacing:12pt;color:rgba(23,58,62,.055);pointer-events:none}header{position:relative;border-bottom:3px solid #b99861;padding:0 0 12px;margin-bottom:16px;color:#173a3e}header:after{content:"SERVICIOS MECÁNICOS ENZO";display:block;margin-top:7px;font-size:8pt;font-weight:700;letter-spacing:2pt;color:#b08e56}h1{font:700 22pt Georgia,serif;letter-spacing:.2pt;margin:0 0 4px}header p{font-size:9pt;color:#526365;margin:0}h2{display:inline-block;font:700 15pt Georgia,serif;letter-spacing:.8pt;margin:3px 0 12px;padding:7px 10px;color:#173a3e;border:1px solid #b99861;background:#f5f0e6}p{margin:6px 0 12px}table{position:relative;width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #c6c2b8;padding:7px 8px;vertical-align:top;overflow-wrap:anywhere;white-space:pre-wrap}th{width:32%;text-align:left;background:#f1ecdf;color:#253b3d;font-weight:700}td{background:rgba(255,255,255,.92)}tr:has(th:first-child){break-inside:avoid}.customer-note{margin-top:13px;padding:10px 12px;border-left:4px solid #b99861;background:#f5f0e6;color:#263c3d;font-size:9.5pt;line-height:1.45}.document-footer{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #b99861;margin-top:18px;padding-top:7px;font-size:8pt;color:#657171}.document-footer strong{color:#173a3e;letter-spacing:1pt}@media print{tr{break-inside:avoid}body{font-size:10.5pt}}</style></head><body><header><h1>Servicios Mecánicos Enzo</h1><p>El oficio de siempre, al servicio de hoy.</p></header><h2>' +
+    esc(documentTitle) + '</h2><table>' + customerDocument(q) +
+    '</table><div class="document-footer"><strong>SME</strong><span>Documento preparado para el cliente</span></div></body></html>';
+  };
 
   const filteredQuotes = () => [...db.presupuestos].filter(q => {
     const f = ctx.relatedFilter; if(!f) return true;
