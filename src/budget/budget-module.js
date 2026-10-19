@@ -103,7 +103,7 @@ export function renderBudgetModule(ctx) {
     '<label>Buscar trabajo o motor<input id="'+prefix+'-time-search" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label>' +
     '<div id="'+prefix+'-time-selected" class="sme-budget-v2-time-selected" hidden></div>' +
     '<div id="'+prefix+'-time-calc" class="sme-budget-v2-time-calc" hidden><div class="sme-budget-v2-grid"><label>Horas mínimas<input id="'+prefix+'-hours-min" type="number" min="0.25" step="0.25"></label><label>Horas habituales<input id="'+prefix+'-hours" type="number" min="0.25" step="0.25"></label><label>Horas máximas<input id="'+prefix+'-hours-max" type="number" min="0.25" step="0.25"></label><label>Tu tarifa por hora ($)<input id="'+prefix+'-rate" data-money type="text" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label><label>Otros costos mínimos ($)<input id="'+prefix+'-other-min" data-money type="text" inputmode="numeric" value="0"></label><label>Otros costos máximos ($)<input id="'+prefix+'-other-max" data-money type="text" inputmode="numeric" value="0"></label></div><p id="'+prefix+'-time-preview" class="muted" aria-live="polite">Ingresá las horas y la tarifa para ver el cálculo.</p><button type="button" class="secondary" id="'+prefix+'-apply-time" disabled>Usar cálculo</button></div>' +
-    '<div id="'+prefix+'-time-results" class="sme-budget-v2-time-results" aria-live="polite"><p class="muted">Escribí el nombre del trabajo o motor para ver coincidencias.</p></div><div class="quick"><button type="button" class="secondary" data-budget-open-times>Abrir tabla completa de tiempos</button></div></section>';
+    '<div id="'+prefix+'-time-results" class="sme-budget-v2-time-results" aria-live="polite"><p class="muted">Escribí el nombre del trabajo o motor para ver coincidencias.</p></div></section>';
   const installmentMarkup = (kind,q) => {
     const formal = kind==='formal', checked = formal ? !!q.ofrecerCuotasFormal : !!q.ofrecerCuotasQuick;
     const count = formal ? (q.cantidadCuotasFormal || '3') : (q.cantidadCuotasQuick || '3');
@@ -182,7 +182,6 @@ export function renderBudgetModule(ctx) {
       '<section data-budget-pane="records" '+(activeTab==='records'?'':'hidden')+'><section class="sme-budget-v2-history"><div class="sme-budget-v2-section-heading"><h3>Historial de presupuestos</h3><span>'+filteredQuotes().length+' registros</span></div><label>Buscar en el historial<input id="sme-budget-history-search" type="search" placeholder="Cliente, vehículo, trabajo, estado o importe"></label><div id="sme-budget-history-list">'+historyItemsMarkup(filteredQuotes())+'</div></section></section></section>';
     root.querySelectorAll('[data-budget-tab]').forEach(button=>button.addEventListener('click',()=>draw(button.dataset.budgetTab)));
     root.querySelector('[data-budget-clear-related]')?.addEventListener('click',()=>ctx.clearRelated?.());
-    root.querySelectorAll('[data-budget-open-times]').forEach(button=>button.addEventListener('click',()=>ctx.navigate('tiempos')));
     root.querySelectorAll('[data-budget-cancel-edit]').forEach(button=>button.addEventListener('click',()=>{editingQuote=null;draw(activeTab)}));
     bindQuickForm(); bindFormalForm(); bindCostForm(); bindHistory();
     if(ctx.clearPendingLaborId&&pendingLaborId){ctx.clearPendingLaborId();pendingLaborId='';}
@@ -214,6 +213,7 @@ export function renderBudgetModule(ctx) {
   function bindQuickForm() {
     const form=root.querySelector('#sme-budget-quick-form');if(!form)return;
     bindMoneyInputs(form);
+    initializeLaborAssist('quick');
     const min=form.elements.quickPrice,max=form.elements.quickPriceMax,useRange=form.elements.usePriceRange,range=form.querySelector('[data-price-range-fields]');
     const total=()=>parseMoney(min.value);
     const paintInstallments=bindInstallments(form,total);
@@ -242,6 +242,7 @@ export function renderBudgetModule(ctx) {
   function bindFormalForm() {
     const form=root.querySelector('#sme-budget-formal-form');if(!form)return;
     bindMoneyInputs(form);
+    initializeLaborAssist('formal');
     const client=form.elements.clienteId, vehicle=form.elements.vehiculoId, work=form.elements.trabajoId;
     const labor=form.elements.laborAmount, parts=form.elements.partsAmount, other=form.elements.otherAmount, total=form.elements.budgetTotal;
     const totalValue=()=>parseMoney(labor.value)+parseMoney(parts.value)+parseMoney(other.value);
@@ -321,7 +322,7 @@ export function renderBudgetModule(ctx) {
       results.innerHTML=matches.length?matches.map(item=>'<button type="button" class="sme-budget-v2-time-row" data-budget-time-select="'+esc(item.id)+'"><span><strong>'+esc(item.title)+'</strong><small>'+esc(item.family||'')+' · '+esc(item.application||'')+'</small></span><span>'+(item.suggested===null?'Sin horas':esc(String(item.min??item.suggested))+'–'+esc(String(item.max??item.suggested))+' h')+'</span></button>').join(''):'<div class="sme-budget-v2-empty">No encontré coincidencias. Probá con “distribución”, “8v”, “K4M”, “tapa” o “embrague”.</div>';
       results.querySelectorAll('[data-budget-time-select]').forEach(button=>button.addEventListener('click',()=>{selectItem(catalog.find(item=>String(item.id)===String(button.dataset.budgetTimeSelect))||null);drawResults()}));
     };
-    search.addEventListener('input',()=>{if(selected&&!searchable(selected).includes(wordsFor(search.value).join(' ')))selected=null;drawResults();selectItem(selected)});
+    search.addEventListener('input',()=>{const words=wordsFor(search.value);if(selected&&!words.every(word=>searchable(selected).includes(word)))selected=null;drawResults();selectItem(selected)});
     [f.min,f.usual,f.max,f.rate,f.otherMin,f.otherMax].forEach(input=>input.addEventListener('input',paintCalc));
     f.apply.addEventListener('click',()=>{
       if(!selected||f.apply.disabled)return;
