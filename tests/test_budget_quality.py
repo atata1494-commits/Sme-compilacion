@@ -47,12 +47,15 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("count+' cuotas estimadas de '+amount(total/count)", MODULE)
         self.assertIn("Confirmá que el medio de pago realmente ofrece esta condición.", MODULE)
 
-    def test_time_assistant_searches_inside_budget_without_leaving_the_form(self):
+    def test_time_assistant_searches_progressively_inside_budget(self):
         self.assertIn("Asistente de tiempos orientativos", MODULE)
         self.assertIn("initializeLaborAssist('quick')", MODULE)
         self.assertIn("initializeLaborAssist('formal')", MODULE)
         self.assertIn("data-budget-time-select", MODULE)
         self.assertNotIn("data-budget-open-times", MODULE)
+        self.assertIn("if(!words.length)", MODULE)
+        self.assertIn("words.every(word=>searchable(item).includes(word))", MODULE)
+        self.assertIn("if(selected){results.innerHTML='';return}", MODULE)
         self.assertIn("form.elements.hoursEstimatedUsual.value=String(usual)", MODULE)
         self.assertIn("form.elements.laborAmount.value=moneyInput(usual*rate)", MODULE)
 
