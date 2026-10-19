@@ -185,7 +185,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn('id="smeQuickUsePriceRange" name="usarRangoPrecio"', SOURCE)
         self.assertIn('id="smeQuickPriceRangeFields" hidden', SOURCE)
         self.assertIn("rangeRequested=fd.get('usarRangoPrecio')==='on'", SOURCE)
-        self.assertIn("max=maxRaw?maxEntered:min", SOURCE)
+        self.assertIn("max=rangeRequested?maxEntered:min", SOURCE)
         self.assertIn("smeOrientativePriceLabel(min,max)", SOURCE)
         self.assertIn("Importe único sujeto a inspección y confirmación del alcance", SOURCE)
         self.assertIn("PRECIO ESTIMADO", SOURCE)
