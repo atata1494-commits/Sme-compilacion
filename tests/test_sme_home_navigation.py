@@ -259,12 +259,11 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("if(smeAuthenticated&&page)localStorage.setItem(SME_RESUME_PAGE_KEY,page)", self.html)
         self.assertIn("page=smeGetResumePage();smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();", self.html)
 
-    def test_quick_orientative_button_has_resilient_click_handling(self):
-        self.assertIn("function smeSetOrientativeBudgetExpanded(toggle)", self.html)
-        self.assertIn("event.target?.closest?.('#smeToggleOrientativeBudget')", self.html)
-        self.assertIn("toggle.dataset.smeQuickToggleBound==='1'", self.html)
-        self.assertIn("toggle.addEventListener('click',()=>smeSetOrientativeBudgetExpanded(toggle))", self.html)
-        self.assertIn("try{if(quickForm&&smeCan('tiempos','view'))smeInitQuickLaborEstimate(quickForm)}catch(error)", self.html)
+    def test_budget_route_uses_an_independent_module(self):
+        self.assertIn("import { renderBudgetModule } from './src/budget/budget-module.js';", self.html)
+        self.assertIn("else if(page==='presupuestos') renderBudgetModule(", self.html)
+        self.assertIn("export function renderBudgetModule(ctx)", (ROOT / "src" / "budget" / "budget-module.js").read_text(encoding="utf-8"))
+        self.assertNotIn("function smeSetOrientativeBudgetExpanded(toggle)", self.html)
 
     def test_workshop_tiles_and_dashboard_metrics_use_distinct_icons(self):
         self.assertIn("target==='recepciones'?'carReception'", self.html)

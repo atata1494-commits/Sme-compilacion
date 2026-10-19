@@ -144,21 +144,6 @@ form button{margin-top:10px;width:100%}
 @media(max-width:520px){.home-layout{grid-template-columns:minmax(0,1fr)}.home-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.home-side .home-widget{margin:0}.home-metrics{gap:6px}.home-metrics .dashboard-stat{padding:8px;min-height:80px}.home-metrics .dashboard-stat .stat-label{font-size:10px}.home-metrics .dashboard-stat .stat-value{font-size:20px}.home-feature{min-height:135px;padding:16px}.home-feature strong{font-size:21px}.home-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.home-side .home-shift{grid-column:1/-1}}
 @media(max-width:360px){.home-side{grid-template-columns:minmax(0,1fr)}.home-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}#smeHelpButton{width:34px;height:34px}}
 #app [hidden]{display:none!important}
-.sme-installment-preview{margin:10px 0;padding:10px 12px;border:1px solid #6d664f;border-radius:8px;background:rgba(16,47,51,.32);color:#e9d8b8;font-size:13px;line-height:1.45}
-.sme-formal-installments{margin:13px 0;padding:12px;border:1px solid #6b614c;border-radius:9px;background:rgba(12,29,29,.32)}
-.sme-formal-installments .sme-installment-check{display:flex;align-items:flex-start;gap:10px;line-height:1.4}
-.sme-formal-installments input[type=checkbox]{width:auto;min-width:20px;flex:0 0 auto;margin-top:4px;accent-color:#c6a16a}
-/* Ayuda contextual en el presupuesto formal. */
-.sme-budget-apply-suggested{width:100%;margin-top:12px;background:#c9a66c;color:#1d2b28;font-weight:800;border:1px solid #e2c38f;border-radius:9px;padding:14px 16px;cursor:pointer}
-.sme-formal-client-details{margin:14px 0;border:1px solid #766447;border-radius:10px;padding:12px;background:rgba(16,47,51,.25)}
-.sme-formal-client-details summary{cursor:pointer;font-weight:800;color:#e5c58f;padding:5px 2px}
-.sme-formal-client-details>p{font-size:13px;line-height:1.45}
-.sme-formal-client-details label{display:block;margin-top:12px}
-.sme-formal-client-details textarea,.sme-formal-client-details input,.sme-formal-client-details select{width:100%}
-/* Módulo de presupuestos: acciones compactas, datos privados visualmente diferenciados. */
-.sme-budget-module{min-width:0}.sme-budget-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.sme-budget-tab{background:rgba(39,43,38,.72);border:1px solid #615641;color:#d8c8aa;padding:10px 12px;font-size:13px}.sme-budget-tab[aria-pressed="true"]{background:#c6a16a;color:#211b13;border-color:#e5c58f;font-weight:750}.sme-budget-pane[hidden]{display:none!important}.sme-budget-private{border-color:#92744c;background:linear-gradient(145deg,rgba(35,48,43,.98),rgba(31,35,31,.98))}.sme-budget-private-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap}.sme-budget-private-heading h3{margin:0;color:#e5c58f;font-family:Georgia,serif;font-size:20px}.sme-budget-private-heading span{font-size:10px;font-weight:800;letter-spacing:1px;color:#f0c98a;border:1px solid #92744c;border-radius:999px;padding:5px 8px}.sme-budget-cost-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 10px}.sme-budget-cost-grid label{min-width:0}.sme-budget-actual-costs{margin:12px 0;border-top:1px solid #5a5549;border-bottom:1px solid #5a5549;padding:10px 0}.sme-budget-actual-costs summary{cursor:pointer;color:#e5c58f;font-weight:700}.sme-budget-cost-summary{margin:14px 0 4px;padding:12px;border:1px solid #5c594d;border-radius:10px;background:rgba(11,22,20,.52)}.sme-budget-cost-summary h4{margin:0 0 10px;color:#e5c58f;font-size:16px}.sme-budget-cost-summary p{margin:7px 0;font-size:13px;line-height:1.45}.sme-budget-cost-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sme-budget-cost-metric{padding:9px;border:1px solid #4e5246;border-radius:8px}.sme-budget-cost-metric small{display:block;color:#bdb29e;font-size:11px}.sme-budget-cost-metric strong{display:block;margin-top:3px;font-size:16px;color:#ead5ad;overflow-wrap:anywhere}.sme-budget-cost-warning{border-left:3px solid #d6a24b;padding:8px 10px;background:rgba(160,94,39,.12);color:#f0cf9b}.sme-budget-cost-good{border-left:3px solid #719a83;padding:8px 10px;background:rgba(70,116,82,.12);color:#c8e1c8}.sme-budget-history{margin-top:10px}.sme-budget-history li{margin:7px 0;font-size:12px;color:#d7c7a9}.sme-budget-module form button{width:100%}
-@media(max-width:430px){.sme-budget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sme-budget-tab{padding:10px 7px}.sme-budget-cost-grid{grid-template-columns:1fr}.sme-budget-cost-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-
 /* Catálogo de tiempos: filas compactas y detalle solo para el trabajo seleccionado. */
 .sme-time-table{margin-top:10px;overflow:hidden;border:1px solid #4f5349;border-radius:12px;background:rgba(33,39,35,.88)}
 .sme-time-table-head,.sme-time-row{display:grid;grid-template-columns:minmax(0,1fr) 88px 84px;gap:8px;align-items:center}
@@ -233,6 +218,7 @@ import { Capacitor, registerPlugin } from '@capacitor/core';
 const SmeBackup=registerPlugin('SmeBackup');
 import { App as CapacitorApp } from '@capacitor/app';
 import { BiometricAuth, AndroidBiometryStrength } from '@aparajita/capacitor-biometric-auth';
+import { renderBudgetModule } from './src/budget/budget-module.js';
 const KEY='sme_taller_v1';
 const emptyDB=()=>({clientes:[],vehiculos:[],trabajos:[],presupuestos:[],movimientos:[],eventos:[],recepciones:[],diagnosticos:[],cuentas:[],asistencias:[],terceros:[],trabajosExternos:[],configHorarios:[],tareas:[],avisos:[],solicitudesGasto:[]});
 let storage,db;
@@ -366,18 +352,6 @@ function smeRestoreFormDrafts(){
   }catch(error){console.warn('No se pudo recuperar un borrador SME:',error)}
  })
 }
-function smeSetOrientativeBudgetExpanded(toggle){
- const body=document.getElementById('smeOrientativeBudgetBody'),form=document.getElementById('smeOrientativeBudgetForm');
- if(!toggle||!body||!form){console.warn('No se encontró el formulario de consulta orientativa.');return}
- const opening=body.hidden;body.hidden=!opening;toggle.setAttribute('aria-expanded',String(opening));toggle.textContent=opening?'− Ocultar consulta orientativa':'＋ Crear consulta orientativa';
- if(opening)setTimeout(()=>{const field=form.elements.namedItem('vehiculoReferencia');if(field&&typeof field.focus==='function')field.focus()},40);
-}
-document.addEventListener('click',event=>{
- const toggle=event.target?.closest?.('#smeToggleOrientativeBudget');
- if(!toggle||toggle.dataset.smeQuickToggleBound==='1')return;
- event.preventDefault();smeSetOrientativeBudgetExpanded(toggle);
-},true);
-
 function smeNavigateTo(nextPage){
  if(nextPage==='inicio'){
   smeResetNavigation();
@@ -817,7 +791,7 @@ function render(){
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
  else if(page==='vehiculos') listPage('Vehículos','vehiculos',[['patente','Patente','text'],['marca','Marca','text'],['modelo','Modelo','text'],['anio','Año','number'],['clienteId','Propietario / empresa','customer'],['kilometros','Kilometraje','text'],['notas','Notas del vehículo','textarea']],'Agregar vehículo');
  else if(page==='trabajos') listPage('Órdenes de trabajo','trabajos',[['numero','N.º de orden','readonly'],['fecha','Fecha de ingreso','date'],['vehiculoId','Vehículo','vehicle'],['clienteId','Cliente','customer'],['kilometros','Kilometraje al ingreso','text'],['problema','Falla informada / pedido del cliente','textarea'],['diagnostico','Diagnóstico','textarea'],['trabajo','Trabajo a realizar','textarea'],['repuestos','Repuestos / materiales','textarea'],['importe','Importe estimado ($)','number'],['estado','Estado','status'],['fechaEntrega','Fecha prevista de entrega','date']],'Guardar orden');
- else if(page==='presupuestos') listPage('Presupuestos','presupuestos',[['fecha','Fecha','date'],['clienteId','Cliente','customer'],['vehiculoId','Vehículo','vehicle'],['trabajoId','Orden de trabajo relacionada (opcional)','work'],['detalle','Detalle del presupuesto','textarea'],['manoObra','Mano de obra ($)','number'],['repuestos','Repuestos y materiales ($)','number'],['otrosConceptos','Servicios externos, insumos y otros trabajos ($)','number'],['importe','Total propuesto ($)','calculated'],['estado','Estado del presupuesto','budgetStatus']],'Guardar presupuesto');
+ else if(page==='presupuestos') renderBudgetModule({root:app,db,save,can:smeCan,navigate:smeNavigateTo,newId:newRecordId,today:todayLocal,laborCatalog:SME_LABOR_TIME_CATALOG,pendingLaborId:smePendingLaborTimeId,clearPendingLaborId:()=>{smePendingLaborTimeId=''},relatedFilter:smeRelatedFilter,confirm:smeStyledConfirm,currentUser:smeCurrentUser,clearRelated:()=>{smeRelatedFilter=null;smeNavigateTo('presupuestos')},openRelated:(target,filter)=>{smeRelatedFilter=filter;smeNavigateTo(target)},print:async(html,name)=>{if(storage?.isNative){await Printer.printHtml({html,name});return}const w=window.open('','_blank');if(!w){alert('El navegador bloqueó la ventana. Permití ventanas emergentes para imprimir.');return}w.document.write(html);w.document.close()},share:async(title,text)=>{if(storage?.isNative){await Share.share({title,text,dialogTitle:title});return}if(navigator.share){await navigator.share({title,text});return}await navigator.clipboard.writeText(text);alert('Mensaje copiado. Ya podés pegarlo en WhatsApp o en la conversación con el cliente.')}});
  else if(page==='caja') listPage('Caja','movimientos',[['fecha','Fecha','date'],['hora','Hora','time'],['tipo','Tipo de movimiento','cashType'],['concepto','Concepto','text'],['categoria','Categoría','cashCategory'],['medioPago','Medio de pago','cashMethod'],['cuotas','Cantidad de cuotas','number'],['comision','Comisión / descuento del cobro ($)','number'],['importe','Importe bruto ($)','number'],['importeNeto','Neto después de comisión ($)','netCalculated'],['acreditacion','Estado del dinero','cashAccreditation'],['trabajoId','Orden relacionada (opcional)','work']],'Registrar movimiento');
  else if(page==='cuentas') accountPage();
  else if(page==='usuarios') smeUserPage();
@@ -860,10 +834,8 @@ function fieldHTML(key,name,label,type,value){
  if(type==='cashCategory')return '<label>'+label+'<select name="'+name+'">'+['Mano de obra','Repuestos y materiales','Reparación / servicio','Casa de repuestos','Distribuidor / proveedor','Alquiler','Luz','Agua / gas / internet','Sueldos y personal','Impuestos','Comisiones bancarias / Posnet','Herramientas','Mantenimiento del taller','Préstamos / cuotas','Otros'].map(x=>'<option '+(x===(v||'Otros')?'selected':'')+'>'+x+'</option>').join('')+'</select></label>';
  if(type==='cashAccreditation')return '<label>'+label+'<select name="'+name+'">'+['Acreditado / disponible','Pendiente de acreditación'].map(x=>'<option '+(x===(v||'Acreditado / disponible')?'selected':'')+'>'+x+'</option>').join('')+'</select></label>';
  if(type==='netCalculated')return '<label>'+label+'<input name="'+name+'" type="text" value="'+esc(v)+'" readonly><small class="muted">Importe bruto menos comisión de cobro.</small></label>';
- if(type==='budgetStatus')return '<label>'+label+'<select name="'+name+'">'+['Borrador','Enviado al cliente','Aprobado','Rechazado','Vencido'].map(x=>'<option '+(x===(v||'Borrador')?'selected':'')+'>'+x+'</option>').join('')+'</select></label>'; 
  if(type==='textarea')return '<label>'+label+'<textarea name="'+name+'" rows="3">'+esc(v)+'</textarea></label>';
  if(type==='readonly')return '<label>'+label+'<input name="'+name+'" value="'+esc(v||nextWorkNumber())+'" readonly></label>';
- if(type==='calculated')return '<label>'+label+'<input name="'+name+'" type="text" inputmode="numeric" value="'+esc(v)+'" readonly><small class="muted">Se calcula automáticamente con mano de obra + repuestos + otros conceptos.</small></label>';
  const isMoney=['importe','manoObra','repuestos','otrosConceptos','comision','materiales','otrosGastos'].includes(name);
  return '<label>'+label+'<input name="'+name+'" type="'+(isMoney?'text':type)+'" '+(isMoney?'inputmode="numeric" autocomplete="off"':'')+' value="'+esc(v||(type==='date'?todayLocal():type==='time'&&name==='hora'?new Date().toTimeString().slice(0,5):name==='cuotas'?'1':''))+'" '+(['patente','nombre','fecha','titulo','concepto'].includes(name)?'required':'')+' '+(type==='number'&&!isMoney?'min="0" step="0.01"':'')+'></label>';
 }
@@ -879,217 +851,12 @@ function formatMoneyWhileTyping(value){
  const integer=integerDigits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
  return hasComma?integer+','+fractionDigits:integer;
 }
-const SME_MONEY_INPUT_SELECTOR='input[name="importe"],input[name="manoObra"],input[name="repuestos"],input[name="otrosConceptos"],input[name="comision"],input[name="estimacionMinima"],input[name="estimacionMaxima"],input[name="quickTarifaHora"],input[name="quickCostMin"],input[name="quickCostMax"],input[name="hourlyCost"],input[name="partsCost"],input[name="externalCost"],input[name="consumablesCost"],input[name="shippingCost"],input[name="overheadCost"],input[name="paymentFeeFixed"],input[name="actualLaborCost"],input[name="actualPartsCost"],input[name="actualOtherCost"]';
+const SME_MONEY_INPUT_SELECTOR='input[name="importe"],input[name="manoObra"],input[name="repuestos"],input[name="otrosConceptos"],input[name="comision"]';
 function bindMoneyInput(input){if(!input||input.readOnly)return;input.type='text';input.inputMode='numeric';input.autocomplete='off';input.dataset.moneyBound='1';if(input.value)input.value=formatMoneyInput(input.value);if(!input.dataset.moneyBlurBound){input.dataset.moneyBlurBound='1';input.addEventListener('blur',()=>{if(input.value)input.value=formatMoneyInput(input.value)})}}
 function bindMoneyFields(form){if(!form)return;Array.from(form.querySelectorAll(SME_MONEY_INPUT_SELECTOR)).forEach(bindMoneyInput)}
 // Captura global como respaldo: también cubre formularios restaurados o reconstruidos por el WebView.
 document.addEventListener('input',event=>{const input=event.target;if(!input||!input.matches||!input.matches(SME_MONEY_INPUT_SELECTOR)||input.readOnly)return;const old=String(input.value??''),caret=input.selectionStart??old.length,digitsBefore=old.slice(0,caret).replace(/\D/g,'').length,commaBefore=old.slice(0,caret).includes(',');const formatted=formatMoneyWhileTyping(old);if(formatted===old)return;input.value=formatted;let seen=0,pos=0;while(pos<formatted.length&&seen<digitsBefore){if(/\d/.test(formatted[pos]))seen++;pos++}if(commaBefore&&formatted[pos]===',')pos++;try{input.setSelectionRange(pos,pos)}catch(_){}},true);
 function formatKilometers(value){const digits=String(value??'').replace(/\D/g,'');return digits?new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(Number(digits)):''}
-
-function smeOrientativeAmount(value){
- const amount=Math.max(0,parseMoneyInput(value));
- return '$ '+new Intl.NumberFormat('es-AR',{minimumFractionDigits:Number.isInteger(amount)?0:2,maximumFractionDigits:2}).format(amount);
-}
-function smeOrientativePriceLabel(min,max){const low=Math.max(0,parseMoneyInput(min)),high=Math.max(0,parseMoneyInput(max));return high>0&&Math.abs(high-low)>0.005?smeOrientativeAmount(low)+' a '+smeOrientativeAmount(high):smeOrientativeAmount(low)}
-function smeOrientativeCombinedScope(quote){
- const scope=String(quote?.alcanceOrientativo||'').trim();
- const proposal=String(quote?.propuestaComercial||'').trim();
- return [scope,proposal].filter(Boolean).join('\n\n');
-}
-function smeOrientativeMessage(quote){
- if(quote&&quote.mensajeOrientativo)return String(quote.mensajeOrientativo);
- return 'Hola, te paso una referencia orientativa para '+String(quote?.trabajoOrientativo||'el trabajo consultado')+' en '+String(quote?.vehiculoReferencia||'el vehículo')+'.\n\nEstimación aproximada: '+smeOrientativeAmount(quote?.estimacionMinima)+' a '+smeOrientativeAmount(quote?.estimacionMaxima)+'.\n\n'+smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.'+'\n\nEste rango es orientativo, no un presupuesto definitivo. Al revisar el vehículo podremos confirmar los trabajos y los repuestos. No se realizarán trabajos adicionales sin autorización.';
-}
-function smeOrientativeWrapText(value,maxChars){
- const words=String(value??'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
- const lines=[];let line='';
- for(const word0 of words){
-  let word=word0;
-  while(word.length>maxChars){
-   if(line){lines.push(line);line=''}
-   lines.push(word.slice(0,maxChars));word=word.slice(maxChars);
-  }
-  if(!word)continue;
-  if(!line)line=word;
-  else if((line+' '+word).length<=maxChars)line+=' '+word;
-  else{lines.push(line);line=word}
- }
- if(line)lines.push(line);
- return lines.length?lines:['—'];
-}
-function smeOrientativeSafeFilePart(value){
- return normalizeSearch(value).replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,44)||'vehiculo';
-}
-function smeOrientativeXml(value){
- return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
-}
-function smeOrientativeWinAnsi(value){
- const replacements={'€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'ˆ':136,'‰':137,'Š':138,'‹':139,'Œ':140,'Ž':142,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'˜':152,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159};
- return Array.from(String(value??'')).map(ch=>{
-  const cp=ch.codePointAt(0);
-  if(Object.prototype.hasOwnProperty.call(replacements,ch))return String.fromCharCode(replacements[ch]);
-  return cp<=255?String.fromCharCode(cp):'?';
- }).join('');
-}
-function smeOrientativePdfEscape(value){
- return smeOrientativeWinAnsi(value).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)').replace(/[\r\n]+/g,' ');
-}
-function smeOrientativePdfBase64(quote){
- const rows=[];
- const add=(text,options={})=>rows.push({text:String(text??''),size:options.size||10,bold:!!options.bold,color:options.color||'dark',spaceBefore:options.spaceBefore||0});
- const addParagraph=(text,options={})=>{
-  const size=options.size||10,maxChars=Math.max(30,Math.floor(492/(size*0.52)));
-  smeOrientativeWrapText(text,maxChars).forEach(line=>add(line,{size,bold:!!options.bold,color:options.color||'dark',spaceBefore:options.spaceBefore||0}));
- };
- const addField=(label,value)=>{
-  add(label.toLocaleUpperCase('es-AR'),{size:9,bold:true,color:'gold',spaceBefore:12});
-  addParagraph(value||'—',{size:11,color:'dark'});
- };
- add('CONSULTA ORIENTATIVA',{size:19,bold:true,color:'gold',spaceBefore:3});
- add('Fecha: '+friendlyDate(quote.fecha||todayLocal()),{size:10,color:'muted',spaceBefore:4});
- addField('Vehículo / referencia',quote.vehiculoReferencia);
- addField('Trabajo consultado',quote.trabajoOrientativo);
- add(Math.abs(parseMoneyInput(quote.estimacionMaxima)-parseMoneyInput(quote.estimacionMinima))<0.005?'PRECIO ESTIMADO':'RANGO ESTIMADO',{size:9,bold:true,color:'gold',spaceBefore:14});
- add(smeOrientativePriceLabel(quote.estimacionMinima,quote.estimacionMaxima),{size:17,bold:true,color:'dark',spaceBefore:4});
- add('QUÉ PODRÍA INCLUIR / QUÉ FALTA CONFIRMAR',{size:9,bold:true,color:'gold',spaceBefore:16});
- addParagraph(smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.',{size:11,color:'dark',spaceBefore:3});
- add('IMPORTANTE',{size:9,bold:true,color:'gold',spaceBefore:16});
- addParagraph('Esta es una referencia orientativa, no un precio confirmado ni un presupuesto definitivo. El importe final depende de revisar el vehículo, identificar el motor, verificar el alcance y confirmar los repuestos y trabajos necesarios.',{size:10,color:'muted',spaceBefore:3});
- addParagraph('No se realizarán trabajos adicionales sin autorización del cliente.',{size:10,bold:true,color:'dark',spaceBefore:5});
- const pages=[];let current=[];let y=746;
- for(const row of rows){
-  const needed=row.spaceBefore+row.size+7;
-  if(y-needed<66&&current.length){pages.push(current);current=[];y=746}
-  y-=row.spaceBefore;
-  current.push({...row,y});
-  y-=row.size+7;
- }
- if(current.length)pages.push(current);
- const objects=[];
- objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
- objects[2]='<< /Type /Pages /Kids ['+pages.map((_,i)=>(5+i*2)+' 0 R').join(' ')+'] /Count '+pages.length+' >>';
- objects[3]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
- objects[4]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
- const colorCommands={dark:'0.13 0.17 0.15 rg',gold:'0.74 0.59 0.37 rg',muted:'0.38 0.40 0.37 rg'};
- pages.forEach((pageRows,index)=>{
-  const pageId=5+index*2,streamId=pageId+1;
-  let stream='q\n0.063 0.184 0.2 rg\n0 774 595 68 re f\nQ\n';
-  stream+='0.91 0.79 0.57 rg\nBT /F2 13 Tf 50 812 Td ('+smeOrientativePdfEscape('SERVICIOS MECÁNICOS ENZO')+') Tj ET\n';
-  stream+='0.95 0.91 0.84 rg\nBT /F1 9 Tf 50 791 Td ('+smeOrientativePdfEscape('El oficio de siempre, al servicio de hoy.')+') Tj ET\n';
-  pageRows.forEach(row=>{
-   stream+=(colorCommands[row.color]||colorCommands.dark)+'\n';
-   stream+='BT /'+(row.bold?'F2':'F1')+' '+row.size+' Tf 50 '+Math.round(row.y)+' Td ('+smeOrientativePdfEscape(row.text)+') Tj ET\n';
-  });
-  stream+='0.74 0.59 0.37 RG 50 55 m 545 55 l S\n';
-  stream+='0.38 0.40 0.37 rg\nBT /F1 8 Tf 50 39 Td ('+smeOrientativePdfEscape('Referencia orientativa · Servicios Mecánicos Enzo')+') Tj ET\n';
-  stream+='BT /F1 8 Tf 510 39 Td ('+(index+1)+'/'+pages.length+') Tj ET\n';
-  objects[pageId]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents '+streamId+' 0 R >>';
-  objects[streamId]='<< /Length '+stream.length+' >>\nstream\n'+stream+'endstream';
- });
- const maxId=objects.length-1;let pdf='%PDF-1.4\n';const offsets=[0];
- for(let id=1;id<=maxId;id++){offsets[id]=pdf.length;pdf+=id+' 0 obj\n'+objects[id]+'\nendobj\n'}
- const xrefOffset=pdf.length;pdf+='xref\n0 '+(maxId+1)+'\n0000000000 65535 f \n';
- for(let id=1;id<=maxId;id++)pdf+=String(offsets[id]).padStart(10,'0')+' 00000 n \n';
- pdf+='trailer\n<< /Size '+(maxId+1)+' /Root 1 0 R >>\nstartxref\n'+xrefOffset+'\n%%EOF';
- return btoa(pdf);
-}
-function smeOrientativeSvg(quote){
- const content=[];let y=300;
- const addText=(text,x,top,size,color,bold=false)=>content.push('<text x="'+x+'" y="'+top+'" font-family="Arial,Helvetica,sans-serif" font-size="'+size+'" font-weight="'+(bold?'700':'400')+'" fill="'+color+'">'+smeOrientativeXml(text)+'</text>');
- const addField=(label,value)=>{
-  addText(label.toLocaleUpperCase('es-AR'),64,y,21,'#8b6d43',true);y+=40;
-  smeOrientativeWrapText(value||'—',51).forEach(line=>{addText(line,64,y,28,'#24302b',true);y+=38});
-  y+=16;
- };
- addField('Vehículo / referencia',quote.vehiculoReferencia);
- addField('Trabajo consultado',quote.trabajoOrientativo);
- const rangeY=y+2;
- content.push('<rect x="64" y="'+rangeY+'" width="772" height="122" rx="18" fill="#e2c18b"/>');
- addText(Math.abs(parseMoneyInput(quote.estimacionMaxima)-parseMoneyInput(quote.estimacionMinima))<0.005?'PRECIO ESTIMADO':'RANGO ESTIMADO',88,rangeY+38,21,'#24302b',true);
- addText(smeOrientativePriceLabel(quote.estimacionMinima,quote.estimacionMaxima),88,rangeY+83,29,'#24302b',true);
- y=rangeY+154;
- addText('QUÉ PODRÍA INCLUIR / QUÉ FALTA CONFIRMAR',64,y,20,'#8b6d43',true);y+=39;
- const scope=smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.';
- smeOrientativeWrapText(scope,54).forEach(line=>{addText(line,64,y,25,'#24302b',false);y+=36});
- y+=17;
- const noteLines=smeOrientativeWrapText('Esta es una referencia orientativa, no un precio confirmado ni un presupuesto definitivo. El importe final depende de revisar el vehículo, identificar el motor, verificar el alcance y confirmar los repuestos y trabajos necesarios. No se realizarán trabajos adicionales sin autorización del cliente.',61);
- const noteHeight=74+noteLines.length*31;
- content.push('<rect x="64" y="'+y+'" width="772" height="'+noteHeight+'" rx="16" fill="#e7e0d2" stroke="#b89b6a" stroke-width="2"/>');
- addText('IMPORTANTE',88,y+36,20,'#8b6d43',true);
- let noteY=y+70;noteLines.forEach(line=>{addText(line,88,noteY,22,'#424740',false);noteY+=31});
- y+=noteHeight+62;
- const height=Math.max(1040,y+42);
- return '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="'+height+'" viewBox="0 0 900 '+height+'"><rect width="900" height="'+height+'" fill="#102f33"/><rect x="25" y="25" width="850" height="'+(height-50)+'" rx="28" fill="#f5efdf" stroke="#c6a16a" stroke-width="3"/><path d="M53 25H847a28 28 0 0 1 28 28v166H25V53a28 28 0 0 1 28-28Z" fill="#173b3d"/><text x="64" y="83" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" letter-spacing="2" fill="#e2c18b">SERVICIOS MECÁNICOS ENZO</text><text x="64" y="137" font-family="Georgia,serif" font-size="42" font-weight="700" fill="#f5efdf">Consulta orientativa</text><text x="64" y="177" font-family="Arial,Helvetica,sans-serif" font-size="19" fill="#d5c7ad">El oficio de siempre, al servicio de hoy.</text><text x="64" y="244" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#6a6d63">Fecha: '+smeOrientativeXml(friendlyDate(quote.fecha||todayLocal()))+'</text>'+content.join('')+'<text x="64" y="'+(height-48)+'" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#6a6d63">Referencia orientativa · Confirmar alcance y precio antes de realizar el trabajo.</text></svg>';
-}
-async function smeOrientativePngBase64(quote){
- const svg=smeOrientativeSvg(quote),url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
- try{
-  const image=new Image();
-  await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('No se pudo preparar la imagen de la consulta.'));image.src=url});
-  const canvas=document.createElement('canvas');canvas.width=900;canvas.height=image.naturalHeight||image.height;
-  const context=canvas.getContext('2d');if(!context)throw new Error('El dispositivo no pudo crear el archivo de imagen.');
-  context.fillStyle='#102f33';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
-  return canvas.toDataURL('image/png').split(',')[1];
- }finally{URL.revokeObjectURL(url)}
-}
-async function smeOrientativeDeliverFile(filename,base64,mimeType,quote){
- if(Capacitor.isNativePlatform()){
-  const saved=await Filesystem.writeFile({path:filename,data:base64,directory:Directory.Documents,recursive:true});
-  await Share.share({title:'Consulta orientativa · SME',text:'Consulta orientativa para '+String(quote.vehiculoReferencia||'el vehículo')+'.',files:[saved.uri],dialogTitle:'Compartir consulta orientativa'});
-  return saved;
- }
- const raw=atob(base64),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
- const url=URL.createObjectURL(new Blob([bytes],{type:mimeType}));const link=document.createElement('a');
- link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
- return {uri:url};
-}
-async function smeCreateAndShareOrientativePdf(quote){
- const date=String(quote.fecha||todayLocal()).replace(/\D/g,'').slice(0,8)||'sfecha';
- const filename='SME_consulta_orientativa_'+date+'_'+smeOrientativeSafeFilePart(quote.vehiculoReferencia)+'.pdf';
- return smeOrientativeDeliverFile(filename,smeOrientativePdfBase64(quote),'application/pdf',quote);
-}
-async function smeCreateAndShareOrientativeImage(quote){
- const date=String(quote.fecha||todayLocal()).replace(/\D/g,'').slice(0,8)||'sfecha';
- const filename='SME_consulta_orientativa_'+date+'_'+smeOrientativeSafeFilePart(quote.vehiculoReferencia)+'.png';
- return smeOrientativeDeliverFile(filename,await smeOrientativePngBase64(quote),'image/png',quote);
-}
-async function smeCopyOrientativeMessage(message){
- if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(message);return}
- const input=document.createElement('textarea');input.value=message;input.setAttribute('readonly','');input.style.position='fixed';input.style.opacity='0';input.style.left='-1000px';document.body.appendChild(input);input.select();
- const copied=document.execCommand('copy');input.remove();if(!copied)throw new Error('El teléfono no permitió copiar el texto. Podés usar la opción de compartir.');
-}
-function smeOrientativePreviewMarkup(quote){
- return '<div style="border:1px solid #8a704a;border-radius:13px;overflow:hidden;margin:12px 0 18px;background:#f5efdf;color:#24302b"><div style="padding:17px;background:#173b3d;color:#f5efdf"><div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#e2c18b">SERVICIOS MECÁNICOS ENZO</div><div style="font:700 23px Georgia,serif;margin-top:8px">Consulta orientativa</div><div style="font-size:12px;color:#d5c7ad;margin-top:5px">Fecha: '+esc(friendlyDate(quote.fecha||todayLocal()))+'</div></div><div style="padding:17px"><div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:#8b6d43">VEHÍCULO / REFERENCIA</div><div style="font-weight:700;font-size:16px;margin:4px 0 15px;overflow-wrap:anywhere">'+esc(quote.vehiculoReferencia||'—')+'</div><div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:#8b6d43">TRABAJO CONSULTADO</div><div style="font-weight:700;font-size:16px;margin:4px 0 15px;overflow-wrap:anywhere">'+esc(quote.trabajoOrientativo||'—')+'</div><div style="background:#e2c18b;border-radius:10px;padding:13px;margin:8px 0 17px"><div style="font-size:11px;font-weight:800">'+(Math.abs(parseMoneyInput(quote.estimacionMaxima)-parseMoneyInput(quote.estimacionMinima))<0.005?'PRECIO ESTIMADO':'RANGO ESTIMADO')+'</div><div style="font-weight:800;font-size:18px;margin-top:5px">'+esc(smeOrientativePriceLabel(quote.estimacionMinima,quote.estimacionMaxima))+'</div></div><div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:#8b6d43">QUÉ PODRÍA INCLUIR / QUÉ FALTA CONFIRMAR</div><div style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.5;margin-top:5px">'+esc(smeOrientativeCombinedScope(quote)||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.')+'</div><div style="background:#e7e0d2;border-radius:10px;padding:12px;margin-top:16px;font-size:12px;line-height:1.5">Es una referencia orientativa, no un precio confirmado ni un presupuesto definitivo. El alcance y el importe final se confirman al revisar el vehículo. No se realizarán trabajos adicionales sin autorización.</div></div></div>';
-}
-function smeOrientativeFileError(kind,error){
- return smeShowMessage('No se pudo preparar el '+kind,'El archivo puede no haberse generado o compartido. '+String(error?.message||'Revisá el espacio disponible y volvé a intentarlo.'),'error');
-}
-function smeOpenOrientativePreview(quoteId){
- const quote=db.presupuestos.find(item=>String(item.id)===String(quoteId)&&item.tipo==='Orientativo');if(!quote)return;
- const overlay=document.createElement('div');overlay.className='sme-dialog-backdrop';overlay.setAttribute('role','presentation');
- overlay.innerHTML='<section class="sme-dialog-card" role="dialog" aria-modal="true" aria-labelledby="smeOrientativePreviewTitle"><p class="sme-dialog-kicker">SERVICIOS MECÁNICOS ENZO</p><h3 id="smeOrientativePreviewTitle">Vista previa para el cliente</h3>'+smeOrientativePreviewMarkup(quote)+'<p class="muted" data-orientative-status aria-live="polite">Revisá los datos antes de compartir. Los importes y las aclaraciones coinciden con la consulta guardada.</p><div class="sme-dialog-actions"><button type="button" data-orientative-copy>Copiar mensaje</button><button type="button" data-orientative-pdf>Generar PDF</button><button type="button" data-orientative-image>Crear imagen</button><button type="button" class="secondary" data-orientative-back>Volver a opciones</button></div></section>';
- const close=()=>overlay.remove();
- overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
- overlay.querySelector('[data-orientative-back]').addEventListener('click',()=>{close();smeOpenOrientativeShareDialog(quote.id)});
- overlay.querySelector('[data-orientative-copy]').addEventListener('click',async()=>{const status=overlay.querySelector('[data-orientative-status]');try{await smeCopyOrientativeMessage(smeOrientativeMessage(quote));status.textContent='Mensaje copiado. Ya podés pegarlo en WhatsApp.'}catch(error){status.textContent=String(error?.message||'No se pudo copiar el mensaje.')}});
- overlay.querySelector('[data-orientative-pdf]').addEventListener('click',async()=>{close();try{await smeCreateAndShareOrientativePdf(quote)}catch(error){await smeOrientativeFileError('PDF',error)}});
- overlay.querySelector('[data-orientative-image]').addEventListener('click',async()=>{close();try{await smeCreateAndShareOrientativeImage(quote)}catch(error){await smeOrientativeFileError('imagen',error)}});
- document.body.appendChild(overlay);
-}
-// navigator.share queda reservado para acciones explícitas; al guardar no se abre ni se copia nada automáticamente.
-function smeOpenOrientativeShareDialog(quoteId){
- const quote=db.presupuestos.find(item=>String(item.id)===String(quoteId)&&item.tipo==='Orientativo');if(!quote)return;
- const overlay=document.createElement('div');overlay.className='sme-dialog-backdrop';overlay.setAttribute('role','presentation');
- overlay.innerHTML='<section class="sme-dialog-card" role="dialog" aria-modal="true" aria-labelledby="smeOrientativeShareTitle"><p class="sme-dialog-kicker">SERVICIOS MECÁNICOS ENZO</p><h3 id="smeOrientativeShareTitle">Consulta guardada</h3><p>Elegí cómo querés compartirla con el cliente. Podés revisar una vista previa, copiar el texto o generar un archivo.</p>'+smeOrientativePreviewMarkup(quote)+'<p class="muted" data-orientative-status aria-live="polite">La consulta es orientativa y no representa un precio definitivo confirmado.</p><div class="sme-dialog-actions"><button type="button" data-orientative-copy>Copiar mensaje</button><button type="button" data-orientative-pdf>Generar PDF</button><button type="button" data-orientative-image>Crear imagen</button><button type="button" class="secondary" data-orientative-preview>Vista previa</button><button type="button" class="secondary" data-orientative-close>Cerrar</button></div></section>';
- const close=()=>overlay.remove();
- overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
- overlay.querySelector('[data-orientative-close]').addEventListener('click',close);
- overlay.querySelector('[data-orientative-preview]').addEventListener('click',()=>{close();smeOpenOrientativePreview(quote.id)});
- overlay.querySelector('[data-orientative-copy]').addEventListener('click',async()=>{const status=overlay.querySelector('[data-orientative-status]');try{await smeCopyOrientativeMessage(smeOrientativeMessage(quote));status.textContent='Mensaje copiado. Ya podés pegarlo en WhatsApp.'}catch(error){status.textContent=String(error?.message||'No se pudo copiar el mensaje.')}});
- overlay.querySelector('[data-orientative-pdf]').addEventListener('click',async()=>{close();try{await smeCreateAndShareOrientativePdf(quote)}catch(error){await smeOrientativeFileError('PDF',error)}});
- overlay.querySelector('[data-orientative-image]').addEventListener('click',async()=>{close();try{await smeCreateAndShareOrientativeImage(quote)}catch(error){await smeOrientativeFileError('imagen',error)}});
- document.body.appendChild(overlay);
-}
 
 function normalizeSearch(value){return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ')}
 function searchableRecordText(key,o){return [recordTitle(key,o),...displayValues(key,o).map(x=>x[1]),JSON.stringify(o)].join(' ')}
@@ -1166,7 +933,7 @@ function smeRelatedButtons(key,o){
  if(key==='clientes'){add('vehiculos','Ver vehículos',{clientId:o.id});add('trabajos','Ver trabajos',{clientId:o.id});add('presupuestos','Ver presupuestos',{clientId:o.id})}
  if(key==='vehiculos'){if(o.clienteId)add('clientes','Ver propietario',{clientId:o.clienteId});add('trabajos','Ver trabajos',{vehicleId:o.id});add('presupuestos','Ver presupuestos',{vehicleId:o.id})}
  if(key==='trabajos'){if(o.clienteId)add('clientes','Ver cliente',{clientId:o.clienteId});if(o.vehiculoId)add('vehiculos','Ver vehículo',{vehicleId:o.vehiculoId});add('presupuestos','Ver presupuestos',{workId:o.id});if(smeCan('caja','view'))add('caja','Ver movimientos',{workId:o.id});if(smeCan('cuentas','view'))add('cuentas','Ver cuenta',{workId:o.id})}
- if(key==='presupuestos'){if(o.clienteId)add('clientes','Ver cliente',{clientId:o.clienteId});if(o.vehiculoId)add('vehiculos','Ver vehículo',{vehicleId:o.vehiculoId});if(o.trabajoId)add('trabajos','Ver orden',{workId:o.trabajoId})}
+ 
  if(key==='movimientos'&&o.trabajoId)add('trabajos','Ver orden',{workId:o.trabajoId});
  return buttons.length?'<div class="quick related-actions">'+buttons.join('')+'</div>':'';
 }
@@ -1337,9 +1104,7 @@ function smeLaborTimeCompactRowMarkup(item,selected,actionAttribute){
 function smeLaborTimesPage(){
  if(!smeCan('tiempos','view')){page='inicio';render();return}
  const canUseBudget=smeCan('presupuestos','edit');
- app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p>'+(smeReturnToQuickQuote?'<div class="quick no-print"><button type="button" class="secondary" id="smeReturnToQuickBudget">← Volver a consulta rápida</button></div>':'')+'<section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div class="sme-time-filter-grid"><label>Familia de trabajo<select id="smeLaborTimeFamilyFilter"><option value="">Todas las familias</option></select></label><label>Grupo de vehículo<select id="smeLaborTimeVehicleFilter"><option value="">Todos los grupos</option></select></label></div><label class="sme-time-filter"><input id="smeLaborTimesShowPending" type="checkbox"> Incluir trabajos sin horas confirmadas</label><p class="muted">Se muestran primero los trabajos con horas sugeridas. Los pendientes aparecen cuando los buscás o activás este filtro.</p></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section>';
- const returnToQuickBudget=document.getElementById('smeReturnToQuickBudget');
- returnToQuickBudget?.addEventListener('click',()=>{smeReturnToQuickQuote=false;smeOpenQuickQuoteAfterTimes=true;smeNavigateTo('presupuestos')});
+ app.innerHTML='<h2 class="section-title">Tiempos de mano de obra</h2><p class="muted">Referencias para estimar horas de trabajo. Base de consulta rápida: elegí una fila para ver el alcance completo. SME distingue referencias técnicas específicas, comparativos externos y promedios genéricos; no reemplaza la verificación del motor exacto ni modifica presupuestos automáticamente.</p>''<section class="panel"><label>Buscar trabajo, operación o motor<input id="smeLaborTimeSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div class="sme-time-filter-grid"><label>Familia de trabajo<select id="smeLaborTimeFamilyFilter"><option value="">Todas las familias</option></select></label><label>Grupo de vehículo<select id="smeLaborTimeVehicleFilter"><option value="">Todos los grupos</option></select></label></div><label class="sme-time-filter"><input id="smeLaborTimesShowPending" type="checkbox"> Incluir trabajos sin horas confirmadas</label><p class="muted">Se muestran primero los trabajos con horas sugeridas. Los pendientes aparecen cuando los buscás o activás este filtro.</p></section><section id="smeLaborTimeDetail" class="sme-time-detail" hidden aria-live="polite"></section><section class="sme-time-table" role="table" aria-label="Catálogo de tiempos de mano de obra"><div class="sme-time-table-head" role="row"><span role="columnheader">Trabajo / operación</span><span role="columnheader">Horas sugeridas</span><span role="columnheader">Estado</span></div><div id="smeLaborTimeResults" role="rowgroup" aria-live="polite"></div></section>';
  const input=document.getElementById('smeLaborTimeSearch'),familyFilter=document.getElementById('smeLaborTimeFamilyFilter'),vehicleFilter=document.getElementById('smeLaborTimeVehicleFilter'),showPending=document.getElementById('smeLaborTimesShowPending'),results=document.getElementById('smeLaborTimeResults'),detail=document.getElementById('smeLaborTimeDetail');
  const families=[...new Set(SME_LABOR_TIME_CATALOG.map(item=>item.family).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
  const vehicleGroups=[...new Set(SME_LABOR_TIME_CATALOG.map(item=>item.vehicleGroup).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -1376,370 +1141,46 @@ function smeLaborTimesPage(){
   if(pending){input.value=pending.title;selectedId=pending.id;draw()}
  }
 }
-function smeInitQuickLaborEstimate(form){
- const search=document.getElementById('smeQuickLaborSearch'),results=document.getElementById('smeQuickLaborResults'),selectedBox=document.getElementById('smeQuickLaborSelected'),calc=document.getElementById('smeQuickLaborCalc'),minHoursInput=document.getElementById('smeQuickLaborMinHours'),hoursInput=document.getElementById('smeQuickLaborHours'),maxHoursInput=document.getElementById('smeQuickLaborMaxHours'),rateInput=document.getElementById('smeQuickLaborRate'),costMinInput=document.getElementById('smeQuickCostMin'),costMaxInput=document.getElementById('smeQuickCostMax'),preview=document.getElementById('smeQuickLaborPreview'),applyButton=document.getElementById('smeQuickApplyLaborEstimate'),minField=form.elements.estimacionMinima,maxField=form.elements.estimacionMaxima,scopeField=form.elements.alcanceOrientativo;
- if(!search||!results||!selectedBox||!calc||!minHoursInput||!hoursInput||!maxHoursInput||!rateInput||!costMinInput||!costMaxInput||!preview||!applyButton||!minField||!maxField)return;
- let selected=null;
- const numberHours=input=>Number(String(input?.value??'').trim().replace(',','.'));
- const moneyValue=input=>String(input?.value??'').trim()?parseMoneyInput(input.value):0;
- const paint=()=>{
-  const minHours=numberHours(minHoursInput),hours=numberHours(hoursInput),maxHours=numberHours(maxHoursInput),rate=moneyValue(rateInput),otherMin=moneyValue(costMinInput),otherMax=moneyValue(costMaxInput);
-  const valid=!!selected&&selected.suggested!==null&&Number.isFinite(minHours)&&minHours>0&&Number.isFinite(hours)&&hours>0&&Number.isFinite(maxHours)&&maxHours>=minHours&&hours>=minHours&&hours<=maxHours&&Number.isFinite(rate)&&rate>0&&Number.isFinite(otherMin)&&otherMin>=0&&Number.isFinite(otherMax)&&otherMax>=otherMin;
-  if(!selected)preview.textContent='Buscá y seleccioná un trabajo. La tabla te dará una referencia de horas; la tarifa la definís vos.';
-  else if(selected.suggested===null)preview.textContent='Este trabajo no tiene horas sugeridas validadas suficientes para calcular un importe.';
-  else if(!valid)preview.textContent='Revisá el rango de horas, tu tarifa por hora y los costos adicionales. La hora habitual debe quedar dentro del rango.';
-  else{
-   const low=Math.round((minHours*rate+otherMin)*100)/100,high=Math.round((maxHours*rate+otherMax)*100)/100,mid=Math.round((hours*rate+(otherMin+otherMax)/2)*100)/100;
-   preview.textContent='Proyección: $ '+money(low)+' a $ '+money(high)+' · con '+smeLaborHoursLabel(hours)+' habituales, el punto medio estimado sería $ '+money(mid)+'. Incluye solo la mano de obra y los costos adicionales que ingreses.';
-  }
-  applyButton.disabled=!valid;
- };
- const selectItem=item=>{
-  selected=item||null;selectedBox.hidden=!selected;calc.hidden=!(selected&&selected.suggested!==null);selectedBox.innerHTML=selected?smeLaborTimeCardMarkup(selected,'',''):'';
-  if(selected&&selected.suggested!==null){
-   minHoursInput.value=String(Number.isFinite(selected.min)?selected.min:selected.suggested);hoursInput.value=String(selected.suggested);maxHoursInput.value=String(Number.isFinite(selected.max)?selected.max:selected.suggested);
-   if(scopeField&&!scopeField.value.trim()&&selected.scope)scopeField.value=selected.scope;
-  }else{minHoursInput.value='';hoursInput.value='';maxHoursInput.value=''}
-  paint();
- };
- const draw=()=>{
-  const words=normalizeSearch(search.value).split(' ').filter(Boolean).filter(word=>!['de','del','la','el','con','para','por','un','una','y','al','en','cambio'].includes(word));
-  const eligible=SME_LABOR_TIME_CATALOG.filter(item=>item.suggested!==null);
-  const ranked=eligible.map(item=>({item,score:words.reduce((score,word)=>score+(smeLaborTimeSearchText(item).includes(word)?1:0),0)}));
-  const matches=(words.length?ranked.filter(entry=>entry.score>0).sort((a,b)=>b.score-a.score||a.item.title.localeCompare(b.item.title,'es')).map(entry=>entry.item):eligible.slice(0,8)).slice(0,10);
-  results.innerHTML=matches.length?'<p class="muted">'+(words.length?'Coincidencias más cercanas. Elegí una para ver las horas y calcular.':'Trabajos sugeridos para empezar. También podés buscar por motor u operación.')+'</p>'+matches.map(item=>smeLaborTimeCompactRowMarkup(item,selected?.id===item.id,'data-quick-labor-select')).join(''):'<div class="sme-time-no-results">No encontré coincidencias. Probá con “distribución”, “8v”, “K4M”, “tapa” o “embrague”.</div>';
-  results.querySelectorAll('[data-quick-labor-select]').forEach(button=>button.addEventListener('click',()=>{
-   const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===button.dataset.quickLaborSelect);if(!item)return;
-   selectItem(item);draw();setTimeout(()=>selectedBox.scrollIntoView({behavior:'smooth',block:'start'}),60);
-  }));
- };
- search.addEventListener('input',()=>{
-  const words=normalizeSearch(search.value).split(' ').filter(Boolean);
-  if(selected&&(!words.length||!words.every(word=>smeLaborTimeSearchText(selected).includes(word))))selectItem(null);
-  draw();
- });
- [minHoursInput,hoursInput,maxHoursInput,rateInput,costMinInput,costMaxInput].forEach(input=>input.addEventListener('input',paint));
- applyButton.addEventListener('click',()=>{
-  const minHours=numberHours(minHoursInput),hours=numberHours(hoursInput),maxHours=numberHours(maxHoursInput),rate=moneyValue(rateInput),otherMin=moneyValue(costMinInput),otherMax=moneyValue(costMaxInput);
-  if(!selected||selected.suggested===null||!Number.isFinite(minHours)||minHours<=0||!Number.isFinite(hours)||hours<minHours||!Number.isFinite(maxHours)||maxHours<hours||!Number.isFinite(rate)||rate<=0||!Number.isFinite(otherMin)||otherMin<0||!Number.isFinite(otherMax)||otherMax<otherMin){paint();return}
-  const low=Math.round((minHours*rate+otherMin)*100)/100,high=Math.round((maxHours*rate+otherMax)*100)/100;
-  minField.value=formatMoneyInput(low);maxField.value=formatMoneyInput(high);
-  minField.dispatchEvent(new Event('input',{bubbles:true}));maxField.dispatchEvent(new Event('input',{bubbles:true}));
-  form.elements.horasEstimadasMinimas.value=String(minHours);form.elements.horasEstimadasHabituales.value=String(hours);form.elements.horasEstimadasMaximas.value=String(maxHours);form.elements.tarifaHoraEstimativa.value=String(rate);form.elements.costoAdicionalMinimo.value=String(otherMin);form.elements.costoAdicionalMaximo.value=String(otherMax);form.elements.operacionTiempoOrientativa.value=selected.id;
-  preview.textContent='Rango completado: $ '+money(low)+' a $ '+money(high)+'. Se usaron '+smeLaborHoursLabel(minHours)+'–'+smeLaborHoursLabel(maxHours)+' y tu tarifa. Revisá repuestos y tareas adicionales antes de compartirlo.';
- });
- draw();paint();
-}
-
 let smePendingLaborTimeId='';
-let smeReturnToQuickQuote=false;
-let smeOpenQuickQuoteAfterTimes=false;
-function smeInitBudgetLaborTimeAssist(form){
- const panel=document.getElementById('smeBudgetLaborTimeAssist');if(!panel)return;
- const search=document.getElementById('smeBudgetLaborSearch'),results=document.getElementById('smeBudgetLaborResults'),hoursInput=document.getElementById('smeBudgetLaborHours'),rateInput=document.getElementById('smeBudgetLaborRate'),preview=document.getElementById('smeBudgetLaborPreview'),selectedBox=document.getElementById('smeBudgetLaborSelected'),calculation=document.getElementById('smeBudgetLaborCalculation'),applyButton=document.getElementById('smeApplyLaborTime'),laborField=form.elements.manoObra,detailField=form.elements.detalle;
- let selected=null;
- const lockedQuote=()=>{const q=editingId===null?null:db.presupuestos.find(item=>String(item.id)===String(editingId));return !!(q&&['Aprobado','En ejecución','Entregado','Pendiente de pago','Finalizado'].includes(String(q.estado||'')))};
- const paintPreview=()=>{
-  const hours=Number(String(hoursInput.value||'').replace(',','.')),rate=parseMoneyInput(rateInput.value||'0');
-  preview.textContent=selected&&selected.suggested!==null&&Number.isFinite(hours)&&hours>0&&Number.isFinite(rate)&&rate>0?'Importe orientativo de mano de obra: $ '+money(hours*rate):'Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.';
-  applyButton.disabled=!selected||selected.suggested===null||!Number.isFinite(hours)||hours<=0||!Number.isFinite(rate)||rate<=0||lockedQuote();
-  if(lockedQuote())preview.textContent='Este presupuesto ya está aprobado o en una etapa posterior. La sugerencia no puede aplicarse a un presupuesto acordado.';
- };
- const selectItem=item=>{
-  selected=item||null;
-  selectedBox.hidden=!selected;
-  calculation.hidden=!(selected&&selected.suggested!==null);
-  selectedBox.innerHTML=selected?smeLaborTimeCardMarkup(selected,'',''):'';
-  hoursInput.value=selected&&selected.suggested!==null?String(selected.suggested):'';
-  paintPreview();
- };
- const draw=()=>{
-  const words=normalizeSearch(search.value).split(' ').filter(Boolean);
-  if(words.length===0){
-   results.innerHTML='<div class="sme-time-search-empty">Escribí el nombre de un trabajo o motor para ver coincidencias.</div>';
-   return;
-  }
-  const matches=SME_LABOR_TIME_CATALOG.filter(item=>words.every(word=>smeLaborTimeSearchText(item).includes(word)));
-  results.innerHTML=matches.length?matches.map(item=>smeLaborTimeCompactRowMarkup(item,selected?.id===item.id,'data-budget-time-select')).join(''):'<div class="sme-time-no-results">No encontré coincidencias. Probá con “tapa”, “distribución”, “K4M” o “embrague”.</div>';
-  results.querySelectorAll('[data-budget-time-select]').forEach(button=>button.addEventListener('click',()=>{
-   const item=SME_LABOR_TIME_CATALOG.find(entry=>entry.id===button.dataset.budgetTimeSelect);if(!item)return;
-   selectItem(item);draw();
-   setTimeout(()=>selectedBox.scrollIntoView({behavior:'smooth',block:'start'}),50);
-  }));
- };
- search.addEventListener('input',()=>{
-  const words=normalizeSearch(search.value).split(' ').filter(Boolean);
-  if(selected&&(!words.length||!words.every(word=>smeLaborTimeSearchText(selected).includes(word))))selectItem(null);
-  draw();
- });
- hoursInput.addEventListener('input',paintPreview);rateInput.addEventListener('input',paintPreview);draw();
- applyButton.addEventListener('click',()=>{
-  if(lockedQuote()){preview.textContent='No se modificó el presupuesto porque ya está aprobado o en una etapa posterior.';applyButton.disabled=true;return}
-  if(!selected||selected.suggested===null){preview.textContent='Esta operación todavía no tiene un tiempo suficientemente validado para calcular un importe.';return}
-  const hours=Number(String(hoursInput.value||'').replace(',','.')),rate=parseMoneyInput(rateInput.value||'0');
-  if(!Number.isFinite(hours)||hours<=0||!Number.isFinite(rate)||rate<=0){preview.textContent='Ingresá horas y una tarifa por hora mayores que cero.';return}
-  const amount=Math.round(hours*rate*100)/100;
-  laborField.value=formatMoneyInput(amount);laborField.dispatchEvent(new Event('input',{bubbles:true}));
-  const title=selected.title;
-  if(detailField&&!normalizeSearch(detailField.value).includes(normalizeSearch(title)))detailField.value=(detailField.value.trim()?detailField.value.trim()+'\n':'')+title;
-  form.elements.horasOrientativas.value=String(hours);form.elements.operacionTiempoOrientativa.value=selected.id;form.elements.tarifaHoraOrientativa.value=String(rate);
-  preview.textContent='Sugerencia aplicada al formulario: '+smeLaborHoursLabel(hours)+' × $ '+money(rate)+' = $ '+money(amount)+'. Revisá el presupuesto y guardalo manualmente cuando estés conforme.';
- });
- if(smePendingLaborTimeId){
-  const pending=SME_LABOR_TIME_CATALOG.find(item=>item.id===smePendingLaborTimeId);
-  if(pending){search.value=pending.title;draw();selectItem(pending);draw()}
-  smePendingLaborTimeId='';
- }
-}
-
 function listPage(title,key,fields,submit){
  editingId=null;
- let budgetInitialView='formal';
+ 
  let html='<h2 class="section-title">'+title+'</h2>';if(smeRelatedFilter)html+='<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>';
  if(key==='movimientos')html+=cashSummaryMarkup()
- if((key==='vehiculos'||key==='trabajos'||key==='presupuestos'||key==='eventos')&&!db.clientes.length&&key!=='eventos')html+='<div class="panel muted">Consejo: primero cargá un cliente en la sección Clientes para poder relacionarlo aquí.</div>';
+ if((key==='vehiculos'||key==='trabajos')&&!db.clientes.length)html+='<div class="panel muted">Consejo: primero cargá un cliente en la sección Clientes para poder relacionarlo aquí.</div>';
  html+='<div class="panel"><form id="entry" data-key="'+key+'">';
  for(const [name,label,type] of fields)html+=fieldHTML(key,name,label,type,'');
- if(key==='presupuestos'){
-  html+='<input type="hidden" name="horasOrientativas" value=""><input type="hidden" name="operacionTiempoOrientativa" value=""><input type="hidden" name="tarifaHoraOrientativa" value="">';
-  html+='<section class="sme-formal-installments"><h3 style="margin-top:0">Opciones de cuotas para el cliente</h3><p class="muted">Activá esta alternativa solo si el medio de pago y sus condiciones permiten ofrecerla. El importe por cuota se recalcula con el total actual.</p><label class="sme-installment-check"><input type="checkbox" name="ofrecerCuotasFormal" id="smeFormalOfferInstallments"> Ofrecer cuotas fijas sin interés al cliente (según las condiciones del medio de pago)</label><div id="smeFormalInstallmentFields" hidden><label>Cantidad de cuotas<select name="cantidadCuotasFormal" id="smeFormalInstallmentCount"><option value="2">2 cuotas</option><option value="3" selected>3 cuotas</option><option value="6">6 cuotas</option><option value="12">12 cuotas</option></select></label><label>Condición del medio de pago (opcional)<input name="condicionesCuotasFormal" maxlength="220" placeholder="Ej.: plan confirmado por el proveedor"></label><p id="smeFormalInstallmentPreview" class="sme-installment-preview" aria-live="polite">Completá los importes y activá las cuotas para ver el cálculo.</p></div></section>';
-  html+='<details class="sme-formal-client-details"><summary>Condiciones y presentación para el cliente</summary><p class="muted">Estos datos mejoran la claridad de la propuesta. Completá solo las condiciones que realmente puedas cumplir.</p><label>Motivo / diagnóstico comunicado al cliente<textarea name="diagnosticoCliente" rows="2" maxlength="900" placeholder="Síntomas observados y causa identificada; diferenciá lo confirmado de lo que falta verificar."></textarea></label><label>Solución recomendada y por qué<textarea name="solucionRecomendada" rows="3" maxlength="1200" placeholder="Explicá qué solución proponés y qué problema busca resolver, en lenguaje claro."></textarea></label><label>Alcance / tareas incluidas<textarea name="alcanceTrabajo" rows="3" maxlength="1400" placeholder="Ej.: desmontaje, reemplazo indicado, armado, puesta en marcha y comprobaciones acordadas."></textarea></label><div class="form-grid"><label>Validez de la propuesta<select name="vigenciaDias"><option value="3">3 días</option><option value="7" selected>7 días</option><option value="10">10 días</option><option value="15">15 días</option></select></label><label>Plazo estimado de entrega<input name="plazoEstimado" maxlength="120" placeholder="A confirmar según diagnóstico y repuestos"></label></div><label>Condiciones de pago<input name="condicionesPago" maxlength="240" placeholder="Ej.: forma de pago y anticipo, a acordar antes de comenzar"></label><label>Garantía / condiciones aplicables<textarea name="condicionesGarantia" rows="2" maxlength="500" placeholder="Detallá el alcance y las condiciones reales aplicables a este trabajo."></textarea></label><label>Detalle de servicios externos, insumos y otros trabajos<textarea name="detalleOtrosConceptos" rows="2" maxlength="700" placeholder="Ej.: rectificadora, limpieza, fluidos, consumibles o tareas tercerizadas indicadas en el importe adicional."></textarea></label><label>Trabajos o repuestos no incluidos<textarea name="trabajosExcluidos" rows="2" maxlength="700" placeholder="Ej.: piezas adicionales que pudieran detectarse al desmontar o tareas ajenas al alcance acordado."></textarea></label><label>Control posterior ofrecido<select name="controlPosterior"><option value="no" selected>No incluir una oferta de control posterior</option><option value="si">Incluir control posterior (si está confirmado)</option></select></label><label>Detalle del control posterior<input name="condicionesControl" maxlength="180" placeholder="Ej.: control visual a coordinar a los 7 días"></label><label>Detalle adicional para el cliente<textarea name="notaCliente" rows="2" maxlength="500" placeholder="Aclaraciones, piezas excluidas o recomendaciones relevantes."></textarea></label></details>';
-  if(smeCan('tiempos','view'))html+='<section class="panel sme-labor-time-assist" id="smeBudgetLaborTimeAssist"><h3>Consultar tiempos orientativos</h3><p class="muted">Buscá una operación. Seleccioná una coincidencia para ver el detalle y usar sus horas como punto de partida; la tarifa la ingresás vos. No se altera ningún presupuesto guardado hasta que revises y guardes el formulario.</p><label>Buscar trabajo o motor<input id="smeBudgetLaborSearch" type="search" placeholder="Ej.: junta tapa 8v, distribución K4M, embrague" autocomplete="off"></label><div id="smeBudgetLaborSelected" class="sme-time-selected-detail" hidden></div><div id="smeBudgetLaborCalculation" class="sme-budget-time-calculation" hidden><div class="form-grid"><label>Horas a presupuestar<input id="smeBudgetLaborHours" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Horas"></label><label>Tarifa de mano de obra por hora ($)<input id="smeBudgetLaborRate" inputmode="numeric" autocomplete="off" placeholder="Ingresala vos"></label></div><p id="smeBudgetLaborPreview" class="muted" aria-live="polite">Ingresá las horas y tu tarifa por hora para calcular el importe sugerido.</p><button type="button" id="smeApplyLaborTime" disabled>Usar importe en presupuesto</button></div><div id="smeBudgetLaborResults" class="sme-budget-time-results" aria-live="polite"><div class="sme-time-search-empty">Escribí el nombre de un trabajo o motor para ver coincidencias.</div></div></section>';
- }
+ 
  html+='<div class="form-error" data-form-error role="alert" aria-live="polite" style="color:#e6a39a;font-weight:600;margin:8px 0"></div><button type="submit">'+submit+'</button><button type="button" class="secondary" id="cancelEdit" hidden>Cancelar edición</button></form></div><label>Buscar en '+title.toLowerCase()+'<input id="searchRecords" type="search" placeholder="Buscar por nombre, patente, estado..."></label><div class="list" id="recordsList"></div>';
- if(key==='presupuestos'){
-  const formStart=html.indexOf('<div class="panel"><form id="entry"');
-  const recordsStart=html.indexOf('<label>Buscar en ');
-  if(formStart<0||recordsStart<formStart)throw new Error('No se pudo separar el formulario formal y el historial.');
-  const formalFormMarkup=html.slice(formStart,recordsStart);
-  const recordsMarkup=html.slice(recordsStart);
-  const relatedIntro=smeRelatedFilter?'<div class="panel muted">Mostrando registros relacionados. <button type="button" class="secondary" data-related-clear>Ver todos</button></div>':'';
-  const clientHint=!db.clientes.length?'<div class="panel muted">Podés registrar una consulta orientativa sin cargar un cliente. Para un presupuesto formal, vinculá el cliente y el vehículo cuando corresponda.</div>':'';
-  const canEditBudget=smeCan('presupuestos','edit');
-  const canReadCosts=smeCan('presupuestos','costs');
-  const formalQuotes=db.presupuestos.filter(o=>o.tipo!=='Orientativo');
-  const quoteOptions=formalQuotes.map(o=>'<option value="'+esc(o.id)+'">'+esc(recordTitle('presupuestos',o))+' · $ '+money(o.importe)+'</option>').join('');
-  const tabs=(canEditBudget?'<button type="button" class="sme-budget-tab" data-budget-tab="quick" aria-pressed="false">Consulta rápida</button><button type="button" class="sme-budget-tab" data-budget-tab="formal" aria-pressed="false">Presupuesto formal</button>':'')+
-   (canReadCosts?'<button type="button" class="sme-budget-tab" data-budget-tab="costs" aria-pressed="false">Costos internos</button>':'')+
-   '<button type="button" class="sme-budget-tab" data-budget-tab="records" aria-pressed="false">Historial</button>';
-  const orientativeMarkup='<section class="panel" id="smeOrientativeBudgetPanel"><p class="muted">Para consultas informales con pocos datos. No requiere registrar cliente ni vehículo. Es una referencia, no un precio confirmado.</p><button type="button" class="secondary" id="smeToggleOrientativeBudget" aria-expanded="false">＋ Crear consulta orientativa</button><div id="smeOrientativeBudgetBody" hidden><form id="smeOrientativeBudgetForm"><input type="hidden" name="operacionTiempoOrientativa" value=""><input type="hidden" name="horasEstimadasMinimas" value=""><input type="hidden" name="horasEstimadasHabituales" value=""><input type="hidden" name="horasEstimadasMaximas" value=""><input type="hidden" name="tarifaHoraEstimativa" value=""><input type="hidden" name="costoAdicionalMinimo" value=""><input type="hidden" name="costoAdicionalMaximo" value=""><label>Vehículo / referencia<input name="vehiculoReferencia" maxlength="120" required placeholder="Ej.: Volkswagen Fox, motor por confirmar"></label><label>Trabajo consultado<input name="trabajoOrientativo" maxlength="160" required placeholder="Ej.: cambio de junta de tapa de cilindros"></label><div class="form-grid"><label>Precio único al cliente ($)<input name="estimacionMinima" inputmode="numeric" required placeholder="Ej.: 250.000"></label></div><label class="sme-installment-check"><input type="checkbox" id="smeQuickUsePriceRange" name="usarRangoPrecio" style="width:auto"> Ofrecer un rango de precios en lugar de un precio único</label><div id="smeQuickPriceRangeFields" hidden><label>Precio máximo / hasta ($)<input name="estimacionMaxima" inputmode="numeric" disabled placeholder="Ej.: 300.000"></label><p class="muted">El máximo debe ser igual o mayor que el precio mínimo.</p></div><label>Qué podría incluir / qué falta confirmar<textarea name="alcanceOrientativo" rows="2" maxlength="1000" placeholder="Repuestos, mano de obra, rectificadora y verificaciones; sujeto a diagnóstico."></textarea></label>'+'<section class="panel" id="smeQuickCommercialOptions" style="margin-top:12px"><h3 style="margin-top:0">Opciones de pago y presentación al cliente</h3><p class="muted">Estas opciones quedan en la propuesta que compartís con el cliente. Marcá solo condiciones que realmente puedas cumplir.</p><label style="display:flex;align-items:flex-start;gap:10px"><input type="checkbox" name="ofrecerRevision" style="width:auto;margin-top:5px"> Proponer una revisión/control posterior a la reparación</label><label>Condiciones del control (opcional)<input name="condicionesRevision" maxlength="180" placeholder="Ej.: coordinar a los 7 días o 500 km"></label><label style="display:flex;align-items:flex-start;gap:10px"><input type="checkbox" name="ofrecerCuotas" id="smeQuickOfferInstallments" style="width:auto;margin-top:5px"> Ofrecer cuotas fijas sin interés (si tu medio de pago lo permite)</label><div id="smeQuickInstallmentCountWrap" hidden><label>Cantidad de cuotas<select name="cantidadCuotas" id="smeQuickInstallmentCount"><option value="2">2 cuotas</option><option value="3" selected>3 cuotas</option><option value="6">6 cuotas</option><option value="12">12 cuotas</option></select></label><p class="muted">Se informará el importe aproximado de cada cuota. Confirmá comisiones, topes y condiciones del medio de pago antes de ofrecerlas.</p><p id="smeQuickInstallmentPreview" class="sme-installment-preview" aria-live="polite">Completá el precio para calcular el importe por cuota.</p></div><label>Otro beneficio confirmado que quieras destacar (opcional)<input name="beneficioExtra" maxlength="220" placeholder="Ej.: limpieza del área intervenida, si realmente la incluís"></label></section>'+(smeCan('tiempos','view')?'<details id="smeQuickLaborEstimator" class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800">Calcular estimado con tiempos sugeridos</summary><p class="muted">Elegí una operación, revisá las horas y agregá tu tarifa. El rango se calcula con las horas mínimas/máximas más los costos adicionales que ingreses.</p><label>Buscar trabajo o motor<input id="smeQuickLaborSearch" type="search" placeholder="Ej.: distribución 8v, K4M, tapa, embrague" autocomplete="off"></label><div id="smeQuickLaborSelected" class="sme-time-selected-detail" hidden></div><div id="smeQuickLaborCalc" hidden><div class="form-grid"><label>Horas mínimas<input id="smeQuickLaborMinHours" type="number" min="0.25" step="0.25" inputmode="decimal"></label><label>Horas habituales<input id="smeQuickLaborHours" type="number" min="0.25" step="0.25" inputmode="decimal"></label><label>Horas máximas<input id="smeQuickLaborMaxHours" type="number" min="0.25" step="0.25" inputmode="decimal"></label><label>Tarifa propia por hora ($)<input id="smeQuickLaborRate" name="quickTarifaHora" inputmode="numeric" placeholder="Ingresala vos"></label><label>Costos adicionales desde ($)<input id="smeQuickCostMin" name="quickCostMin" inputmode="numeric" placeholder="Opcional"></label><label>Costos adicionales hasta ($)<input id="smeQuickCostMax" name="quickCostMax" inputmode="numeric" placeholder="Opcional"></label></div><p id="smeQuickLaborPreview" class="muted" aria-live="polite">La proyección aparecerá aquí.</p><button type="button" id="smeQuickApplyLaborEstimate" disabled>Calcular y completar rango</button></div><div id="smeQuickLaborResults" class="sme-budget-time-results" aria-live="polite"><div class="sme-time-search-empty">Escribí una operación o motor para ver sugerencias de horas.</div></div></details>':'')+(smeCan('tiempos','view')?'<div class="quick no-print"><button type="button" class="secondary" id="smeOpenLaborTimesFromQuick">Abrir tabla completa de tiempos</button></div>':'')+'<div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar y compartir consulta</button><button type="button" class="secondary" id="smeCancelOrientativeBudget">Cancelar</button></form></div></section>';
-  const internalCostsMarkup='<section class="panel sme-budget-private" id="smeInternalCostingPanel"><div class="sme-budget-private-heading"><h3>Costos internos y rentabilidad</h3><span>SOLO USO INTERNO</span></div><p class="muted">Esta información no se agrega al presupuesto que se imprime o comparte con el cliente. Guardar un análisis no modifica el precio ni el estado acordado.</p><form id="smeInternalCostForm"><label for="smeBudgetCostQuote">Presupuesto formal</label><select id="smeBudgetCostQuote" name="quoteId"><option value="">Elegí un presupuesto</option>'+quoteOptions+'</select><div class="sme-budget-cost-grid"><label>Horas de mano de obra<input name="hours" inputmode="decimal" placeholder="0"></label><label>Costo interno por hora ($)<input name="hourlyCost" inputmode="numeric" placeholder="0"></label><label>Costo de compra de repuestos ($)<input name="partsCost" inputmode="numeric" placeholder="0"></label><label>Trabajos de terceros ($)<input name="externalCost" inputmode="numeric" placeholder="0"></label><label>Insumos y consumibles ($)<input name="consumablesCost" inputmode="numeric" placeholder="0"></label><label>Flete y logística ($)<input name="shippingCost" inputmode="numeric" placeholder="0"></label><label>Costos indirectos asignados ($)<input name="overheadCost" inputmode="numeric" placeholder="0"></label><label>Contingencia estimada (%)<input name="contingencyPct" type="number" min="0" max="100" step="0.5" value="5"></label><label>Margen objetivo (%)<input name="targetMarginPct" type="number" min="0" max="90" step="0.5" value="25"></label><label>Impuesto estimado sobre la venta (%)<input name="taxRatePct" type="number" min="0" max="100" step="0.5" value="0"></label><label>Tratamiento del impuesto<select name="taxMode"><option value="included">Incluido en el precio informado</option><option value="added">Se suma al precio informado</option></select></label><label>Comisión estimada del medio de cobro (%)<input name="paymentFeePct" type="number" min="0" max="35" step="0.1" value="0"></label><label>Costo fijo de cobro por operación ($)<input name="paymentFeeFixed" inputmode="numeric" placeholder="0"></label></div><details class="sme-budget-actual-costs"><summary>Agregar costos reales al finalizar el trabajo</summary><p class="muted">Se comparan con el costo previsto para detectar desvíos.</p><div class="sme-budget-cost-grid"><label>Costo real de mano de obra ($)<input name="actualLaborCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Costo real de repuestos ($)<input name="actualPartsCost" inputmode="numeric" placeholder="Sin cargar"></label><label>Terceros y otros costos reales ($)<input name="actualOtherCost" inputmode="numeric" placeholder="Sin cargar"></label></div></details><div id="smeBudgetInternalSummary" class="sme-budget-cost-summary" aria-live="polite"><p class="muted">Elegí un presupuesto para calcular costos y margen.</p></div><button type="submit" id="smeSaveInternalCostAnalysis">Guardar análisis interno</button></form></section>';
-  budgetInitialView=canEditBudget?'formal':canReadCosts?'costs':'records';
-  html='<section class="sme-budget-module"><h2 class="section-title">Presupuestos</h2><p class="muted">Prepará una cotización clara para el cliente y evaluá la rentabilidad por separado.</p>'+relatedIntro+
-   '<div class="sme-budget-tabs" role="tablist" aria-label="Secciones de presupuestos">'+tabs+'</div>'+
-   (canEditBudget?'<section class="sme-budget-pane" data-budget-pane="quick" hidden>'+orientativeMarkup+'</section><section class="sme-budget-pane" data-budget-pane="formal" hidden>'+clientHint+formalFormMarkup+'</section>':'')+
-   (canReadCosts?'<section class="sme-budget-pane" data-budget-pane="costs" hidden>'+internalCostsMarkup+'</section>':'')+
-   '<section class="sme-budget-pane" data-budget-pane="records" hidden><h3 class="section-title" style="font-size:20px">Historial de presupuestos</h3>'+recordsMarkup+'</section></section>';
-}
+ 
 app.innerHTML=html;
- if(key==='presupuestos'){
-  let activeView=budgetInitialView;
-  const tabButtons=[...app.querySelectorAll('[data-budget-tab]')];
-  const chooseView=view=>{
-   if(!tabButtons.some(button=>button.dataset.budgetTab===view))view=tabButtons[0]?.dataset.budgetTab||'records';
-   activeView=view;
-   app.querySelectorAll('[data-budget-pane]').forEach(pane=>pane.hidden=pane.dataset.budgetPane!==view);
-   tabButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.budgetTab===view)));
-  };
-  tabButtons.forEach(button=>button.addEventListener('click',()=>chooseView(button.dataset.budgetTab)));
-  chooseView(activeView);
-  if(key==='presupuestos'&&smeOpenQuickQuoteAfterTimes){
-   smeOpenQuickQuoteAfterTimes=false;chooseView('quick');
-   const quickToggle=document.getElementById('smeToggleOrientativeBudget'),quickBody=document.getElementById('smeOrientativeBudgetBody');
-   if(quickToggle&&quickBody){quickBody.hidden=false;quickToggle.setAttribute('aria-expanded','true');quickToggle.textContent='− Ocultar consulta orientativa'}
-  }
-  const costForm=document.getElementById('smeInternalCostForm');
-  if(costForm){
-   bindMoneyFields(costForm);
-   const canEditCosts=smeCan('presupuestos','costs-edit');
-   costForm.querySelectorAll('input:not([name="quoteId"]),select:not([name="quoteId"])').forEach(field=>field.disabled=!canEditCosts);
-   const saveCostsButton=document.getElementById('smeSaveInternalCostAnalysis');
-   if(saveCostsButton)saveCostsButton.hidden=!canEditCosts;
-   const quoteSelector=costForm.elements.quoteId;
-   const summary=document.getElementById('smeBudgetInternalSummary');
-   const fields=['hours','hourlyCost','partsCost','externalCost','consumablesCost','shippingCost','overheadCost','contingencyPct','targetMarginPct','taxRatePct','taxMode','paymentFeePct','paymentFeeFixed','actualLaborCost','actualPartsCost','actualOtherCost'];
-   const readCostNumber=name=>{
-    const raw=String(costForm.elements[name]?.value??'').trim();
-    if(!raw)return 0;
-    const n=['hours','contingencyPct','targetMarginPct','taxRatePct','paymentFeePct'].includes(name)?Number(raw.replace(',','.')):parseMoneyInput(raw);
-    return Number.isFinite(n)?Math.max(0,n):0;
-   };
-   const currentQuote=()=>db.presupuestos.find(item=>String(item.id)===String(quoteSelector?.value||'')&&item.tipo!=='Orientativo')||null;
-   const currency=value=>{const n=Number(value);return Number.isFinite(n)?'$ '+money(Math.max(0,n)):'No viable'};
-   const getCostCalc=quote=>{
-    const hours=readCostNumber('hours'),hourly=readCostNumber('hourlyCost');
-    const labor=hours*hourly,parts=readCostNumber('partsCost'),external=readCostNumber('externalCost'),consumables=readCostNumber('consumablesCost'),shipping=readCostNumber('shippingCost'),overhead=readCostNumber('overheadCost');
-    const laborHoursEntered=String(costForm.elements.hours.value??'').trim()!=='',laborRateEntered=String(costForm.elements.hourlyCost.value??'').trim()!=='';
-    const laborInputsIncomplete=laborHoursEntered!==laborRateEntered||(laborHoursEntered&&(!Number.isFinite(hours)||hours<=0||!Number.isFinite(hourly)||hourly<=0));
-    const baseCost=labor+parts+external+consumables+shipping+overhead;
-    const contingencyPct=Math.min(100,readCostNumber('contingencyPct')),contingency=baseCost*contingencyPct/100,paymentFeeFixed=readCostNumber('paymentFeeFixed'),estimatedCost=baseCost+contingency+paymentFeeFixed;
-    const targetMarginPct=Math.min(90,readCostNumber('targetMarginPct')),taxRatePct=Math.min(100,readCostNumber('taxRatePct')),paymentFeePct=Math.min(35,readCostNumber('paymentFeePct')),taxMode=costForm.elements.taxMode.value==='added'?'added':'included';
-    const salePrice=Math.max(0,parseMoneyInput(String(quote?.importe??'0')));
-    const taxAmount=taxMode==='included'?salePrice*taxRatePct/(100+taxRatePct||100):salePrice*taxRatePct/100;
-    const netRevenue=taxMode==='included'?salePrice-taxAmount:salePrice;
-    const customerTotal=taxMode==='added'?salePrice*(1+taxRatePct/100):salePrice;
-    const paymentFee=customerTotal*paymentFeePct/100;
-    const profit=netRevenue-estimatedCost-paymentFee,margin=netRevenue>0?profit/netRevenue*100:null;
-    const requiredDenominator=1-targetMarginPct/100-(1+taxRatePct/100)*paymentFeePct/100;
-    const minimumBasePrice=requiredDenominator>0?estimatedCost/requiredDenominator:Infinity;
-    const minimumCustomerTotal=minimumBasePrice*(1+taxRatePct/100);
-    const suggestedMinimum=taxMode==='included'?minimumCustomerTotal:minimumBasePrice;
-    const actualValues=['actualLaborCost','actualPartsCost','actualOtherCost'].map(name=>String(costForm.elements[name]?.value??'').trim());
-    const actualEntered=actualValues.some(value=>value!=='');
-    const actualComplete=actualValues.every(value=>value!=='');
-    const actualCost=readCostNumber('actualLaborCost')+readCostNumber('actualPartsCost')+readCostNumber('actualOtherCost');
-    const estimatedCostInputs=baseCost>0;
-    const actualProfit=netRevenue-actualCost-paymentFee-paymentFeeFixed,actualMargin=netRevenue>0?actualProfit/netRevenue*100:null;
-    return {hours,hourly,labor,parts,external,consumables,shipping,overhead,baseCost,laborInputsIncomplete,contingencyPct,contingency,paymentFeeFixed,paymentFeePct,paymentFee,estimatedCost,targetMarginPct,taxRatePct,taxMode,salePrice,taxAmount,netRevenue,profit,margin,minimumBasePrice,minimumCustomerTotal,suggestedMinimum,customerTotal,requiredDenominator,actualEntered,actualComplete,actualCost,actualProfit,actualMargin,estimatedCostInputs};
-   };
-   const paintSummary=(savedMessage='')=>{
-    const quote=currentQuote();
-    if(!quote){summary.innerHTML='<p class="muted">Primero guardá un presupuesto formal. Después elegilo acá para analizar su rentabilidad.</p>';return null}
-    const result=getCostCalc(quote),analysis=quote.analisisInterno||{},history=Array.isArray(analysis.historial)?analysis.historial:[];
-    const hasSaved=!!analysis.updatedAt,priceChanged=hasSaved&&Number(analysis.precioClienteAlAnalizar)!==Number(parseMoneyInput(String(quote.importe??'0')));
-    const moneyCostFields=['hourlyCost','partsCost','externalCost','consumablesCost','shippingCost','overheadCost','paymentFeeFixed','actualLaborCost','actualPartsCost','actualOtherCost'];
-    const analysisMatchesForm=hasSaved&&fields.every(name=>{const current=String(costForm.elements[name]?.value??'').trim(),savedValue=String(analysis[name]??'').trim();return moneyCostFields.includes(name)?parseMoneyInput(current)===parseMoneyInput(savedValue):current===savedValue});
-    const warnings=[];
-    if(!result.estimatedCostInputs)warnings.push('Todavía no cargaste costos previstos positivos. El costo, la ganancia y el margen mostrados no son concluyentes.');
-    if(result.laborInputsIncomplete)warnings.push('Completá juntos las horas de mano de obra y el costo interno por hora para calcular ese componente correctamente.');
-    if(!(result.requiredDenominator>0))warnings.push('La combinación de margen objetivo, impuesto y comisión no permite calcular un precio mínimo viable. Revisá los parámetros.');
-    if(result.margin!==null&&result.margin<result.targetMarginPct)warnings.push('El margen calculado está por debajo del objetivo configurado. Revisá costos, alcance y precio.');
-    if(result.actualEntered&&!result.actualComplete)warnings.push('Los costos reales están incompletos. Completá las tres categorías antes de evaluar el desvío.');
-    if(result.actualComplete&&result.actualCost>(result.estimatedCost-result.paymentFeeFixed))warnings.push('Los costos reales cargados superan la base prevista de mano de obra, repuestos y otros costos. Revisá el desvío y su impacto.');
-    if(priceChanged)warnings.push('El precio formal cambió desde el último análisis interno. Conviene recalcular; no se modificó automáticamente.');
-    if(['Aprobado','En ejecución','Entregado','Pendiente de pago','Finalizado'].includes(String(quote.estado||'')))warnings.push('El presupuesto tiene estado “'+quote.estado+'”. Este análisis no modifica el importe acordado, la autorización ni el estado del trabajo.');
-    const warningMarkup=warnings.map(w=>'<p class="sme-budget-cost-warning">'+esc(w)+'</p>').join('')||'<p class="sme-budget-cost-good">No se detecta una alerta de margen con los datos cargados. Verificá que los costos estén completos.</p>';
-    const metrics=[['Precio base del presupuesto',result.salePrice],['Costos previstos antes de comisión porcentual',result.estimatedCost],['Comisión estimada de cobro',result.paymentFee],['Costo total estimado incluyendo cobro',result.estimatedCost+result.paymentFee],['Precio mínimo sugerido',result.suggestedMinimum],['Total estimado para el cliente',result.customerTotal],['Ganancia estimada después de costos, impuesto y cobro',result.profit]];
-    const metricMarkup=metrics.map(([label,value])=>'<div class="sme-budget-cost-metric"><small>'+esc(label)+'</small><strong>'+currency(value)+'</strong></div>').join('')+'<div class="sme-budget-cost-metric"><small>Margen estimado sobre venta neta</small><strong>'+(result.margin===null?'—':money(result.margin)+' %')+'</strong></div>'+(result.actualEntered?'<div class="sme-budget-cost-metric"><small>'+(result.actualComplete?'Costo real cargado':'Costo real parcial')+'</small><strong>'+currency(result.actualCost)+'</strong></div><div class="sme-budget-cost-metric"><small>'+(result.actualComplete?'Margen real estimado':'Margen parcial · no concluyente')+'</small><strong>'+(result.actualMargin===null?'—':money(result.actualMargin)+' %')+'</strong></div>':'');
-    const canApplySuggested=smeCan('presupuestos','edit')&&String(quote.estado||'Borrador')==='Borrador'&&Number.isFinite(result.suggestedMinimum)&&result.suggestedMinimum>0&&result.estimatedCostInputs&&result.salePrice<result.suggestedMinimum&&hasSaved&&analysisMatchesForm&&!priceChanged;
-    const alreadyCoversMinimum=result.estimatedCostInputs&&Number.isFinite(result.suggestedMinimum)&&result.suggestedMinimum>0&&result.salePrice>=result.suggestedMinimum;
-    const applyMarkup=canApplySuggested?'<button type="button" class="sme-budget-apply-suggested" data-apply-cost-price>Aplicar precio mínimo sugerido al borrador</button><p class="muted">Solo actúa sobre este presupuesto en estado Borrador, requiere confirmación y distribuye el nuevo importe entre los conceptos del documento. Revisá el desglose antes de enviarlo.</p>':'';
-    const coversMarkup=alreadyCoversMinimum?'<p class="sme-budget-cost-good">El precio actual alcanza o supera el mínimo calculado con los costos y parámetros ingresados. No hace falta aplicarlo de nuevo.</p>':'';
-    const pendingPriceApply=String(quote.estado||'Borrador')==='Borrador'&&result.estimatedCostInputs&&Number.isFinite(result.suggestedMinimum)&&result.salePrice<result.suggestedMinimum&&(!hasSaved||!analysisMatchesForm||priceChanged)?'<p class="sme-budget-cost-warning">Antes de aplicar el precio, guardá el análisis interno y verificá que siga correspondiendo a este importe. Esto mantiene alineados los cálculos privados y el presupuesto.</p>':'';
-    const versionMarkup=history.length?'<details class="sme-budget-history"><summary>Versiones guardadas del análisis ('+history.length+')</summary><ol>'+history.slice().reverse().map(item=>'<li>'+esc(item.fecha||'Fecha no registrada')+' · '+esc(item.usuario||'Usuario')+' — Costo: '+currency(item.costoEstimado)+' · Precio mínimo: '+currency(item.precioMinimo)+' · Margen: '+(item.margen===null?'—':money(item.margen)+' %')+'</li>').join('')+'</ol></details>':'';
-    const priceHistory=Array.isArray(quote.historialPrecio)?quote.historialPrecio:[];
-    const priceHistoryMarkup=priceHistory.length?'<details class="sme-budget-history"><summary>Cambios de precio registrados ('+priceHistory.length+')</summary><ol>'+priceHistory.slice().reverse().map(item=>'<li>'+esc(item.fecha||'Fecha no registrada')+' · '+esc(item.usuario||'Usuario')+' — '+currency(item.precioAnterior)+' → '+currency(item.precioNuevo)+' · '+esc(item.motivo||'Ajuste de precio')+'</li>').join('')+'</ol></details>':'';
-    summary.innerHTML='<h4>Resultado privado · '+esc(recordTitle('presupuestos',quote))+'</h4><div class="sme-budget-cost-metrics">'+metricMarkup+'</div><p class="muted">Base estimada: mano de obra $ '+money(result.labor)+'; repuestos $ '+money(result.parts)+'; terceros $ '+money(result.external)+'; insumos $ '+money(result.consumables)+'; logística $ '+money(result.shipping)+'; indirectos $ '+money(result.overhead)+'; contingencia $ '+money(result.contingency)+'; comisión de cobro estimada $ '+money(result.paymentFee)+' y cargo fijo $ '+money(result.paymentFeeFixed)+'. Impuesto estimado: '+money(result.taxRatePct)+' % ('+(result.taxMode==='included'?'incluido en el precio':'sumado al precio')+'). Son estimaciones internas; no reemplazan la determinación fiscal que corresponda.</p>'+warningMarkup+applyMarkup+coversMarkup+pendingPriceApply+(hasSaved?'<p class="muted">Último guardado: '+esc(analysis.updatedAt)+' · Versiones: '+history.length+'</p>':'<p class="muted">Todavía no hay un análisis guardado. Los resultados son preliminares hasta guardar.</p>')+versionMarkup+priceHistoryMarkup+(savedMessage?'<p class="sme-budget-cost-good">'+esc(savedMessage)+'</p>':'');
-    const applyButton=summary.querySelector('[data-apply-cost-price]');
-    applyButton?.addEventListener('click',async()=>{
-     const liveQuote=currentQuote();
-     if(!liveQuote||String(liveQuote.estado||'Borrador')!=='Borrador'){paintSummary('Solo se puede aplicar el precio sugerido a un presupuesto en estado Borrador.');return}
-     if(!smeCan('presupuestos','edit')){paintSummary('Tu usuario no tiene permiso para modificar el presupuesto.');return}
-     const currentResult=getCostCalc(liveQuote);
-     if(!(currentResult.requiredDenominator>0)||!Number.isFinite(currentResult.suggestedMinimum)||currentResult.suggestedMinimum<=0){paintSummary('No hay un precio mínimo viable con los parámetros actuales.');return}
-     const originalTotal=Math.max(0,parseMoneyInput(String(liveQuote.importe||'0'))),savedAnalysis=liveQuote.analisisInterno||{},formMatches=fields.every(name=>{const current=String(costForm.elements[name]?.value??'').trim(),savedValue=String(savedAnalysis[name]??'').trim();return moneyCostFields.includes(name)?parseMoneyInput(current)===parseMoneyInput(savedValue):current===savedValue});if(!savedAnalysis.updatedAt||!formMatches||Number(savedAnalysis.precioClienteAlAnalizar)!==originalTotal){paintSummary('Guardá el análisis interno y verificá el precio del presupuesto antes de aplicar la sugerencia.');return}if(originalTotal>=currentResult.suggestedMinimum){paintSummary('El precio actual ya alcanza el mínimo recomendado. No se modificó el desglose.');return}const target=Math.ceil(currentResult.suggestedMinimum);
-     const accepted=await smeStyledConfirm('Aplicar precio recomendado','Se actualizará solamente el presupuesto borrador seleccionado. El precio nunca se reducirá: se conservará el importe actual si ya supera el mínimo sugerido. Los costos internos no se mostrarán al cliente. ¿Querés continuar?');if(!accepted)return;
-     const before=JSON.stringify(db),labor=Math.max(0,parseMoneyInput(String(liveQuote.manoObra||'0'))),parts=Math.max(0,parseMoneyInput(String(liveQuote.repuestos||'0'))),other=Math.max(0,parseMoneyInput(String(liveQuote.otrosConceptos||'0'))),sum=labor+parts+other;
-     let nextLabor=0,nextParts=0,nextOther=0;
-     if(sum>0){nextLabor=Math.round(target*labor/sum);nextParts=Math.round(target*parts/sum);nextOther=target-nextLabor-nextParts}else nextLabor=target;
-     const priceHistory=Array.isArray(liveQuote.historialPrecio)?liveQuote.historialPrecio.slice():[];priceHistory.push({fecha:new Date().toISOString(),usuario:smeCurrentUser?.name||smeCurrentUser?.username||'Usuario',precioAnterior:originalTotal,precioNuevo:target,margenObjetivo:currentResult.targetMarginPct,motivo:'Aplicación confirmada del precio mínimo sugerido'});liveQuote.historialPrecio=priceHistory.slice(-50);
-     liveQuote.manoObra=String(nextLabor);liveQuote.repuestos=String(nextParts);liveQuote.otrosConceptos=String(nextOther);liveQuote.importe=String(target);liveQuote.actualizadoPrecioInternoAt=new Date().toISOString();
-     const appliedAt=new Date().toISOString(),actor=smeCurrentUser?.name||smeCurrentUser?.username||'Usuario',updatedResult=getCostCalc(liveQuote),analysisHistory=Array.isArray(savedAnalysis.historial)?savedAnalysis.historial.slice():[];
-     analysisHistory.push({fecha:appliedAt,usuario:actor,costoEstimado:updatedResult.estimatedCost+updatedResult.paymentFee,precioMinimo:updatedResult.suggestedMinimum,margen:updatedResult.margin,precioClienteAlAnalizar:updatedResult.salePrice,parametros:Object.fromEntries(fields.map(name=>[name,String(costForm.elements[name]?.value??'')]))});
-     liveQuote.analisisInterno={...savedAnalysis,costoEstimado:updatedResult.estimatedCost+updatedResult.paymentFee,precioMinimo:updatedResult.suggestedMinimum,precioClienteAlAnalizar:updatedResult.salePrice,updatedAt:appliedAt,updatedByUserId:smeCurrentUser?.id||'',updatedBy:actor,historial:analysisHistory.slice(-50)};
-     if(!(await save())){db=JSON.parse(before);paintSummary('No se pudo guardar el precio recomendado. No se confirmó ningún cambio.');return}
-     loadQuoteAnalysis();paintSummary('Precio mínimo sugerido aplicado al presupuesto borrador. Revisá el desglose, el alcance, las condiciones y el documento antes de enviarlo.');
-    });
-    return result;
-   };
-   const loadQuoteAnalysis=()=>{
-    const quote=currentQuote(),saved=quote?.analisisInterno||{};
-    const defaults={hours:String(quote?.horasOrientativas||''),hourlyCost:'',partsCost:'',externalCost:'',consumablesCost:'',shippingCost:'',overheadCost:'',contingencyPct:'5',targetMarginPct:'25',taxRatePct:'0',taxMode:'included',paymentFeePct:'0',paymentFeeFixed:'',actualLaborCost:'',actualPartsCost:'',actualOtherCost:''};
-    fields.forEach(name=>{if(costForm.elements[name]){const value=saved[name]!==undefined?String(saved[name]):defaults[name];costForm.elements[name].value=moneyCostFields.includes(name)&&value.trim()?formatMoneyInput(value):value}});
-    if(!quote)fields.forEach(name=>{if(costForm.elements[name]&&!['contingencyPct','targetMarginPct','taxRatePct','taxMode'].includes(name))costForm.elements[name].value=''});
-    paintSummary();
-   };
-   costForm.addEventListener('input',()=>paintSummary());
-   costForm.addEventListener('change',event=>{if(event.target===quoteSelector)loadQuoteAnalysis();else paintSummary()});
-   costForm.addEventListener('submit',async event=>{
-    event.preventDefault();
-    if(!smeCan('presupuestos','costs-edit')){alert('Tu usuario puede consultar, pero no modificar, el análisis privado de costos.');return}
-    const quote=currentQuote();
-    if(!quote){alert('Elegí un presupuesto formal válido antes de guardar el análisis.');return}
-    const targetMargin=readCostNumber('targetMarginPct'),taxPct=readCostNumber('taxRatePct'),feePct=readCostNumber('paymentFeePct');
-    if(targetMargin<0||targetMargin>90||taxPct<0||taxPct>100||feePct<0||feePct>35){alert('Revisá el margen objetivo (0–90 %), el impuesto estimado (0–100 %) y la comisión de cobro (0–35 %).');return}
-    const before=JSON.stringify(db),result=getCostCalc(quote),now=new Date().toISOString(),actor=smeCurrentUser?.name||smeCurrentUser?.username||'Usuario',previous=quote.analisisInterno||{},history=Array.isArray(previous.historial)?previous.historial.slice():[];
-    history.push({fecha:now,usuario:actor,costoEstimado:result.estimatedCost+result.paymentFee,precioMinimo:result.suggestedMinimum,margen:result.margin,precioClienteAlAnalizar:result.salePrice,parametros:Object.fromEntries(fields.map(name=>[name,String(costForm.elements[name]?.value??'')]))});
-    quote.analisisInterno={hours:String(costForm.elements.hours.value||''),hourlyCost:String(costForm.elements.hourlyCost.value||''),partsCost:String(costForm.elements.partsCost.value||''),externalCost:String(costForm.elements.externalCost.value||''),consumablesCost:String(costForm.elements.consumablesCost.value||''),shippingCost:String(costForm.elements.shippingCost.value||''),overheadCost:String(costForm.elements.overheadCost.value||''),contingencyPct:String(costForm.elements.contingencyPct.value||'5'),targetMarginPct:String(costForm.elements.targetMarginPct.value||'25'),taxRatePct:String(costForm.elements.taxRatePct.value||'0'),taxMode:costForm.elements.taxMode.value,paymentFeePct:String(costForm.elements.paymentFeePct.value||'0'),paymentFeeFixed:String(costForm.elements.paymentFeeFixed.value||''),actualLaborCost:String(costForm.elements.actualLaborCost.value||''),actualPartsCost:String(costForm.elements.actualPartsCost.value||''),actualOtherCost:String(costForm.elements.actualOtherCost.value||''),costoEstimado:result.estimatedCost+result.paymentFee,precioMinimo:result.suggestedMinimum,precioClienteAlAnalizar:result.salePrice,updatedAt:now,updatedByUserId:smeCurrentUser?.id||'',updatedBy:actor,historial:history.slice(-50)};
-    if(!(await save())){db=JSON.parse(before);loadQuoteAnalysis();return}
-    loadQuoteAnalysis();
-    paintSummary('Análisis guardado. El precio del presupuesto y su estado quedaron sin cambios.');
-   });
-   loadQuoteAnalysis();
-  }
-  const toggle=document.getElementById('smeToggleOrientativeBudget'),body=document.getElementById('smeOrientativeBudgetBody'),quickForm=document.getElementById('smeOrientativeBudgetForm');
-  if(quickForm)bindMoneyFields(quickForm);
-  if(toggle&&body&&quickForm&&!toggle.dataset.smeQuickToggleBound){toggle.dataset.smeQuickToggleBound='1';toggle.addEventListener('click',()=>smeSetOrientativeBudgetExpanded(toggle))}
-  try{if(quickForm&&smeCan('tiempos','view'))smeInitQuickLaborEstimate(quickForm)}catch(error){console.error('No se pudo iniciar el calculador de tiempos de la consulta rápida:',error)}
-  const quickRangeCheck=document.getElementById('smeQuickUsePriceRange'),quickRangeFields=document.getElementById('smeQuickPriceRangeFields'),quickRangeMax=quickForm?.elements.namedItem('estimacionMaxima');
-  const updateQuickPriceRange=()=>{const useRange=!!quickRangeCheck?.checked;if(quickRangeFields)quickRangeFields.hidden=!useRange;if(quickRangeMax){quickRangeMax.disabled=!useRange;quickRangeMax.required=useRange;if(!useRange)quickRangeMax.value=''}};
-  const installmentCheck=document.getElementById('smeQuickOfferInstallments'),installmentWrap=document.getElementById('smeQuickInstallmentCountWrap'),installmentCount=document.getElementById('smeQuickInstallmentCount'),installmentPreview=document.getElementById('smeQuickInstallmentPreview');
-  const repaintQuickInstallments=()=>{if(installmentWrap)installmentWrap.hidden=!installmentCheck?.checked;if(!installmentPreview)return;if(!installmentCheck?.checked){installmentPreview.textContent='';return}const fd=new FormData(quickForm),rawMin=String(fd.get('estimacionMinima')||'').trim(),min=parseMoneyInput(rawMin),rawMax=String(fd.get('estimacionMaxima')||'').trim(),max=rawMax?parseMoneyInput(rawMax):min,count=Math.max(2,Math.min(12,Number(installmentCount?.value)||3));if(min<=0||(quickRangeCheck?.checked&&(!rawMax||parseMoneyInput(rawMax)<min))||max<min){installmentPreview.textContent='Completá un precio único válido o el mínimo y máximo si elegiste rango.';return}const low=Math.round(min/count*100)/100,high=Math.round(max/count*100)/100;installmentPreview.textContent='Cálculo orientativo: '+count+' cuotas de '+smeOrientativePriceLabel(low,high)+' cada una. Confirmá las condiciones reales del medio de pago.'};
-  quickRangeCheck?.addEventListener('change',()=>{updateQuickPriceRange();repaintQuickInstallments()});
-  quickForm?.elements.namedItem('estimacionMinima')?.addEventListener('input',repaintQuickInstallments);
-  quickForm?.elements.namedItem('estimacionMaxima')?.addEventListener('input',repaintQuickInstallments);
-  updateQuickPriceRange();
-  installmentCheck?.addEventListener('change',repaintQuickInstallments);installmentCount?.addEventListener('change',repaintQuickInstallments);['estimacionMinima','estimacionMaxima'].forEach(name=>quickForm?.elements.namedItem(name)?.addEventListener('input',repaintQuickInstallments));repaintQuickInstallments();
-  const openLaborTimesButton=document.getElementById('smeOpenLaborTimesFromQuick');
-  if(openLaborTimesButton&&!openLaborTimesButton.dataset.smeQuickTableBound){openLaborTimesButton.dataset.smeQuickTableBound='1';openLaborTimesButton.addEventListener('click',event=>{event.preventDefault();try{if(!smeCan('tiempos','view')){smeFormError(quickForm,'Tu usuario no tiene permiso para consultar los tiempos de mano de obra.');return}smeSaveFormDraft(quickForm);smeReturnToQuickQuote=true;smeNavigateTo('tiempos');if(page!=='tiempos')smeFormError(quickForm,'No se pudo abrir la tabla de tiempos. Volvé a intentar.')}catch(error){console.error('Error al abrir tabla de tiempos:',error);smeFormError(quickForm,'No se pudo abrir la tabla. La sesión sigue abierta.')}})}
-  document.getElementById('smeCancelOrientativeBudget')?.addEventListener('click',()=>{quickForm.reset();body.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.textContent='＋ Consulta orientativa rápida'});
-  quickForm?.addEventListener('submit',async ev=>{
-   ev.preventDefault();if(smeAuthenticated)smeResetIdleTimer();const fd=new FormData(quickForm),rangeRequested=fd.get('usarRangoPrecio')==='on',min=parseMoneyInput(fd.get('estimacionMinima')),maxRaw=String(fd.get('estimacionMaxima')||'').trim(),maxEntered=parseMoneyInput(fd.get('estimacionMaxima')),max=rangeRequested?maxEntered:min,vehicle=String(fd.get('vehiculoReferencia')||'').trim(),job=String(fd.get('trabajoOrientativo')||'').trim(),scope=String(fd.get('alcanceOrientativo')||'').trim(),proposalParts=[];const conditions=String(fd.get('condicionesRevision')||'').trim(),extraBenefit=String(fd.get('beneficioExtra')||'').trim();if(fd.get('ofrecerRevision')==='on')proposalParts.push('Revisión/control posterior: podemos coordinar un control después de la reparación'+(conditions?' ('+conditions+')':'; fecha, alcance y condiciones a coordinar con el taller')+'.');if(fd.get('ofrecerCuotas')==='on'){const count=Math.max(2,Math.min(12,Number(fd.get('cantidadCuotas')||3)));proposalParts.push('Alternativa de pago: '+count+' cuotas estimadas de '+smeOrientativePriceLabel(Math.round(min/count*100)/100,Math.round(max/count*100)/100)+' cada una, sin interés únicamente si el medio de pago y sus condiciones lo confirman.');}if(extraBenefit)proposalParts.push('Otro beneficio ofrecido por el taller: '+extraBenefit+'.');const proposalText=proposalParts.join('\n');
-   if(!vehicle||!job){smeFormError(quickForm,'Completá el vehículo y el trabajo consultado.');return}
-   if(!Number.isFinite(min)||!Number.isFinite(max)||min<=0||(rangeRequested&&(!maxRaw||max<min))||max<min){smeFormError(quickForm,'Ingresá un precio único mayor que cero o, si elegiste rango, completá un máximo igual o superior al mínimo.');return}
-   const before=JSON.stringify(db),now=todayLocal(),combinedScope=smeOrientativeCombinedScope({alcanceOrientativo:scope,propuestaComercial:proposalText}),message='Hola, te paso una referencia orientativa para '+job+' en '+vehicle+'.\n\nEstimación aproximada: '+smeOrientativePriceLabel(min,max)+'.\n\n'+(combinedScope||'El alcance y los repuestos necesarios deben confirmarse según el diagnóstico.')+'\n\nComo todavía no revisamos el vehículo, este rango no es un presupuesto definitivo. Al verlo podremos confirmar los trabajos, los repuestos, la garantía aplicable y las alternativas de pago. No se realizarán trabajos adicionales sin autorización.';
-   const quote={id:newRecordId(),fecha:now,clienteId:'',vehiculoId:'',trabajoId:'',tipo:'Orientativo',vehiculoReferencia:vehicle,trabajoOrientativo:job,estimacionMinima:String(min),estimacionMaxima:String(max),detalle:job+' — '+(scope||'Alcance sujeto a revisión y diagnóstico.'),alcanceOrientativo:scope,propuestaComercial:proposalText,ofrecerRevision:fd.get('ofrecerRevision')==='on',condicionesRevision:conditions,ofrecerCuotas:fd.get('ofrecerCuotas')==='on',cantidadCuotas:fd.get('ofrecerCuotas')==='on'?String(fd.get('cantidadCuotas')||3):'',beneficioExtra:extraBenefit,operacionTiempoOrientativa:String(fd.get('operacionTiempoOrientativa')||''),horasEstimadasMinimas:String(fd.get('horasEstimadasMinimas')||''),horasEstimadasHabituales:String(fd.get('horasEstimadasHabituales')||''),horasEstimadasMaximas:String(fd.get('horasEstimadasMaximas')||''),tarifaHoraEstimativa:String(fd.get('tarifaHoraEstimativa')||''),costoAdicionalMinimo:String(fd.get('costoAdicionalMinimo')||''),costoAdicionalMaximo:String(fd.get('costoAdicionalMaximo')||''),manoObra:'',repuestos:'',importe:String(Math.round((min+max)/2)),estado:'Orientativo',mensajeOrientativo:message};
-   db.presupuestos.push(quote);
-   if(!(await save())){db=JSON.parse(before);return}
-   drawRecords(document.getElementById('searchRecords')?.value||'');
-   quickForm.reset();try{localStorage.removeItem(smeDraftKey(quickForm))}catch(_){}body.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.textContent='＋ Consulta orientativa rápida';
-   smeOpenOrientativeShareDialog(quote.id);
-  });
- }
+ 
  const form=document.getElementById('entry');
  bindMoneyFields(form);bindKilometerFields(form);
  if(key==='movimientos'){const amount=form.elements.importe,fee=form.elements.comision,net=form.elements.importeNeto,method=form.elements.medioPago,accredit=form.elements.acreditacion;const calcNet=()=>{if(net)net.value=(amount&&amount.value.trim())?formatMoneyInput(Math.max(0,parseMoneyInput(amount.value)-parseMoneyInput(fee&&fee.value))):''};if(amount)amount.addEventListener('input',calcNet);if(fee)fee.addEventListener('input',calcNet);if(method)method.addEventListener('change',()=>{if(accredit&&['Tarjeta de crédito','Tarjeta de débito','QR / billetera virtual'].includes(method.value))accredit.value='Pendiente de acreditación';else if(accredit)accredit.value='Acreditado / disponible'});calcNet();}
- if(key==='presupuestos'){
-  bindMoneyFields(form);
-  const named=name=>form.elements.namedItem(name);
-  const labor=named('manoObra'),parts=named('repuestos'),other=named('otrosConceptos'),total=named('importe');
-  const offerInstallments=named('ofrecerCuotasFormal'),installmentFields=document.getElementById('smeFormalInstallmentFields'),installmentCount=document.getElementById('smeFormalInstallmentCount'),installmentPreview=document.getElementById('smeFormalInstallmentPreview');
-  const paintFormalInstallments=()=>{if(installmentFields)installmentFields.hidden=!offerInstallments?.checked;if(!installmentPreview)return;const count=Math.max(2,Math.min(12,Number(installmentCount?.value)||3)),amount=parseMoneyInput(total?.value||'');if(!offerInstallments?.checked){installmentPreview.textContent='';return}installmentPreview.textContent=amount>0?'Cálculo orientativo: '+count+' cuotas de '+smeBudgetDocumentAmount(Math.round(amount/count*100)/100)+' cada una. Confirmá las condiciones de tu medio de pago antes de ofrecerlas.':'Completá mano de obra, repuestos u otros conceptos para calcular el importe por cuota.'};
-  const calcTotal=()=>{const fields=[labor,parts,other].filter(Boolean),values=fields.map(input=>String(input.value??'').trim()),sum=fields.reduce((acc,input)=>acc+parseMoneyInput(input.value??''),0);if(total){total.value=values.some(value=>value!=='')?formatMoneyInput(sum):'';total.setAttribute('value',total.value)}paintFormalInstallments()};
-  // Vincular los importes directamente evita que el total dependa del burbujeo del WebView.
-  // También se recalcula al pegar, al confirmar el campo y al restaurar un borrador.
-  [labor,parts,other].filter(Boolean).forEach(input=>['input','change','keyup','blur'].forEach(type=>input.addEventListener(type,calcTotal)));
-  form.addEventListener('input',event=>{if(['manoObra','repuestos','otrosConceptos'].includes(event.target?.name)||event.target?.id==='smeFormalInstallmentCount')calcTotal()});
-  form.addEventListener('change',()=>{calcTotal();paintFormalInstallments()});
-  [offerInstallments,installmentCount].filter(Boolean).forEach(input=>input.addEventListener('change',paintFormalInstallments));
-  calcTotal();
-  const ws=named('trabajoId'),vs=named('vehiculoId'),cs=named('clienteId');
-  if(ws)ws.addEventListener('change',()=>{const t=db.trabajos.find(x=>String(x.id)===ws.value);if(t){cs.value=t.clienteId||'';vs.value=t.vehiculoId||''}});
-  if(smeCan('tiempos','view'))try{smeInitBudgetLaborTimeAssist(form)}catch(error){console.error('No se pudo iniciar la ayuda de tiempos en Presupuestos:',error)}
- }
+ 
  if(key==='trabajos'){
   const vs=form.elements.vehiculoId,cs=form.elements.clienteId;
   vs.addEventListener('change',()=>{const v=db.vehiculos.find(x=>String(x.id)===vs.value);if(v&&v.clienteId)cs.value=v.clienteId});
   cs.addEventListener('change',()=>{const current=vs.value;Array.from(vs.options).forEach(o=>{if(!o.value)return;const v=db.vehiculos.find(x=>String(x.id)===o.value);o.hidden=!!(cs.value&&v&&String(v.clienteId)!==cs.value)});if(current&&vs.selectedOptions[0]?.hidden)vs.value=''});
  }
- if(key==='presupuestos'||key==='eventos'){
+ if(key==='eventos'){
   const vs=form.elements.vehiculoId,cs=form.elements.clienteId;
   if(vs&&cs)vs.addEventListener('change',()=>{const v=db.vehiculos.find(x=>String(x.id)===vs.value);if(v&&v.clienteId)cs.value=v.clienteId});
  }
  function drawRecords(query=''){
   const needle=normalizeSearch(query);const filter=smeRelatedFilter;const arr=[...db[key]].reverse().filter(o=>smeRelatedMatches(key,o,filter)&&(!needle||normalizeSearch(searchableRecordText(key,o)).includes(needle)));
-  document.getElementById('recordsList').innerHTML=arr.length?arr.map(o=>'<div class="item"><strong>'+esc(recordTitle(key,o))+'</strong><div class="muted">'+displayValues(key,o).map(([k,v])=>'<div>'+esc(k)+': '+esc(v)+'</div>').join('')+'</div>'+smeRelatedButtons(key,o)+'<div class="quick">'+(key==='presupuestos'&&o.tipo==='Orientativo'?'':'<button class="secondary" data-edit="'+o.id+'">Editar</button>')+'<button class="secondary" data-delete="'+o.id+'">Eliminar</button><button class="secondary" data-print="'+o.id+'">Imprimir</button>'+(key==='presupuestos'&&o.tipo==='Orientativo'?'<button class="secondary" data-share-orientative="'+o.id+'">Compartir</button>':'')+'</div></div>').join(''):'<div class="empty">No hay registros que coincidan. Podés agregar uno arriba.</div>';
+  document.getElementById('recordsList').innerHTML=arr.length?arr.map(o=>'<div class="item"><strong>'+esc(recordTitle(key,o))+'</strong><div class="muted">'+displayValues(key,o).map(([k,v])=>'<div>'+esc(k)+': '+esc(v)+'</div>').join('')+'</div>'+smeRelatedButtons(key,o)+'<div class="quick">'+'<button class="secondary" data-edit="'+o.id+'">Editar</button>'+'<button class="secondary" data-delete="'+o.id+'">Eliminar</button><button class="secondary" data-print="'+o.id+'">Imprimir</button>'+'</div></div>').join(''):'<div class="empty">No hay registros que coincidan. Podés agregar uno arriba.</div>';
   document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{const id=b.dataset.delete;const linked=(key==='clientes'&&(db.vehiculos.some(x=>String(x.clienteId)===id)||db.trabajos.some(x=>String(x.clienteId)===id)||db.presupuestos.some(x=>String(x.clienteId)===id)||db.eventos.some(x=>String(x.clienteId)===id)||db.recepciones.some(x=>String(x.clienteId)===id)||db.diagnosticos.some(x=>String(x.clienteId)===id)||db.cuentas.some(x=>String(x.clienteId)===id)))||(key==='vehiculos'&&(db.trabajos.some(x=>String(x.vehiculoId)===id)||db.presupuestos.some(x=>String(x.vehiculoId)===id)||db.eventos.some(x=>String(x.vehiculoId)===id)||db.recepciones.some(x=>String(x.vehiculoId)===id)||db.diagnosticos.some(x=>String(x.vehiculoId)===id)))||(key==='trabajos'&&(db.movimientos.some(x=>String(x.trabajoId)===id)||db.recepciones.some(x=>String(x.trabajoId)===id)||db.diagnosticos.some(x=>String(x.trabajoId)===id)||db.presupuestos.some(x=>String(x.trabajoId)===id)||db.cuentas.some(x=>String(x.trabajoId)===id)));if(linked){alert('Este registro está vinculado a otros datos. Para evitar perder relaciones, no se puede eliminar todavía.');return}if(!await smeStyledConfirm('Eliminar registro','¿Eliminar este registro?'))return;const before=JSON.stringify(db);db[key]=db[key].filter(x=>String(x.id)!==id);if(!(await save())){db=JSON.parse(before);return}render()});
   document.querySelectorAll('[data-print]').forEach(b=>b.onclick=()=>printRecord(key,db[key].find(x=>String(x.id)===b.dataset.print)));
-  document.querySelectorAll('[data-share-orientative]').forEach(b=>b.onclick=()=>{const quote=db.presupuestos.find(x=>String(x.id)===b.dataset.shareOrientative);if(!quote||quote.tipo!=='Orientativo')return;smeOpenOrientativeShareDialog(quote.id)});
-  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const o=db[key].find(x=>String(x.id)===b.dataset.edit);if(!o)return;editingId=o.id;for(const [name] of fields){if(form.elements[name])form.elements[name].value=name==='kilometros'?formatKilometers(o[name]):(o[name]??'')}if(key==='movimientos'){if(!form.elements.medioPago.value)form.elements.medioPago.value='Efectivo';if(!form.elements.categoria.value)form.elements.categoria.value='Otros';if(!form.elements.acreditacion.value)form.elements.acreditacion.value='Acreditado / disponible';form.elements.importeNeto.value=formatMoneyInput(Math.max(0,parseMoneyInput(form.elements.importe.value)-parseMoneyInput(form.elements.comision.value)))}['importe','manoObra','repuestos','otrosConceptos','comision'].forEach(name=>{if(form.elements[name]&&form.elements[name].value)form.elements[name].value=formatMoneyInput(form.elements[name].value)});if(key==='presupuestos'){form.elements.importe.value=formatMoneyInput(parseMoneyInput(form.elements.manoObra.value)+parseMoneyInput(form.elements.repuestos.value)+parseMoneyInput(form.elements.otrosConceptos?.value||'0'));['horasOrientativas','operacionTiempoOrientativa','tarifaHoraOrientativa','diagnosticoCliente','solucionRecomendada','alcanceTrabajo','vigenciaDias','plazoEstimado','condicionesPago','condicionesCuotasFormal','cantidadCuotasFormal','condicionesGarantia','detalleOtrosConceptos','trabajosExcluidos','controlPosterior','condicionesControl','notaCliente'].forEach(name=>{if(form.elements[name])form.elements[name].value=o[name]??(name==='vigenciaDias'?'7':name==='controlPosterior'?'no':name==='cantidadCuotasFormal'?'3':'')});if(form.elements.ofrecerCuotasFormal){form.elements.ofrecerCuotasFormal.checked=String(o.ofrecerCuotasFormal||'')==='on'||o.ofrecerCuotasFormal===true;form.elements.ofrecerCuotasFormal.dispatchEvent(new Event('change',{bubbles:true}))}}form.querySelector('button[type=submit]').textContent='Guardar cambios';document.getElementById('cancelEdit').hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'})});
+    document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{const o=db[key].find(x=>String(x.id)===b.dataset.edit);if(!o)return;editingId=o.id;for(const [name] of fields){if(form.elements[name])form.elements[name].value=name==='kilometros'?formatKilometers(o[name]):(o[name]??'')}if(key==='movimientos'){if(!form.elements.medioPago.value)form.elements.medioPago.value='Efectivo';if(!form.elements.categoria.value)form.elements.categoria.value='Otros';if(!form.elements.acreditacion.value)form.elements.acreditacion.value='Acreditado / disponible';form.elements.importeNeto.value=formatMoneyInput(Math.max(0,parseMoneyInput(form.elements.importe.value)-parseMoneyInput(form.elements.comision.value)))}['importe','manoObra','repuestos','otrosConceptos','comision'].forEach(name=>{if(form.elements[name]&&form.elements[name].value)form.elements[name].value=formatMoneyInput(form.elements[name].value)});form.querySelector('button[type=submit]').textContent='Guardar cambios';document.getElementById('cancelEdit').hidden=false;form.scrollIntoView({behavior:'smooth',block:'start'})});
  }
  document.getElementById('searchRecords').addEventListener('input',e=>drawRecords(e.target.value));
  document.getElementById('cancelEdit').onclick=()=>render();
  form.onsubmit=async e=>{e.preventDefault();if(smeAuthenticated)smeResetIdleTimer();let beforeSnapshot=null,wasSaved=false;try{const obj=Object.fromEntries(new FormData(form).entries());if(obj.kilometros!==undefined)obj.kilometros=obj.kilometros.replace(/\D/g,'');['importe','manoObra','repuestos','otrosConceptos','comision','importeNeto'].forEach(k=>{if(obj[k]!==undefined)obj[k]=String(parseMoneyInput(obj[k]))});const before=JSON.stringify(db);beforeSnapshot=before;const selectedVehicle=obj.vehiculoId?db.vehiculos.find(x=>String(x.id)===String(obj.vehiculoId)):null;if((key!=='presupuestos'||!obj.trabajoId)&&selectedVehicle&&selectedVehicle.clienteId&&obj.clienteId&&String(selectedVehicle.clienteId)!==String(obj.clienteId)){smeFormError(form,'El cliente seleccionado no coincide con el propietario asociado al vehículo. Revisá la relación antes de guardar.','vehiculoId');return}if(key==='trabajos'&&!obj.vehiculoId){smeFormError(form,'Seleccioná un vehículo para guardar la orden.','vehiculoId');return}if(key==='trabajos'&&!obj.clienteId){smeFormError(form,'Seleccioná un cliente para guardar la orden.','clienteId');return}
  if(key==='vehiculos'&&obj.clienteId==='')obj.clienteId='';
  if(key==='movimientos'){obj.hora=obj.hora||new Date().toTimeString().slice(0,5);obj.medioPago=obj.medioPago||'Efectivo';obj.categoria=obj.categoria||'Otros';obj.cuotas=String(Math.max(1,Number(obj.cuotas)||1));obj.comision=String(obj.tipo==='Ingreso'?Math.max(0,Number(obj.comision)||0):0);obj.importe=String(Math.max(0,Number(obj.importe)||0));obj.importeNeto=String(obj.tipo==='Ingreso'?Math.max(0,Number(obj.importe)-Number(obj.comision)):Number(obj.importe));obj.cuotas=String(Math.max(1,Math.floor(Number(obj.cuotas)||1)));obj.acreditacion=obj.acreditacion||'Acreditado / disponible';if(!['Tarjeta de crédito','Tarjeta de débito','QR / billetera virtual'].includes(obj.medioPago)&&obj.acreditacion==='Pendiente de acreditación')obj.acreditacion='Acreditado / disponible';}
- if(key==='presupuestos'){if(obj.trabajoId){const linkedWork=db.trabajos.find(x=>String(x.id)===obj.trabajoId);if(linkedWork){obj.clienteId=linkedWork.clienteId||'';obj.vehiculoId=linkedWork.vehiculoId||''}}obj.estado=obj.estado||'Borrador';const m=Number(obj.manoObra)||0,r=Number(obj.repuestos)||0,other=Number(obj.otrosConceptos)||0;if([m,r,other].some(value=>!Number.isFinite(value)||value<0)){smeFormError(form,'Los importes del presupuesto no pueden ser negativos.','manoObra');return}obj.importe=String(m+r+other)}
+ 
  if(editingId!==null){const idx=db[key].findIndex(x=>String(x.id)===String(editingId));if(idx>=0){const old=db[key][idx];if(key==='trabajos'&&old.estado!==obj.estado){obj.historialEstado=[...(old.historialEstado||[{fecha:old.fecha||'Registro inicial',estado:old.estado||'Pendiente'}]),{fecha:new Date().toLocaleString('es-AR'),estado:obj.estado}]}else if(key==='trabajos')obj.historialEstado=old.historialEstado||[];db[key][idx]={...old,...obj}}}else{obj.id=newRecordId();if(key==='trabajos'&&!obj.numero)obj.numero=nextWorkNumber();if(key==='trabajos')obj.historialEstado=[{fecha:new Date().toLocaleString('es-AR'),estado:obj.estado||'Pendiente'}];db[key].push(obj)}
  if(!(await save())){db=JSON.parse(before);return}wasSaved=true;try{localStorage.removeItem(smeDraftKey(form))}catch(_){}if(smeAuthenticated)smeResetIdleTimer();render()}catch(error){console.error('Error al guardar el registro:',error);if(beforeSnapshot&&!wasSaved){try{db=JSON.parse(beforeSnapshot)}catch(_){}}smeFormError(form,'No se pudo completar el guardado. La sesión se mantiene abierta. Revisá los datos y conservá tu respaldo.')}};
  drawRecords();
@@ -1904,8 +1345,7 @@ function recordTitle(key,o){
  if(key==='clientes')return o.nombre||'Cliente';
  if(key==='vehiculos')return [o.patente,o.marca,o.modelo].filter(Boolean).join(' · ')||'Vehículo';
  if(key==='trabajos')return (o.numero||'Orden')+' · '+vehicleName(o.vehiculoId);
- if(key==='presupuestos')return (o.tipo==='Orientativo'?'Consulta orientativa':'Presupuesto')+' · '+(o.fecha||'')+' · '+(o.vehiculoReferencia||customerName(o.clienteId));
- if(key==='movimientos')return o.tipo+' · $ '+money(o.importe);
+  if(key==='movimientos')return o.tipo+' · $ '+money(o.importe);
  return o.titulo||o.concepto||'Registro';
 }
 let printWatermarkData='';
@@ -1923,69 +1363,9 @@ async function getPrintWatermark(){
  }
 }
 
-function smeBudgetDocumentAmount(value){
- const amount=Number(parseMoneyInput(value));
- return new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:Number.isInteger(amount)?0:2,maximumFractionDigits:2}).format(Number.isFinite(amount)?amount:0);
-}
-function smeBudgetDocumentHtml(o){
- const orientative=o.tipo==='Orientativo';
- const date=friendlyDate(o.fecha||todayLocal());
- const id=String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase()||'PROPUESTA';
- const client=o.clienteId?customerName(o.clienteId):'Consulta sin cliente registrado';
- const vehicle=o.vehiculoId?vehicleName(o.vehiculoId):(o.vehiculoReferencia||'—');
- const details=String(o.detalle||o.trabajoOrientativo||'Trabajo a confirmar').trim();
- const diagnosis=String(o.diagnosticoCliente||'').trim();
- const recommendation=String(o.solucionRecomendada||'').trim();
- const excluded=String(o.trabajosExcluidos||'').trim();
- const scope=String(o.alcanceTrabajo||o.alcanceOrientativo||'').trim();
- const validity=Number(o.vigenciaDias)||7;
- const labor=Number(parseMoneyInput(o.manoObra));
- const parts=Number(parseMoneyInput(o.repuestos));
- const otherConcepts=Number(parseMoneyInput(o.otrosConceptos));
- const total=Number(parseMoneyInput(o.importe));
- const analysis=o.analisisInterno&&typeof o.analisisInterno==='object'?o.analisisInterno:{};
- const taxPct=Math.min(100,Math.max(0,Number(analysis.taxRatePct)||0));
- const taxMode=analysis.taxMode==='added'?'added':'included';
- const estimatedTax=taxMode==='added'?total*taxPct/100:0;
- const customerTotal=total+estimatedTax;
- const rangeMin=Number(parseMoneyInput(o.estimacionMinima));
- const rangeMax=Number(parseMoneyInput(o.estimacionMaxima));
- const payment=String(o.condicionesPago||'Condiciones de pago a coordinar antes de comenzar.').trim();
- const delivery=String(o.plazoEstimado||'Plazo a confirmar según diagnóstico y disponibilidad de repuestos.').trim();
- const warranty=String(o.condicionesGarantia||'Las condiciones aplicables se detallarán según el trabajo realizado y los repuestos instalados.').trim();
- const formalInstallmentCount=Math.max(2,Math.min(12,Number(o.cantidadCuotasFormal)||3));
- const formalInstallmentOffer=String(o.ofrecerCuotasFormal||'')==='on'||o.ofrecerCuotasFormal===true;
- const formalInstallmentAmount=Math.ceil((customerTotal>0?customerTotal:total)/formalInstallmentCount);
- const formalInstallmentsHtml=!orientative&&formalInstallmentOffer&&formalInstallmentAmount>0?'<section class="benefit"><span class="benefit-mark">$</span><div><strong>Alternativa de pago: '+formalInstallmentCount+' cuotas estimadas</strong><p>'+esc(smeBudgetDocumentAmount(formalInstallmentAmount))+' por cuota, sin interés solo si el medio de pago lo confirma. '+esc(o.condicionesCuotasFormal||'Sujeto a las condiciones vigentes del proveedor de pago.')+'</p></div></section>':'';
- const control=String(o.controlPosterior||'no')==='si'?'<section class="benefit"><span class="benefit-mark">✓</span><div><strong>Control posterior incluido en la propuesta</strong><p>'+esc(o.condicionesControl||'El taller coordinará con el cliente el momento y alcance del control posterior.')+'</p></div></section>':'';
- const extra=String(o.notaCliente||'').trim()?'<section class="note"><h3>Observaciones</h3><p>'+esc(o.notaCliente)+'</p></section>':'';
- const lineRows=orientative
-  ?'<tr><td><strong>'+(Math.abs(rangeMax-rangeMin)<0.005?'Precio orientativo':'Estimación orientativa')+'</strong><small>'+(Math.abs(rangeMax-rangeMin)<0.005?'Importe único sujeto a inspección y confirmación del alcance':'Rango sujeto a inspección y confirmación del alcance')+'</small></td><td class="amount">'+esc(smeOrientativePriceLabel(rangeMin,rangeMax))+'</td></tr>'
-  :'<tr><td><strong>Mano de obra</strong><small>Según el detalle y alcance acordado</small></td><td class="amount">'+(labor>0?esc(smeBudgetDocumentAmount(labor)):'A confirmar')+'</td></tr><tr><td><strong>Repuestos y materiales</strong><small>Según piezas y cantidades indicadas</small></td><td class="amount">'+(parts>0?esc(smeBudgetDocumentAmount(parts)):'A confirmar')+'</td></tr>'+(otherConcepts>0?'<tr><td><strong>Servicios externos, insumos y otros trabajos</strong><small>'+esc(o.detalleOtrosConceptos||'Conceptos adicionales indicados en la propuesta')+'</small></td><td class="amount">'+esc(smeBudgetDocumentAmount(otherConcepts))+'</td></tr>':'')+(taxMode==='added'&&taxPct>0?'<tr><td><strong>Impuesto estimado ('+esc(money(taxPct))+' %)</strong><small>A revisar según la condición fiscal aplicable</small></td><td class="amount">'+esc(smeBudgetDocumentAmount(estimatedTax))+'</td></tr>':'');
- const totalHtml=orientative
-  ?'<div class="total-card orientative-total"><div><span>'+(Math.abs(rangeMax-rangeMin)<0.005?'Precio estimado':'Rango estimado')+'</span><small>No es un precio definitivo confirmado</small></div><strong>'+esc(smeOrientativePriceLabel(rangeMin,rangeMax))+'</strong></div>'
-  :'<div class="total-card"><div><span>'+(taxMode==='added'&&taxPct>0?'Total estimado para el cliente':'Total propuesto')+'</span><small>'+(taxMode==='added'&&taxPct>0?'Incluye el impuesto estimado del desglose; verificar antes de emitir':'Importe en pesos argentinos; revisar la condición fiscal aplicable')+'</small></div><strong>'+(total>0?esc(smeBudgetDocumentAmount(customerTotal)):'A confirmar')+'</strong></div>';
- const status=String(o.estado||'Borrador');
- const offerHeading=orientative?'Consulta orientativa':'Presupuesto de reparación';
- const validText=orientative?'Esta consulta es orientativa y no representa un precio definitivo. El importe y el alcance se confirman al inspeccionar el vehículo.':('Propuesta válida por '+validity+' días desde la fecha de emisión, salvo cambios de alcance, repuestos o disponibilidad.');
- const acceptance=orientative
-  ?'La revisión del vehículo permitirá confirmar el diagnóstico, el alcance y el importe final. No se realizarán trabajos adicionales sin autorización.'
-  :'La aceptación confirma únicamente los trabajos y conceptos detallados en esta propuesta. Cualquier tarea adicional requiere autorización previa del cliente.';
- return '<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(offerHeading)+' · SME-'+id+'</title><style>'+
- '@page{size:A4;margin:12mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}html,body{margin:0;padding:0;background:#f2efe8;color:#263330;font:10.5pt/1.48 Arial,Helvetica,sans-serif}body{padding:0}.sheet{max-width:800px;margin:0 auto;background:#fff;border:1px solid #e4ded1;box-shadow:0 10px 35px #102f3310}.topbar{height:8px;background:#c6a16a}.hero{padding:28px 32px 24px;background:#102f33;color:#f7f1e5;position:relative}.brand{font-size:9pt;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;color:#e2c18b}.tagline{font-size:9pt;color:#d6d1c7;margin-top:4px}.hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-top:27px}.hero h1{font:700 23pt/1.12 Georgia,serif;margin:0;color:#f7f1e5}.hero-sub{font-size:9pt;color:#d7cdbb;margin:7px 0 0}.ref{flex:0 0 auto;border:1px solid #b99a67;border-radius:5px;padding:8px 10px;text-align:right;color:#f0d7aa;font-size:8.5pt}.body{padding:26px 32px 25px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}.meta-card{border:1px solid #e1ddd4;border-radius:7px;padding:13px 15px;min-width:0;background:#fbfaf7}.meta-card .label{font-size:7.5pt;letter-spacing:1.1px;text-transform:uppercase;color:#8c7145;font-weight:800;margin-bottom:6px}.meta-card strong{display:block;font-size:10.5pt;color:#203a3a;overflow-wrap:anywhere}.meta-card p{margin:4px 0 0;color:#6e716c;font-size:9pt;overflow-wrap:anywhere}.section-title{font-size:8pt;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:#94794e;margin:22px 0 8px}.work-card{border-left:3px solid #c6a16a;background:#f8f6f0;padding:14px 16px;border-radius:0 6px 6px 0;break-inside:avoid}.work-card h2{font:700 15pt/1.3 Georgia,serif;margin:0 0 7px;color:#173b3d}.work-card p{margin:0;color:#434a46;white-space:pre-wrap;overflow-wrap:anywhere}.scope{margin-top:12px;padding:12px 14px;border:1px solid #e6e0d5;border-radius:6px}.scope h3,.note h3{margin:0 0 6px;color:#244649;font-size:10pt}.scope p,.note p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.lines{width:100%;border-collapse:separate;border-spacing:0;margin-top:10px}.lines thead th{background:#173b3d;color:#f8f2e7;text-align:left;font-size:8pt;font-weight:700;letter-spacing:.4px;padding:10px 12px}.lines thead th:last-child{text-align:right;width:32%}.lines td{padding:13px 12px;border-bottom:1px solid #e6e1d8;vertical-align:top}.lines td strong{display:block;color:#243d3b;font-size:10pt}.lines td small{display:block;color:#767971;font-size:8.2pt;margin-top:3px}.lines td.amount{text-align:right;font-weight:800;color:#203d3a;white-space:nowrap}.muted{color:#77786f;font-size:8.2pt}.total-card{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:15px;padding:18px 20px;border-radius:7px;background:#173b3d;color:#fff7e8;break-inside:avoid}.total-card span{display:block;font:700 13pt Georgia,serif}.total-card small{display:block;color:#d6cdbb;font-size:8.3pt;margin-top:4px}.total-card strong{font-size:19pt;line-height:1.2;color:#edcc8f;text-align:right}.orientative-total{background:#f3ead8;border:1px solid #d8c398;color:#263330}.orientative-total small{color:#716b5d}.orientative-total strong{color:#765a30;font-size:15pt}.conditions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.condition{padding:12px 13px;background:#faf9f5;border:1px solid #e6e1d8;border-radius:6px;break-inside:avoid}.condition strong{display:block;font-size:8pt;color:#927346;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}.condition p{margin:0;color:#454c47;font-size:9pt;overflow-wrap:anywhere}.benefit{display:flex;gap:10px;padding:13px 15px;border:1px solid #d9c79f;background:#fcf8ed;border-radius:6px;margin-top:12px;break-inside:avoid}.benefit-mark{display:inline-flex;align-items:center;justify-content:center;background:#173b3d;color:#eed29a;border-radius:50%;width:23px;height:23px;flex:0 0 23px;font-weight:800}.benefit strong{display:block;color:#234543}.benefit p{margin:3px 0 0;color:#555d56;font-size:9pt}.note{margin-top:12px;padding:12px 14px;background:#fbfaf7;border:1px solid #e3ded4;border-radius:6px}.terms{margin-top:20px;padding:13px 15px;background:#f3f4f0;border-radius:6px;border:1px solid #e1e3dc}.terms h3{font-size:8pt;letter-spacing:1px;text-transform:uppercase;color:#284a49;margin:0 0 5px}.terms p{font-size:8.8pt;color:#4c544f;margin:0}.acceptance{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:27px;padding-top:16px;border-top:1px solid #d9d5ca;break-inside:avoid}.sign-line{padding-top:22px;border-bottom:1px solid #7c8179}.sign-label{font-size:8pt;color:#777b73;margin-top:5px}.footer{padding:14px 32px;background:#f7f5ef;border-top:1px solid #e5dfd2;display:flex;justify-content:space-between;gap:18px;font-size:8pt;color:#68716b}.footer strong{color:#244746;letter-spacing:.5px}.footer span:last-child{text-align:right}.fineprint{margin-top:6px;font-size:7.5pt;color:#8a8a81}.avoid{break-inside:avoid;page-break-inside:avoid}'+
- '@media(max-width:560px){.hero,.body{padding:20px 18px}.hero-row{align-items:flex-start;flex-direction:column}.ref{text-align:left}.meta,.conditions,.acceptance{grid-template-columns:1fr}.total-card{align-items:flex-start;flex-direction:column}.total-card strong{text-align:left}.footer{padding:13px 18px;flex-direction:column}.footer span:last-child{text-align:left}}'+
- '@media print{html,body{background:#fff!important}.sheet{max-width:none;border:0;box-shadow:none}.hero{break-inside:avoid}.body{padding:22px 26px}.meta-card,.work-card,.scope,.condition,.terms,.note,.benefit,.total-card{break-inside:avoid;page-break-inside:avoid}.footer{break-inside:avoid}.lines thead{display:table-header-group}.lines tr{break-inside:avoid;page-break-inside:avoid}}'+
- '</style></head><body><article class="sheet"><div class="topbar"></div><header class="hero"><div class="brand">Servicios Mecánicos Enzo</div><div class="tagline">El oficio de siempre, al servicio de hoy.</div><div class="hero-row"><div><h1>'+esc(offerHeading)+'</h1><p class="hero-sub">'+(orientative?'Una primera referencia clara para conversar el trabajo.':'Detalle del trabajo, importes y condiciones de la propuesta.')+'</p></div><div class="ref">REFERENCIA<br><strong>SME-'+id+'</strong><br>'+esc(status)+'</div></div></header><main class="body"><div class="meta"><section class="meta-card"><div class="label">Emitido</div><strong>'+esc(date)+'</strong><p>Válido '+(orientative?'para orientación inicial':validity+' días desde la emisión')+'</p></section><section class="meta-card"><div class="label">Cliente</div><strong>'+esc(client)+'</strong><p>'+(o.clienteId?esc(customerDocument(o.clienteId)):'Datos a completar si corresponde')+'</p></section><section class="meta-card"><div class="label">Vehículo</div><strong>'+esc(vehicle)+'</strong><p>'+(o.vehiculoId?esc(customerName(o.clienteId)):'Referencia informada por el cliente')+'</p></section><section class="meta-card"><div class="label">Plazo estimado</div><strong>'+esc(delivery)+'</strong><p>Confirmar disponibilidad y alcance antes de iniciar.</p></section></div><div class="section-title">Trabajo propuesto</div><section class="work-card"><h2>'+esc(o.trabajoOrientativo||details||'Trabajo a presupuestar')+'</h2><p>'+esc(details)+'</p></section>'+(diagnosis?'<section class="scope"><h3>Motivo / diagnóstico comunicado</h3><p>'+esc(diagnosis)+'</p></section>':'')+(recommendation?'<section class="scope"><h3>Solución recomendada</h3><p>'+esc(recommendation)+'</p></section>':'')+(scope?'<section class="scope"><h3>Alcance / tareas incluidas</h3><p>'+esc(scope)+'</p></section>':'')+(excluded?'<section class="note"><h3>Fuera del alcance de esta propuesta</h3><p>'+esc(excluded)+'</p></section>':'')+'<div class="section-title">Detalle económico</div><table class="lines"><thead><tr><th>Concepto</th><th>Importe estimado</th></tr></thead><tbody>'+lineRows+'</tbody></table>'+totalHtml+formalInstallmentsHtml+'<div class="conditions"><section class="condition"><strong>Condiciones de pago</strong><p>'+esc(payment)+'</p></section><section class="condition"><strong>Garantía / condiciones</strong><p>'+esc(warranty)+'</p></section></div>'+control+extra+'<section class="terms"><h3>Antes de confirmar</h3><p>'+esc(validText)+' '+esc(acceptance)+' No se realizarán trabajos adicionales sin autorización previa.</p></section><div class="acceptance"><div><div class="sign-line"></div><div class="sign-label">Nombre y firma del cliente</div></div><div><div class="sign-line"></div><div class="sign-label">Fecha de aceptación</div></div></div></main><footer class="footer"><span><strong>SERVICIOS MECÁNICOS ENZO</strong><br>El oficio de siempre, al servicio de hoy.</span><span>Gracias por confiar en nuestro trabajo.<br><span class="fineprint">Documento generado por SME · Conservá una copia de esta propuesta.</span></span></footer></article><script>window.onload=()=>setTimeout(()=>window.print(),350);<\/script></body></html>';
-}
-
 async function printRecord(key,o){
  if(!o)return;
- if(key==='presupuestos'){
-  const html=smeBudgetDocumentHtml(o);
-  if(storage?.isNative){try{await Printer.printHtml({html,name:recordTitle(key,o)})}catch(error){console.error('Error de impresión de presupuesto:',error);alert('No se pudo abrir el presupuesto para imprimir. Detalle: '+String(error?.message||error))}return}
-  const w=window.open('','_blank');if(!w){alert('El navegador bloqueó la ventana. Permití ventanas emergentes para imprimir.');return}
-  w.document.write(html);w.document.close();return;
- }
+ 
  let printableValues=displayValues(key,o);
  if(key==='diagnosticos'){
   const fullChecks=[];
@@ -2021,9 +1401,7 @@ function displayValues(key,o){
  const fields={
  clientes:[['Teléfono',o.telefono],['DNI / CUIT',o.documento],['Empresa',o.empresa],['Notas',o.notas]],
  vehiculos:[['Cliente',customerName(o.clienteId)],['Año',o.anio],['Kilometraje',formatKilometers(o.kilometros)],['Notas',o.notas]],
- trabajos:[['Fecha',o.fecha],['Cliente',customerName(o.clienteId)],['Vehículo',vehicleName(o.vehiculoId)],['Kilometraje',o.kilometros],['Falla informada',o.problema],['Diagnóstico',o.diagnostico],['Trabajo',o.trabajo],['Repuestos',o.repuestos],['Importe estimado','$ '+money(o.importe)],['Estado',o.estado],['Entrega prevista',o.fechaEntrega],['Historial de estados',(o.historialEstado||[]).map(h=>h.fecha+' — '+h.estado).join(' | ')]],
- presupuestos:[['Tipo',o.tipo||'Formal'],['Fecha',o.fecha],['Cliente',o.clienteId?customerName(o.clienteId):'Consulta sin cliente registrado'],['Vehículo',o.vehiculoId?vehicleName(o.vehiculoId):(o.vehiculoReferencia||'—')],['Orden relacionada',o.trabajoId?((db.trabajos.find(x=>String(x.id)===String(o.trabajoId))||{}).numero||'Orden vinculada'):'—'],['Estado',o.estado||'Borrador'],['Detalle',o.detalle],['Alcance orientativo',o.alcanceOrientativo],['Rango orientativo',o.tipo==='Orientativo'?'$ '+money(o.estimacionMinima)+' a $ '+money(o.estimacionMaxima):''],['Mano de obra',o.tipo==='Orientativo'?'—':'$ '+money(o.manoObra)],['Repuestos',o.tipo==='Orientativo'?'—':'$ '+money(o.repuestos)],['Total',o.tipo==='Orientativo'?'No es un precio definitivo':'$ '+money(o.importe)]],
- movimientos:[['Fecha',o.fecha],['Hora',o.hora],['Tipo',o.tipo],['Concepto',o.concepto],['Categoría',o.categoria],['Medio de pago',o.medioPago],['Cuotas',o.cuotas],['Importe bruto','$ '+money(o.importe)],['Comisión de cobro',Number(o.comision)>0?'$ '+money(o.comision):'—'],['Neto',o.importeNeto!==undefined?'$ '+money(o.importeNeto):'$ '+money(o.importe)],['Acreditación',o.acreditacion],['Orden relacionada',o.trabajoId?(()=>{const t=db.trabajos.find(x=>String(x.id)===String(o.trabajoId));return t?(t.numero+' · '+vehicleName(t.vehiculoId)):'Orden no encontrada'})():'—']],
+ trabajos:[['Fecha',o.fecha],['Cliente',customerName(o.clienteId)],['Vehículo',vehicleName(o.vehiculoId)],['Kilometraje',o.kilometros],['Falla informada',o.problema],['Diagnóstico',o.diagnostico],['Trabajo',o.trabajo],['Repuestos',o.repuestos],['Importe estimado','$ '+money(o.importe)],['Estado',o.estado],['Entrega prevista',o.fechaEntrega],['Historial de estados',(o.historialEstado||[]).map(h=>h.fecha+' — '+h.estado).join(' | ')]], movimientos:[['Fecha',o.fecha],['Hora',o.hora],['Tipo',o.tipo],['Concepto',o.concepto],['Categoría',o.categoria],['Medio de pago',o.medioPago],['Cuotas',o.cuotas],['Importe bruto','$ '+money(o.importe)],['Comisión de cobro',Number(o.comision)>0?'$ '+money(o.comision):'—'],['Neto',o.importeNeto!==undefined?'$ '+money(o.importeNeto):'$ '+money(o.importe)],['Acreditación',o.acreditacion],['Orden relacionada',o.trabajoId?(()=>{const t=db.trabajos.find(x=>String(x.id)===String(o.trabajoId));return t?(t.numero+' · '+vehicleName(t.vehiculoId)):'Orden no encontrada'})():'—']],
  eventos:[['Fecha',o.fecha],['Hora',o.hora],['Cliente',o.clienteId?customerName(o.clienteId):'—'],['Vehículo',o.vehiculoId?vehicleName(o.vehiculoId):'—'],['Detalle',o.notas]],
  recepciones:[['Fecha y hora',((o.fecha||'')+' '+(o.hora||'')).trim()],['Cliente',customerName(o.clienteId)],['DNI / CUIT',customerDocument(o.clienteId)],['Vehículo',vehicleName(o.vehiculoId)],['Orden relacionada',o.trabajoId?((db.trabajos.find(x=>String(x.id)===String(o.trabajoId))||{}).numero||'Orden vinculada'):'Sin orden vinculada'],['Kilometraje',o.kilometros],['Tipo de combustible',o.combustibleTipo],['Nivel de combustible',o.combustibleNivel],['Diagnóstico previo',o.diagnosticoPrevio],['Detalle del diagnóstico previo',o.detalleDiagnostico],['Trabajo solicitado',o.trabajoSolicitado],['Servicios solicitados',(o.servicios||[]).join(', ')],['Condiciones de ingreso',(o.condiciones||[]).join(', ')],['Presupuesto realizado',o.presupuestoRealizado],['Monto estimado',o.importe?'$ '+money(o.importe):'—'],['Firma del cliente',o.nombreFirma||'—'],['Fotos adjuntas',String((o.fotos||[]).length)],['Observaciones',o.observaciones]],
  diagnosticos:[['Fecha',o.fecha],['Cliente',customerName(o.clienteId)],['DNI / CUIT',customerDocument(o.clienteId)],['Vehículo',vehicleName(o.vehiculoId)],['Orden relacionada',o.trabajoId?((db.trabajos.find(x=>String(x.id)===String(o.trabajoId))||{}).numero||'Orden vinculada'):'Sin orden vinculada'],['Testigos en tablero',(o.testigos||[]).join(', ')||'Ninguno marcado'],['Detalle de otros testigos',o.testigosDetalle],['Anomalías detectadas',diagnosticFlags(o).map(x=>x.label+': '+x.value).join(' | ')||'No hay valores marcados como anómalos'],['Fotos adjuntas',String((o.fotos||[]).length)],['Observaciones',o.observaciones]]
