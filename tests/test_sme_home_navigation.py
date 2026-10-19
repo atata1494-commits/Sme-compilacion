@@ -28,7 +28,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
             self.assertIn("smeRenderHubPage('" + hub + "'", self.html)
         self.assertIn("if(key==='registros')return ['clientes','vehiculos','trabajos'].some", self.html)
         self.assertIn("if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some", self.html)
-        self.assertIn("function smeHub", self.html)
+        self.assertIn("function smeRenderHubPage", self.html)
 
     def test_dashboard_is_asymmetric_and_can_leave_space_empty(self):
         self.assertIn("home-layout", self.html)

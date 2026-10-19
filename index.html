@@ -422,8 +422,11 @@ function smeShowBackExitPrompt(){
  },2200);
 }
 const SME_BACK_PARENT_BY_PAGE=Object.freeze({
- clientes:'inicio',vehiculos:'inicio',trabajos:'inicio',mas:'inicio',
- agenda:'mas',caja:'mas',cuentas:'mas',presupuestos:'mas',tiempos:'mas',recepciones:'mas',diagnosticos:'mas',usuarios:'mas',asistencias:'mas',terceros:'mas',tareas:'mas',avisos:'mas',gastos:'mas'
+ inicio:'inicio',registros:'inicio',taller:'inicio',gestion:'inicio',mas:'inicio',
+ clientes:'registros',vehiculos:'registros',trabajos:'registros',
+ recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',
+ presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',
+ usuarios:'mas',respaldos:'mas'
 });
 async function smeHandleHardwareBack(){
  if(page!=='inicio'){
@@ -2760,7 +2763,7 @@ function smeShowContextHelp(){const map={inicio:['Inicio','Acá encontrás un re
 taller:['Taller','Recepción, diagnóstico y coordinación diaria del equipo están agrupados en esta sección. Cada acción sigue respetando los permisos de tu cuenta.'],
 gestion:['Gestión','Presupuestos, caja, cuentas corrientes, agenda y tiempos de mano de obra están agrupados acá; la tarifa la decide el taller y las referencias no cambian precios automáticamente.'],
 mas:['Más','Usuarios y respaldos quedan en una zona separada para que no ocupen espacio en las secciones de uso diario. La restauración completa requiere autorización del administrador principal.'],
-respaldos:['Respaldos y restauración','Usá JSON para una copia transportable que combina registros nuevos. Usá SQLite para una recuperación integral: restaurar esta copia reemplaza la base actual después de una validación y confirmación del administrador principal. Guardá una copia fuera del teléfono.']};const item=map[page]||['Ayuda de SME','Consultá esta ayuda para orientarte. Las acciones disponibles dependen de los permisos de tu cuenta; si necesitás una función que no aparece, consultá al administrador.'];smeShowInfoDialog(item[0],'<p>'+esc(item[1])+'</p>'+(page==='mas'?'<p>Administración: presupuestos, caja y cuentas. Coordinación: tareas, avisos y gastos. Herramientas del taller: recepción y diagnóstico.</p>':''))}
+respaldos:['Respaldos y restauración','Usá JSON para una copia transportable que combina registros nuevos. Usá SQLite para una recuperación integral: restaurar esta copia reemplaza la base actual después de una validación y confirmación del administrador principal. Guardá una copia fuera del teléfono.']};const item=map[page]||['Ayuda de SME','Consultá esta ayuda para orientarte. Las acciones disponibles dependen de los permisos de tu cuenta; si necesitás una función que no aparece, consultá al administrador.'];smeShowInfoDialog(item[0],'<p>'+esc(item[1])+'</p>'+(page==='mas'?'<p>Usuarios, permisos y respaldos.</p>':page==='registros'?'<p>Clientes, vehículos y órdenes de trabajo.</p>':page==='taller'?'<p>Recepción, diagnóstico y coordinación.</p>':page==='gestion'?'<p>Presupuestos, tiempos de mano de obra, caja, cuentas y agenda.</p>':page==='respaldos'?'<p>Copias portables, recuperación completa y respaldos locales automáticos.</p>':''))}
 function smeWelcomeKey(){return 'sme_welcome_state_v3_'+String(smeCurrentUser?.id||smeCurrentUser?.username||'usuario')}
 function smeReadWelcomeState(){try{return JSON.parse(localStorage.getItem(smeWelcomeKey())||'{}')}catch(_){return {}}}
 function smeWriteWelcomeState(state){try{localStorage.setItem(smeWelcomeKey(),JSON.stringify(state))}catch(_){}}
@@ -3098,7 +3101,7 @@ document.addEventListener('click',event=>{
  if(open){
   event.preventDefault();
   if(!smeCanSeeFaatraReference()){alert('Tu usuario no tiene permiso para consultar esta referencia.');return}
-  smeNavigateTo('mas');
+  smeNavigateTo('gestion');
  }
 });
 document.addEventListener('visibilitychange',()=>{

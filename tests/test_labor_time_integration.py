@@ -45,8 +45,10 @@ class LaborTimeIntegrationTests(unittest.TestCase):
     def test_catalog_has_own_management_entry_and_permission(self):
         self.assertIn("{key:'tiempos',label:'Tiempos de mano de obra'}", SOURCE)
         self.assertIn("else if(page==='tiempos') smeLaborTimesPage()", SOURCE)
-        self.assertIn("Referencias orientativas para presupuestar','tiempos')", SOURCE)
-        self.assertIn("tiempos:'mas'", SOURCE)
+        self.assertIn("Tiempos de mano de obra", SOURCE)
+        self.assertIn("Promedios y referencias orientativas", SOURCE)
+        self.assertIn("else if(page==='gestion')smeRenderHubPage('Gestión'", SOURCE)
+        self.assertIn("tiempos:'gestion'", SOURCE)
         self.assertIn("set(['tiempos'],'view')", SOURCE)
 
     def test_quote_hour_metadata_is_separate_from_client_price_fields(self):
