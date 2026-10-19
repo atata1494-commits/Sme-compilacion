@@ -107,5 +107,14 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("Sin tiempo confirmado", SHELL)
 
 
+    def test_faatra_has_a_visible_expired_historical_fallback_without_cache(self):
+        self.assertIn("const SME_FAATRA_FALLBACK=Object.freeze({value:84000", SOURCE)
+        self.assertIn("period:'Julio, agosto y septiembre de 2026'", SOURCE)
+        self.assertIn("usingFallback=!savedCurrent,current=savedCurrent||SME_FAATRA_FALLBACK", SOURCE)
+        self.assertIn("Último valor oficial conocido · histórico", SOURCE)
+        self.assertIn("no debe interpretarse como tarifa vigente", SOURCE)
+        self.assertIn("Se mantiene este valor histórico de respaldo", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main()
