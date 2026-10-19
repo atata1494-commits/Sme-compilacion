@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test-and-build:
@@ -75,3 +75,14 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish APK download for phone testing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="sme-test-${GITHUB_SHA::7}"
+          gh release create "$TAG" android/app/build/outputs/apk/debug/app-debug.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "SME APK de prueba ${GITHUB_SHA::7}" \
+            --notes "APK de prueba generada automáticamente desde la rama ${GITHUB_REF_NAME}. Commit: ${GITHUB_SHA}. Instalar solo para pruebas." \
+            --prerelease
