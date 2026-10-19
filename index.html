@@ -474,7 +474,7 @@ function iconSvg(name,size=28){const originalIcons={cleaning:'/cleaning-icon.web
  briefcase:'<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>',
  cleaning:'<path d="M3 15 8.5 12.5 12 15l-2 6H4z"/><path d="m5 17 4 2"/><path d="M15 8h4l2 4v8H13v-8z"/><path d="M15 8V6h3l2 2"/><path d="M16 12h3"/><path d="M10 5h3M9 7l3 1M10 9l2 0.5"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
- laborStopwatch:'<circle cx="10.5" cy="13" r="7.4"/><path d="M10.5 9.5V13l2.4 1.4"/><path d="M8.5 3h4M10.5 3v2.5"/><path d="m14.2 18.2 4.4-4.4"/><path d="M15.4 10.9a3.6 3.6 0 0 0 4.1 4.1l-4.8 4.8-3.4-3.4"/>',
+ laborStopwatch:'<circle cx="10.5" cy="13.2" r="7"/><path d="M10.5 9.2v4l2.7 1.6"/><path d="M8.5 3.1h4M10.5 3.1v3"/><path d="m15.2 6.2 1.4-1.4"/>',
  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>'
 };return '<svg class="line-icon" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.wrench)+'</svg>'}
 function tile(icon,name,desc,target){const symbol=target==='clientes'?'userRound':target==='recepciones'?'receptionForm':target==='diagnosticos'?'diagnosticScan':target==='usuarios'?'users':target==='terceros'?'briefcase':target==='asistencias'?'clock':target==='tiempos'?'laborStopwatch':target==='tareas'?'listChecks':target==='avisos'?'bell':target==='gastos'?'cashregister':target==='respaldos'?'clipboardList':iconName(icon);return '<button class="tile" data-go="'+target+'"><span class="tile-icon">'+iconSvg(symbol,40)+'</span><strong>'+name+'</strong><small>'+desc+'</small></button>'}
