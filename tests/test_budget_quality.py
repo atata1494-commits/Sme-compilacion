@@ -76,7 +76,7 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("Estimación preliminar de costo", document)
         self.assertIn("PRESUPUESTO ORIENTATIVO", document)
         self.assertIn("PRESUPUESTO DE REPARACIÓN", document)
-        self.assertIn("requerirá autorización del cliente", document)
+        self.assertIn("No se realizarán trabajos adicionales sin autorización del cliente", document)
         self.assertIn('content:"SME"', document)
         self.assertIn("rgba(23,58,62,.055)", document)
         self.assertIn("Documento preparado para el cliente", document)
