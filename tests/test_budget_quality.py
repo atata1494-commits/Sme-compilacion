@@ -10,7 +10,9 @@ class BudgetQualityTests(unittest.TestCase):
     def test_formal_quote_breakdown_adds_other_customer_facing_concepts(self):
         self.assertIn("['otrosConceptos','Servicios externos, insumos y otros trabajos ($)','number']", SOURCE)
         self.assertIn("obj.importe=String(m+r+other)", SOURCE)
-        self.assertIn("const labor=form.elements.manoObra, parts=form.elements.repuestos, other=form.elements.otrosConceptos, total=form.elements.importe", SOURCE)
+        self.assertIn("const named=name=>form.elements.namedItem(name)", SOURCE)
+        self.assertIn("const calcTotal=()=>{const fields=[labor,parts,other]", SOURCE)
+        self.assertIn("formatMoneyInput(sum)", SOURCE)
         self.assertIn("Los importes del presupuesto no pueden ser negativos.", SOURCE)
         self.assertIn("const isMoney=['importe','manoObra','repuestos','otrosConceptos','comision','materiales','otrosGastos'].includes(name)", SOURCE)
         self.assertIn("Se calcula automáticamente con mano de obra + repuestos + otros conceptos.", SOURCE)
@@ -64,6 +66,26 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertNotIn("targetMarginPct", document)
         self.assertNotIn("paymentFeePct", document)
         self.assertIn("analysis.taxRatePct", document)
+
+
+
+    def test_formal_budget_total_updates_after_draft_restoration_and_live_input(self):
+        self.assertIn("function smeRestoreFormDrafts()", SOURCE)
+        self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
+        self.assertIn("form.addEventListener('input',event=>{if(['manoObra','repuestos','otrosConceptos']", SOURCE)
+        self.assertIn("function formatMoneyWhileTyping(value)", SOURCE)
+        self.assertIn("input.type='text';input.inputMode='numeric';input.autocomplete='off'", SOURCE)
+
+    def test_formal_installments_are_configurable_calculated_and_printed(self):
+        for fragment in ('name="ofrecerCuotasFormal"', 'name="cantidadCuotasFormal"', 'name="condicionesCuotasFormal"', 'id="smeFormalInstallmentPreview"'):
+            self.assertIn(fragment, SOURCE)
+        self.assertIn("const paintFormalInstallments=()=>", SOURCE)
+        self.assertIn("const formalInstallmentsHtml=!orientative&&formalInstallmentOffer", SOURCE)
+
+    def test_save_errors_do_not_discard_session(self):
+        self.assertIn("let beforeSnapshot=null,wasSaved=false;try{const obj=Object.fromEntries", SOURCE)
+        self.assertIn("if(smeAuthenticated)smeResetIdleTimer()", SOURCE)
+        self.assertIn("La sesión se mantiene abierta. Revisá los datos", SOURCE)
 
 
 if __name__ == "__main__":
