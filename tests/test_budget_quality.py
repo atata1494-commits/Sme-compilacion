@@ -71,7 +71,7 @@ class BudgetQualityTests(unittest.TestCase):
 
     def test_formal_budget_total_updates_after_draft_restoration_and_live_input(self):
         self.assertIn("function smeRestoreFormDrafts()", SOURCE)
-        self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
+        self.assertIn("restored.forEach(el=>{try{if(el.matches&&el.matches(SME_MONEY_INPUT_SELECTOR)&&!el.readOnly&&el.value)el.value=formatMoneyInput(el.value);el.dispatchEvent(new Event", SOURCE)
         self.assertIn("form.addEventListener('input',event=>{if(['manoObra','repuestos','otrosConceptos']", SOURCE)
         self.assertIn("[labor,parts,other].filter(Boolean).forEach(input=>['input','change','keyup','blur'].forEach(type=>input.addEventListener(type,calcTotal)))", SOURCE)
         self.assertIn("total.setAttribute('value',total.value)", SOURCE)
