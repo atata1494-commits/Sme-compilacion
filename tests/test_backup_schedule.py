@@ -8,7 +8,8 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 HTML = ROOT / "index.html"
-SOURCE = HTML.read_text(encoding="utf-8")
+MODULE = (ROOT / "src" / "budget" / "budget-module.js").read_text(encoding="utf-8")
+SOURCE = HTML.read_text(encoding="utf-8") + "\n" + MODULE
 
 
 class BackupScheduleSourceTests(unittest.TestCase):
@@ -133,46 +134,45 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("Restaurar copia completa (.db)", SOURCE)
 
     def test_orientative_budget_is_optional_and_kept_distinct_from_formal_quote(self):
-        self.assertIn("smeToggleOrientativeBudget", SOURCE)
-        self.assertIn("smeOrientativeBudgetForm", SOURCE)
-        self.assertIn("tipo:'Orientativo'", SOURCE)
-        self.assertIn("estimacionMinima:String(min)", SOURCE)
-        self.assertIn("estimacionMaxima:String(max)", SOURCE)
-        self.assertIn("max<min", SOURCE)
-        self.assertIn("No se realizarán trabajos adicionales sin autorización", SOURCE)
-        self.assertIn("navigator.share", SOURCE)
-        self.assertIn("Rango orientativo", SOURCE)
-        self.assertIn("No es un precio definitivo", SOURCE)
+        # La consulta rápida ahora vive en el módulo independiente, no en el HTML monolítico.
+        self.assertIn('id="sme-budget-quick-form"', MODULE)
+        self.assertIn('name="quickPrice"', MODULE)
+        self.assertIn('name="usePriceRange"', MODULE)
+        self.assertIn("tipo:'Orientativo'", MODULE)
+        self.assertIn("estimacionMinima:String(low)", MODULE)
+        self.assertIn("estimacionMaxima:String(requestedRange?high:low)", MODULE)
+        self.assertIn("requestedRange&&(high<low||high<=0)", MODULE)
+        self.assertIn("usarRangoPrecio:!!requestedRange", MODULE)
+        self.assertIn("No se realizarán trabajos adicionales sin autorización", MODULE)
+        self.assertIn("ctx.share(quoteTitle(q),quoteText(q))", MODULE)
+        self.assertIn("Es una referencia inicial, no un presupuesto definitivo", MODULE)
+
+
 
 
     def test_budget_module_separates_private_costs_and_permissions(self):
-        self.assertIn('data-budget-tab="quick"', SOURCE)
-        self.assertIn('data-budget-tab="formal"', SOURCE)
-        self.assertIn('data-budget-tab="costs"', SOURCE)
-        self.assertIn('data-budget-tab="records"', SOURCE)
-        self.assertIn('id="smeInternalCostForm"', SOURCE)
-        self.assertIn("permissions.presupuestosCostos", SOURCE)
-        self.assertIn("smeCan('presupuestos','costs-edit')", SOURCE)
-        self.assertIn("hours", SOURCE)
-        self.assertIn("hourlyCost", SOURCE)
-        self.assertIn("partsCost", SOURCE)
-        self.assertIn("externalCost", SOURCE)
-        self.assertIn("consumablesCost", SOURCE)
-        self.assertIn("shippingCost", SOURCE)
-        self.assertIn("overheadCost", SOURCE)
-        self.assertIn("contingencyPct", SOURCE)
-        self.assertIn("targetMarginPct", SOURCE)
-        self.assertIn("actualLaborCost", SOURCE)
-        self.assertIn("actualPartsCost", SOURCE)
-        self.assertIn("actualOtherCost", SOURCE)
-        self.assertIn("quote.analisisInterno=", SOURCE)
-        self.assertIn("historial:history.slice(-50)", SOURCE)
-        self.assertIn("parametros:Object.fromEntries(fields.map(name=>[name,String(costForm.elements[name]?.value??'')]))", SOURCE)
-        self.assertIn("estimatedCostInputs", SOURCE)
-        self.assertIn("actualComplete", SOURCE)
-        self.assertIn("El precio del presupuesto y su estado quedaron sin cambios", SOURCE)
-        self.assertIn("precio formal cambió desde el último análisis interno", SOURCE)
-        self.assertNotIn("analisisInterno", SOURCE[SOURCE.index("function displayValues("):SOURCE.index("function recordTitle(")])
+        # Las pestañas se generan desde permisos y los datos internos quedan en el módulo.
+        self.assertIn("const allowedTabs=[];", MODULE)
+        self.assertIn("allowedTabs.push(['quick','Consulta rápida'],['formal','Presupuesto formal']);", MODULE)
+        self.assertIn("allowedTabs.push(['costs','Costos internos']);", MODULE)
+        self.assertIn("allowedTabs.push(['records','Historial']);", MODULE)
+        for pane in ("quick", "formal", "costs", "records"):
+            self.assertIn('data-budget-pane="' + pane + '"', MODULE)
+        self.assertIn('id="smeInternalCostForm"', MODULE)
+        self.assertIn("const canReadCosts = can('presupuestos', 'costs');", MODULE)
+        self.assertIn("const canEditCosts = can('presupuestos', 'costs-edit');", MODULE)
+        for field in ("hours", "hourlyCost", "partsCost", "externalCost", "consumablesCost",
+                      "shippingCost", "overheadCost", "paymentFeePct", "paymentFeeFixed",
+                      "taxRatePct", "targetMarginPct"):
+            self.assertIn(field, MODULE)
+        self.assertIn("q.analisisInterno=Object.fromEntries", MODULE)
+        self.assertIn("if(!canEditCosts)return;", MODULE)
+        self.assertIn("if(!canReadCosts)return;", MODULE)
+        start = MODULE.index("const customerDocument = q =>")
+        end = MODULE.index("const buildDocumentHtml = q =>", start)
+        customer_document = MODULE[start:end]
+        for field in ("hourlyCost", "partsCost", "targetMarginPct", "paymentFeePct", "analisisInterno"):
+            self.assertNotIn(field, customer_document)
 
 
     def test_faatra_hourly_reference_is_permission_gated_and_never_sets_shop_prices(self):
