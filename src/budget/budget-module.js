@@ -318,9 +318,9 @@ export function renderBudgetModule(ctx) {
     const drawResults=()=>{
       const words=wordsFor(search.value);
       if(selected){results.innerHTML='';return}
-      if(!words.length){results.innerHTML='<p class="muted">Escribí una operación o motor para ver hasta 8 coincidencias.</p>';return}
+      if(!words.length){results.innerHTML='<p class="muted">Escribí una operación o motor para ver hasta 5 coincidencias.</p>';return}
       const matches=catalog.filter(item=>words.every(word=>searchable(item).includes(word)))
-        .sort((a,b)=>{const score=item=>words.reduce((sum,w)=>sum+(searchable(item).includes(w)?1:0),0);return score(b)-score(a)||String(a.title).localeCompare(String(b.title),'es')}).slice(0,8);
+        .sort((a,b)=>{const score=item=>words.reduce((sum,w)=>sum+(searchable(item).includes(w)?1:0),0);return score(b)-score(a)||String(a.title).localeCompare(String(b.title),'es')}).slice(0,5);
       results.innerHTML=matches.length?matches.map(item=>'<button type="button" class="sme-budget-v2-time-row" data-budget-time-select="'+esc(item.id)+'"><span><strong>'+esc(item.title)+'</strong><small>'+esc(item.family||'')+' · '+esc(item.application||'')+'</small></span><span>'+(item.suggested===null?'Sin horas':esc(String(item.min??item.suggested))+'–'+esc(String(item.max??item.suggested))+' h')+'</span></button>').join(''):'<div class="sme-budget-v2-empty">No encontré coincidencias con todos esos términos. Probá con “distribución”, “8v”, “K4M”, “tapa” o “embrague”.</div>';
       results.querySelectorAll('[data-budget-time-select]').forEach(button=>button.addEventListener('click',()=>{selectItem(catalog.find(item=>String(item.id)===String(button.dataset.budgetTimeSelect))||null);drawResults()}));
     };
