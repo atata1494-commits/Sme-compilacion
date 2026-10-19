@@ -55,6 +55,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertNotIn("data-budget-open-times", MODULE)
         self.assertIn("if(!words.length)", MODULE)
         self.assertIn("words.every(word=>searchable(item).includes(word))", MODULE)
+        self.assertIn(".slice(0,5)", MODULE)
+        self.assertIn("ver hasta 5 coincidencias", MODULE)
         self.assertIn("if(selected){results.innerHTML='';return}", MODULE)
         self.assertIn("form.elements.hoursEstimatedUsual.value=String(usual)", MODULE)
         self.assertIn("form.elements.laborAmount.value=moneyInput(usual*rate)", MODULE)
