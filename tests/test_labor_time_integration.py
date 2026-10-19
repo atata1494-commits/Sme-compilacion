@@ -203,6 +203,10 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("const repaintQuickInstallments=()=>", SOURCE)
         self.assertIn("count+' cuotas de '+smeOrientativePriceLabel(low,high)+' cada una", SOURCE)
 
+    def test_quick_installment_choices_precede_the_optional_time_estimator(self):
+        self.assertLess(SOURCE.index('id="smeQuickCommercialOptions"'), SOURCE.index('id="smeQuickLaborEstimator"'))
+        self.assertIn("Ofrecer cuotas fijas sin interés (si tu medio de pago lo permite)", SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main()
