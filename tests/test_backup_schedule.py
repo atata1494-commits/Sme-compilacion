@@ -116,6 +116,12 @@ class BackupScheduleSourceTests(unittest.TestCase):
 
     def test_manual_full_sqlite_export_is_separate_from_portable_json(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("function smeBackupPage()", SOURCE)
+        self.assertIn("data-page=\"mas\"", SOURCE)
+        self.assertIn("else if(page==='respaldos')smeBackupPage()", SOURCE)
+        self.assertIn("data-backup-panel", SOURCE)
+        self.assertIn("Copia completa del dispositivo · SQLite", SOURCE)
+        self.assertIn("Copias automáticas locales", SOURCE)
         self.assertIn("saveFullDatabaseBackup", plugin)
         self.assertIn("ACTION_CREATE_DOCUMENT", plugin)
         self.assertIn("checkpointDatabase(database)", plugin)

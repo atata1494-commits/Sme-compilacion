@@ -11,9 +11,24 @@ class SmeHomeNavigationTests(unittest.TestCase):
     def setUpClass(cls):
         cls.html = INDEX.read_text(encoding="utf-8")
 
-    def test_fixed_navigation_uses_gestion_label(self):
+    def test_fixed_navigation_uses_five_logical_sections(self):
+        self.assertIn('data-page="registros"', self.html)
+        self.assertIn('data-page="taller"', self.html)
+        self.assertIn('data-page="gestion"', self.html)
         self.assertIn('data-page="mas"', self.html)
+        self.assertIn('</span>Registros</button>', self.html)
+        self.assertIn('</span>Taller</button>', self.html)
         self.assertIn('</span>Gestión</button>', self.html)
+        self.assertIn('</span>Más</button>', self.html)
+        nav = self.html[self.html.index('<nav id="nav"'):self.html.index('</nav>', self.html.index('<nav id="nav"'))]
+        self.assertEqual(nav.count('data-page='), 5)
+
+    def test_records_workshop_and_management_have_separate_hubs(self):
+        for hub in ("Registros", "Taller", "Gestión"):
+            self.assertIn("smeRenderHubPage('" + hub + "'", self.html)
+        self.assertIn("if(key==='registros')return ['clientes','vehiculos','trabajos'].some", self.html)
+        self.assertIn("if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some", self.html)
+        self.assertIn("function smeHub", self.html)
 
     def test_dashboard_is_asymmetric_and_can_leave_space_empty(self):
         self.assertIn("home-layout", self.html)
@@ -37,7 +52,9 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("const candidates=[", self.html)
         self.assertIn("].filter(item=>smeCan(item.key,'view'));", self.html)
         self.assertIn("if(steps.length>=4)break;", self.html)
-        self.assertIn("key:'gestion',page:'mas',title:'Gestión: herramientas según tus permisos'", self.html)
+        self.assertIn("key:'mas',page:'mas',title:'Más: permisos y respaldos'", self.html)
+        self.assertIn("page:'taller'", self.html)
+        self.assertIn("page:'gestion'", self.html)
         self.assertIn("return steps.slice(0,5)", self.html)
         self.assertIn("const workAccess=smeCan('trabajos','view')", self.html)
         self.assertIn("title:'Inicio: lo principal del día'", self.html)
@@ -219,6 +236,21 @@ class SmeHomeNavigationTests(unittest.TestCase):
             self.assertIn(key + ":[", help_function)
         self.assertIn("permisos", help_function)
         self.assertIn("Solo el administrador principal", help_function)
+
+
+    def test_hubs_obey_module_permissions_and_backup_restore_permissions(self):
+        self.assertIn("if(key==='gestion')return ['presupuestos','tiempos','caja','cuentas','agenda'].some", self.html)
+        self.assertIn("if(key==='respaldos')return smeCanBackup(action);", self.html)
+        self.assertIn("key==='mas'&&(smeCan('usuarios','view')||smeCanBackup('view'))", self.html)
+        self.assertIn("if(restoreDatabaseButton&&!smeCanBackup('edit'))restoreDatabaseButton.hidden=true", self.html)
+
+    def test_backup_types_explain_portable_merge_and_full_restore(self):
+        self.assertIn("La importación JSON combina registros nuevos y no reemplaza los existentes.", self.html)
+        self.assertIn("restaurar esta copia sustituye la base de datos actual", self.html)
+        self.assertIn("Exportar respaldo JSON", self.html)
+        self.assertIn("Exportar copia completa SQLite (.db)", self.html)
+        self.assertIn("Restaurar copia completa (.db)", self.html)
+        self.assertIn("hasta 7 copias diarias y 60 mensuales", self.html)
 
 
 if __name__ == "__main__":

@@ -205,12 +205,12 @@ form button{margin-top:10px;width:100%}
 <body>
 <header><div class="header-inner"><img class="brand-logo" src="./logo.svg" alt="Emblema de Servicios Mecánicos Enzo"><div class="header-copy"><div class="brand">Sistema de gestión</div><h1 class="title">Servicios Mecánicos Enzo</h1><div class="subtitle">El oficio de siempre, al servicio de hoy.</div></div><button type="button" id="smeHelpButton" aria-label="Ayuda de SME" title="Ayuda">?</button></div></header>
 <main id="app"></main>
-<nav id="nav">
+<nav id="nav" aria-label="Navegación principal">
 <button class="active" data-page="inicio"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V21h13V9.5M9.5 21v-7h5v7"/></svg></span>Inicio</button>
-<button data-page="clientes"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6" r="3"/><path d="M8.5 10.5c-2.5 1.4-4 4.2-4 7.5v1h15v-1c0-3.3-1.5-6.1-4-7.5M5 22h14"/></svg></span>Clientes</button>
-<button data-page="vehiculos"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 11 2-5h10l2 5M3.5 11h17v7h-17zM6 18v2M18 18v2"/><circle cx="7" cy="15" r="1"/><circle cx="17" cy="15" r="1"/></svg></span>Vehículos</button>
-<button data-page="trabajos"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.2a5 5 0 0 0-6.4 6.4L3 17.7 6.3 21l5.2-5.1a5 5 0 0 0 6.4-6.4l-3.3 3.2-3.2-3.2z"/></svg></span>Trabajos</button>
-<button data-page="mas"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Gestión</button>
+<button data-page="registros"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="13" height="16" rx="1.5"/><path d="M8 8h5M8 12h5M8 16h5M17 8h3v12H8"/></svg></span>Registros</button>
+<button data-page="taller"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.2a5 5 0 0 0-6.4 6.4L3 17.7 6.3 21l5.2-5.1a5 5 0 0 0 6.4-6.4l-3.3 3.2-3.2-3.2z"/></svg></span>Taller</button>
+<button data-page="gestion"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h3M8 16h6"/></svg></span>Gestión</button>
+<button data-page="mas"><span class="nav-symbol"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Más</button>
 </nav>
 <script type="module">
 import { openSMEStorage } from './src/storage/sqlite-store.js';
@@ -751,10 +751,21 @@ function gastoPage(){
  }));
 }
 
+function smeRenderHubPage(title,intro,groups,extra=''){
+ app.innerHTML='<h2 class="section-title">'+esc(title)+'</h2><p class="muted">'+esc(intro)+'</p>'+
+  groups.map(group=>'<section class="more-group"><h3 class="more-section-title">'+esc(group.title)+'</h3><p class="more-section-subtitle">'+esc(group.subtitle)+'</p><div class="cards">'+group.tiles.map(item=>tile(item[0],item[1],item[2],item[3])).join('')+'</div></section>').join('')+extra;
+}
+function smeBackupPage(){
+ app.innerHTML='<h2 class="section-title">Respaldos y restauración</h2><p class="muted">Herramientas para proteger los datos del taller y recuperarlos en un cambio de teléfono o una reinstalación. Revisá qué tipo de copia necesitás antes de importar o restaurar.</p>'+
+ '<section class="more-group"><h3 class="more-section-title">Respaldo portable · JSON</h3><p class="more-section-subtitle">Para guardar una copia transportable o incorporar datos desde otro respaldo. La importación JSON combina registros nuevos y no reemplaza los existentes.</p><div class="panel" data-backup-panel><div class="quick"><button id="backup">Exportar respaldo JSON</button><button class="secondary" id="restoreBtn">Importar respaldo JSON</button></div><input id="restoreFile" type="file" accept="application/json" hidden><p class="muted">Incluye los registros y los metadatos protegidos de la cuenta propietaria necesarios para recuperación. Nunca incluye la contraseña en texto plano. Guardá el archivo en un lugar privado.</p></div></section>'+
+ '<section class="more-group"><h3 class="more-section-title">Copia completa del dispositivo · SQLite</h3><p class="more-section-subtitle">Para una recuperación integral. A diferencia de JSON, restaurar esta copia sustituye la base de datos actual.</p><div class="panel" data-backup-panel><p class="muted">La copia completa valida la integridad de SQLite, las tablas, los registros y la huella de los adjuntos. Antes de reemplazar la base, SME conserva una copia interna de seguridad y solicita confirmación del administrador principal.</p>'+(storage?.isNative?'<div class="quick"><button id="backupFullDatabaseBtn">Exportar copia completa SQLite (.db)</button><button class="secondary" id="restoreDatabaseBtn">Restaurar copia completa (.db)</button></div>':'<p class="muted">La copia completa SQLite está disponible en la aplicación Android instalada.</p>')+'</div></section>'+
+ '<section class="more-group"><h3 class="more-section-title">Copias automáticas locales</h3><p class="muted">SME mantiene respaldos internos diarios y mensuales en el dispositivo cuando las tareas de respaldo están disponibles. Conserva hasta 7 copias diarias y 60 mensuales. Estas copias ayudan ante errores de la aplicación, pero no protegen si se pierde el teléfono: exportá periódicamente una copia portable y guardala fuera del dispositivo.</p></section>';
+}
 function render(){
  smeRememberCurrentPage();
- if(page!=='inicio'&&page!=='mas'&&!smeCan(page,'view')){page='inicio';}
- document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||(['agenda','caja','cuentas','presupuestos','tiempos','recepciones','diagnosticos','usuarios','asistencias','terceros','tareas','avisos','gastos'].includes(page)&&b.dataset.page==='mas')));
+ if(page!=='inicio'&&!smeCan(page,'view')){page='inicio';}
+ const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas'};
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||navGroupByPage[page]===b.dataset.page));
  if(page==='inicio'){renderDashboard()}
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
  else if(page==='vehiculos') listPage('Vehículos','vehiculos',[['patente','Patente','text'],['marca','Marca','text'],['modelo','Modelo','text'],['anio','Año','number'],['clienteId','Propietario / empresa','customer'],['kilometros','Kilometraje','text'],['notas','Notas del vehículo','textarea']],'Agregar vehículo');
@@ -772,7 +783,22 @@ function render(){
  else if(page==='avisos') avisoPage();
  else if(page==='gastos') gastoPage();
  else if(page==='tiempos') smeLaborTimesPage();
- else if(page==='mas'){app.innerHTML='<h2 class="section-title">Gestión</h2><p class="muted">Herramientas organizadas por tema. Vas directamente a cada función según tus permisos.</p><section class="more-group"><h3 class="more-section-title">Operación del taller</h3><p class="more-section-subtitle">Ingreso e inspección técnica de los vehículos.</p><div class="cards">'+tile('🚘','Recepción','Ingreso e inspección inicial','recepciones')+tile('🧰','Diagnóstico técnico','Inspección por sistemas','diagnosticos')+'</div></section><section class="more-group"><h3 class="more-section-title">Administración</h3><p class="more-section-subtitle">Presupuestos, movimientos, turnos y respaldos.</p><div class="cards">'+tile('🧾','Presupuestos','Cotizaciones','presupuestos')+tile('⏱','Tiempos de mano de obra','Referencias orientativas para presupuestar','tiempos')+tile('▤','Caja','Ingresos y egresos','caja')+tile('📅','Agenda','Turnos y recordatorios','agenda')+tile('↔','Cuentas corrientes y deudas','Lo que te deben y lo que debés','cuentas')+tile('👥','Usuarios y permisos','Administrar cuentas y accesos','usuarios')+tile('🕒','Control horario','Entradas, salidas y alertas','asistencias')+tile('🧰','Terceros y trabajos externos','Proveedores, permanencia y costos','terceros')+'</div></section>'+smeFaatraReferenceCardMarkup()+'<section class="more-group"><h3 class="more-section-title">Coordinación interna</h3><p class="more-section-subtitle">Organizá el trabajo, comunicá problemas y registrá gastos que requieren autorización.</p><div class="cards">'+tile('☑','Tareas del equipo','Asignación, avances y pendientes','tareas')+tile('⚑','Avisos internos','Faltantes, roturas y necesidades','avisos')+tile('▤','Autorizaciones de gastos','Solicitudes, aprobación y rendición','gastos')+'</div></section><div class="panel"><strong>Respaldo local</strong><p class="muted">El respaldo incluye datos del taller y la información protegida necesaria para recuperar la cuenta dueña en una reinstalación. Guardalo en un lugar privado; nunca incluye tu contraseña en texto plano. La importación JSON agrega registros nuevos; no borra ni reemplaza los existentes.</p><div class="quick"><button id="backup">Exportar respaldo JSON</button><button class="secondary" id="backupFullDatabaseBtn">Exportar copia completa SQLite (.db)</button><button class="secondary" id="restoreBtn">Importar respaldo JSON</button>'+(storage?.isNative?'<button class="secondary" id="restoreDatabaseBtn">Restaurar copia completa (.db)</button>':'')+'</div><input id="restoreFile" type="file" accept="application/json" hidden><p class="muted">La restauración completa valida la integridad de SQLite, las tablas, los registros y la huella de los adjuntos. Antes de sustituir la base, conserva una copia interna de seguridad de la base actual.</p></div></section>'}
+ else if(page==='registros')smeRenderHubPage('Registros','La información principal del taller queda agrupada acá: personas, vehículos y órdenes de trabajo.',[
+ {title:'Personas y vehículos',subtitle:'Primero identificá al cliente y su vehículo para mantener los antecedentes vinculados.',tiles:[['👥','Clientes','Personas y empresas','clientes'],['🚘','Vehículos','Patentes, modelos y propietarios','vehiculos']]},
+ {title:'Órdenes de trabajo',subtitle:'Registrá el ingreso, el pedido y el estado del trabajo asociado al vehículo.',tiles:[['🔧','Trabajos y órdenes','Consultar, crear y actualizar órdenes','trabajos']]}
+]);
+else if(page==='taller')smeRenderHubPage('Taller','Ingreso, diagnóstico y coordinación cotidiana del equipo.',[
+ {title:'Ingreso y diagnóstico',subtitle:'Recepción e inspección técnica del vehículo.',tiles:[['🚘','Recepción','Ingreso e inspección inicial','recepciones'],['🧰','Diagnóstico técnico','Inspección por sistemas','diagnosticos']]},
+ {title:'Seguimiento del trabajo',subtitle:'Coordinación interna y trabajos derivados.',tiles:[['☑','Tareas del equipo','Asignaciones, avances y pendientes','tareas'],['⚑','Avisos internos','Faltantes, roturas y necesidades','avisos'],['🕒','Control horario','Entradas, salidas y alertas','asistencias'],['🧰','Terceros y trabajos externos','Proveedores, permanencia y costos','terceros'],['▤','Autorizaciones de gastos','Solicitudes, aprobación y rendición','gastos']]}
+]);
+else if(page==='gestion')smeRenderHubPage('Gestión','Presupuestos, finanzas y planificación económica del taller.',[
+ {title:'Presupuestos y mano de obra',subtitle:'Prepará cotizaciones y consultá referencias antes de decidir las horas y tarifas.',tiles:[['🧾','Presupuestos','Cotizaciones y seguimiento','presupuestos'],['⏱','Tiempos de mano de obra','Promedios y referencias orientativas','tiempos']]},
+ {title:'Finanzas y organización',subtitle:'Movimientos, cuentas pendientes y turnos.',tiles:[['▤','Caja','Ingresos y egresos','caja'],['↔','Cuentas corrientes y deudas','Lo que te deben y lo que debés','cuentas'],['📅','Agenda','Turnos y recordatorios','agenda']]}
+],smeFaatraReferenceCardMarkup());
+else if(page==='mas')smeRenderHubPage('Más','Herramientas de acceso y seguridad que no hace falta mostrar en la barra principal.',[
+ {title:'Usuarios y datos',subtitle:'Administración de accesos y protección de la información.',tiles:[['👥','Usuarios y permisos','Administrar cuentas y accesos','usuarios'],['▤','Respaldos y restauración','Exportar, importar y recuperar datos','respaldos']]}
+]);
+else if(page==='respaldos')smeBackupPage();
  smeApplyPermissions();
  smeRestoreFormDrafts();
 }
@@ -2014,6 +2040,10 @@ function smeCan(key,action='view'){
  if(!smeAuthenticated||!smeCurrentUser)return false;
  key=smeModuleKey(key);
  if(key==='inicio'||key==='mas')return true;
+ if(key==='registros')return ['clientes','vehiculos','trabajos'].some(module=>smeCan(module,action));
+ if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,action));
+ if(key==='gestion')return ['presupuestos','tiempos','caja','cuentas','agenda'].some(module=>smeCan(module,action))||smeCanSeeFaatraReference();
+ if(key==='respaldos')return smeCanBackup(action);
  if(key==='asistencias')return action==='view'||!!smeCurrentUser.isPrimary;
  if(key==='terceros'){if(smeCurrentUser.isPrimary)return true;const level=smeCurrentUser.permissions&&smeCurrentUser.permissions[key]||'none';return action==='edit'?level==='edit':level==='view'||level==='edit';}
  if(key==='usuarios')return !!smeCurrentUser.isPrimary;
@@ -2068,7 +2098,12 @@ function smeApplyPermissions(){
  if(!smeAuthenticated||!smeCurrentUser)return;
  document.querySelectorAll('#nav button[data-page]').forEach(button=>{
   const key=button.dataset.page;
-  button.hidden=key!=='inicio'&&key!=='mas'&&!smeCan(key,'view');
+  const visible=key==='inicio'
+   ||(key==='registros'&&['clientes','vehiculos','trabajos'].some(module=>smeCan(module,'view')))
+   ||(key==='taller'&&['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,'view')))
+   ||(key==='gestion'&&(['presupuestos','tiempos','caja','cuentas','agenda'].some(module=>smeCan(module,'view'))||smeCanSeeFaatraReference()))
+   ||(key==='mas'&&(smeCan('usuarios','view')||smeCanBackup('view')));
+  button.hidden=!visible;
  });
  document.querySelectorAll('[data-go]').forEach(button=>{
   if(!smeCan(button.dataset.go,'view'))button.hidden=true;
@@ -2085,15 +2120,17 @@ function smeApplyPermissions(){
   });
   document.querySelectorAll('[data-edit],[data-delete],[data-edit-reception],[data-delete-reception],[data-create-work],[data-edit-diagnosis],[data-delete-diagnosis],[data-account-edit],[data-account-delete],[data-account-payment],[data-pay-toggle],[data-task-action],[data-aviso-action],[data-gasto-action]').forEach(button=>button.hidden=true);
  }
+ document.querySelectorAll('[data-backup-panel]').forEach(panel=>{panel.hidden=!smeCanBackup('view')});
  const backupButton=document.getElementById('backup');
- if(backupButton&&!smeCanBackup('view')){
-  const panel=backupButton.closest('.panel');
-  if(panel)panel.hidden=true;
- }
+ if(backupButton&&!smeCanBackup('view'))backupButton.hidden=true;
+ const fullBackupButton=document.getElementById('backupFullDatabaseBtn');
+ if(fullBackupButton&&!smeCanBackup('view'))fullBackupButton.hidden=true;
  const restoreButton=document.getElementById('restoreBtn');
+ const restoreDatabaseButton=document.getElementById('restoreDatabaseBtn');
  const restoreInput=document.getElementById('restoreFile');
  if(restoreInput)restoreInput.oncancel=()=>smeFinishFilePicker();
  if(restoreButton&&!smeCanBackup('edit'))restoreButton.hidden=true;
+ if(restoreDatabaseButton&&!smeCanBackup('edit'))restoreDatabaseButton.hidden=true;
  if(restoreInput&&!smeCanBackup('edit'))restoreInput.hidden=true;
  smeRenderFaatraUpdateNotice();
 }
@@ -2719,7 +2756,11 @@ function smeCloseInfoDialog(){document.querySelectorAll('.sme-info-overlay').for
 function smeShowInfoDialog(title,body,primaryLabel='Entendido',secondaryLabel=''){
  smeCloseInfoDialog();const overlay=document.createElement('div');overlay.className='sme-info-overlay';overlay.innerHTML='<section class="sme-info-dialog" role="dialog" aria-modal="true" aria-labelledby="smeInfoTitle"><h2 id="smeInfoTitle">'+esc(title)+'</h2>'+body+'<div class="sme-info-actions">'+(secondaryLabel?'<button type="button" class="secondary" data-info-secondary>'+esc(secondaryLabel)+'</button>':'')+'<button type="button" class="accent" data-info-primary>'+esc(primaryLabel)+'</button></div></section>';document.body.appendChild(overlay);overlay.addEventListener('click',e=>{if(e.target===overlay||e.target.closest('[data-info-primary]')||e.target.closest('[data-info-secondary]'))overlay.remove()});
 }
-function smeShowContextHelp(){const map={inicio:['Inicio','Acá encontrás un resumen del taller y los accesos habilitados para tu puesto. Los avisos y pendientes importantes aparecen cuando corresponden.'],clientes:['Clientes','Buscá una persona o empresa y revisá sus datos antes de guardar cambios. Desde un registro podés abrir los vehículos y trabajos relacionados, siempre que tu cuenta tenga permiso.'],vehiculos:['Vehículos','Cada vehículo se vincula con su propietario y puede tener órdenes, presupuestos y antecedentes relacionados. Revisá la patente y los datos identificatorios para evitar duplicados.'],trabajos:['Órdenes de trabajo','La orden reúne el vehículo, el trabajo solicitado, el diagnóstico, el responsable y el estado. Actualizá solo los datos que correspondan a tu tarea y a tus permisos.'],presupuestos:['Presupuestos','Registrá los conceptos y sus importes con cuidado y revisá el total antes de compartirlo. Crear o modificar presupuestos requiere el permiso correspondiente.'],caja:['Caja y movimientos','Usá esta sección únicamente si tu puesto tiene permiso. Diferenciá ingresos y egresos, verificá fecha e importe y no registres un movimiento si no podés respaldarlo.'],cuentas:['Cuentas corrientes','Consultá saldos y movimientos de cuenta según los permisos de tu usuario. Verificá cliente, concepto e importe antes de registrar ajustes.'],agenda:['Agenda','Revisá las fechas y horarios antes de crear o modificar una cita. Confirmá a qué cliente o vehículo corresponde y avisá si necesitás reprogramar.'],recepciones:['Recepciones','Al recibir un vehículo, registrá los datos observados y el motivo de ingreso con claridad. Confirmá el vehículo y el cliente para evitar asociar la recepción al registro equivocado.'],diagnosticos:['Diagnósticos','Dejá asentados síntomas, comprobaciones, mediciones y conclusiones de forma clara. Separá lo observado de lo que todavía falta verificar.'],terceros:['Terceros y trabajos externos','Usá esta sección para documentar trabajos derivados o realizados por proveedores autorizados. Registrá responsable, concepto e importes solo cuando tengas la información confirmada.'],tareas:['Tareas del equipo','Consultá las tareas disponibles para tu puesto, su prioridad y sus plazos. Actualizá el avance si tenés permiso; si algo impide continuar, comunicalo mediante el canal habilitado.'],avisos:['Avisos internos','Comunicá faltantes, roturas, riesgos o asuntos que necesitan conocimiento del equipo. Elegí la categoría y prioridad con cuidado, y asigná responsables solo si corresponde.'],asistencias:['Control horario','Registrá tu jornada según el procedimiento del taller. Si una marca es incorrecta o falta una, informalo al responsable; no registres una asistencia por otra persona.'],gastos:['Autorizaciones de gastos','Antes de solicitar o autorizar un gasto, indicá el motivo y el importe estimado. Una solicitud no significa que el gasto ya esté aprobado; verificá el estado antes de avanzar.'],usuarios:['Usuarios y permisos','Cada persona debe usar su propia cuenta. Solo el administrador principal debe crear usuarios y ajustar permisos. Otorgá únicamente los accesos necesarios para las tareas del puesto.'],mas:['Gestión','Las herramientas están agrupadas por función y solo deberían usarse las acciones habilitadas para tu cuenta. Los datos financieros y administrativos requieren permisos específicos.']};const item=map[page]||['Ayuda de SME','Consultá esta ayuda para orientarte. Las acciones disponibles dependen de los permisos de tu cuenta; si necesitás una función que no aparece, consultá al administrador.'];smeShowInfoDialog(item[0],'<p>'+esc(item[1])+'</p>'+(page==='mas'?'<p>Administración: presupuestos, caja y cuentas. Coordinación: tareas, avisos y gastos. Herramientas del taller: recepción y diagnóstico.</p>':''))}
+function smeShowContextHelp(){const map={inicio:['Inicio','Acá encontrás un resumen del taller y los accesos habilitados para tu puesto. Los avisos y pendientes importantes aparecen cuando corresponden.'],clientes:['Clientes','Buscá una persona o empresa y revisá sus datos antes de guardar cambios. Desde un registro podés abrir los vehículos y trabajos relacionados, siempre que tu cuenta tenga permiso.'],vehiculos:['Vehículos','Cada vehículo se vincula con su propietario y puede tener órdenes, presupuestos y antecedentes relacionados. Revisá la patente y los datos identificatorios para evitar duplicados.'],trabajos:['Órdenes de trabajo','La orden reúne el vehículo, el trabajo solicitado, el diagnóstico, el responsable y el estado. Actualizá solo los datos que correspondan a tu tarea y a tus permisos.'],presupuestos:['Presupuestos','Registrá los conceptos y sus importes con cuidado y revisá el total antes de compartirlo. Crear o modificar presupuestos requiere el permiso correspondiente.'],caja:['Caja y movimientos','Usá esta sección únicamente si tu puesto tiene permiso. Diferenciá ingresos y egresos, verificá fecha e importe y no registres un movimiento si no podés respaldarlo.'],cuentas:['Cuentas corrientes','Consultá saldos y movimientos de cuenta según los permisos de tu usuario. Verificá cliente, concepto e importe antes de registrar ajustes.'],agenda:['Agenda','Revisá las fechas y horarios antes de crear o modificar una cita. Confirmá a qué cliente o vehículo corresponde y avisá si necesitás reprogramar.'],recepciones:['Recepciones','Al recibir un vehículo, registrá los datos observados y el motivo de ingreso con claridad. Confirmá el vehículo y el cliente para evitar asociar la recepción al registro equivocado.'],diagnosticos:['Diagnósticos','Dejá asentados síntomas, comprobaciones, mediciones y conclusiones de forma clara. Separá lo observado de lo que todavía falta verificar.'],terceros:['Terceros y trabajos externos','Usá esta sección para documentar trabajos derivados o realizados por proveedores autorizados. Registrá responsable, concepto e importes solo cuando tengas la información confirmada.'],tareas:['Tareas del equipo','Consultá las tareas disponibles para tu puesto, su prioridad y sus plazos. Actualizá el avance si tenés permiso; si algo impide continuar, comunicalo mediante el canal habilitado.'],avisos:['Avisos internos','Comunicá faltantes, roturas, riesgos o asuntos que necesitan conocimiento del equipo. Elegí la categoría y prioridad con cuidado, y asigná responsables solo si corresponde.'],asistencias:['Control horario','Registrá tu jornada según el procedimiento del taller. Si una marca es incorrecta o falta una, informalo al responsable; no registres una asistencia por otra persona.'],gastos:['Autorizaciones de gastos','Antes de solicitar o autorizar un gasto, indicá el motivo y el importe estimado. Una solicitud no significa que el gasto ya esté aprobado; verificá el estado antes de avanzar.'],usuarios:['Usuarios y permisos','Cada persona debe usar su propia cuenta. Solo el administrador principal debe crear usuarios y ajustar permisos. Otorgá únicamente los accesos necesarios para las tareas del puesto.'],registros:['Registros','Clientes, vehículos y órdenes de trabajo están juntos para que puedas ir de la persona al vehículo y al trabajo relacionado sin llenar una sola pantalla de tarjetas.'],
+taller:['Taller','Recepción, diagnóstico y coordinación diaria del equipo están agrupados en esta sección. Cada acción sigue respetando los permisos de tu cuenta.'],
+gestion:['Gestión','Presupuestos, caja, cuentas corrientes, agenda y tiempos de mano de obra están agrupados acá; la tarifa la decide el taller y las referencias no cambian precios automáticamente.'],
+mas:['Más','Usuarios y respaldos quedan en una zona separada para que no ocupen espacio en las secciones de uso diario. La restauración completa requiere autorización del administrador principal.'],
+respaldos:['Respaldos y restauración','Usá JSON para una copia transportable que combina registros nuevos. Usá SQLite para una recuperación integral: restaurar esta copia reemplaza la base actual después de una validación y confirmación del administrador principal. Guardá una copia fuera del teléfono.']};const item=map[page]||['Ayuda de SME','Consultá esta ayuda para orientarte. Las acciones disponibles dependen de los permisos de tu cuenta; si necesitás una función que no aparece, consultá al administrador.'];smeShowInfoDialog(item[0],'<p>'+esc(item[1])+'</p>'+(page==='mas'?'<p>Administración: presupuestos, caja y cuentas. Coordinación: tareas, avisos y gastos. Herramientas del taller: recepción y diagnóstico.</p>':''))}
 function smeWelcomeKey(){return 'sme_welcome_state_v3_'+String(smeCurrentUser?.id||smeCurrentUser?.username||'usuario')}
 function smeReadWelcomeState(){try{return JSON.parse(localStorage.getItem(smeWelcomeKey())||'{}')}catch(_){return {}}}
 function smeWriteWelcomeState(state){try{localStorage.setItem(smeWelcomeKey(),JSON.stringify(state))}catch(_){}}
@@ -2739,17 +2780,17 @@ function smeCloseVisualTour(){
 }
 function smeBuildVisualTour(){
  const candidates=[
-  {key:'tareas',label:'Tareas',page:'mas',title:'Tareas',text:'Consultá las tareas que tenés asignadas y revisá qué queda pendiente.'},
-  {key:'asistencias',label:'Control horario',page:'mas',title:'Control horario',text:'Consultá los registros horarios y, según tus permisos, revisá fichajes y alertas del equipo.'},
-  {key:'recepciones',label:'Recepción',page:'mas',title:'Recepción',text:'Consultá o registrá la recepción de vehículos según las acciones autorizadas.'},
-  {key:'diagnosticos',label:'Diagnósticos',page:'mas',title:'Diagnósticos',text:'Revisá los diagnósticos que tu cuenta puede consultar o registrar.'},
-  {key:'presupuestos',label:'Presupuestos',page:'mas',title:'Presupuestos',text:'Consultá o prepará presupuestos según los permisos de tu cuenta.'},
-  {key:'agenda',label:'Agenda',page:'mas',title:'Agenda',text:'Consultá los turnos y recordatorios disponibles para tu cuenta.'},
-  {key:'avisos',label:'Avisos internos',page:'mas',title:'Avisos internos',text:'Revisá faltantes, roturas, demoras y avisos habilitados para tu cuenta.'},
-  {key:'caja',label:'Caja',page:'mas',title:'Caja',text:'Consultá los ingresos y egresos si tenés acceso a este módulo.'},
-  {key:'cuentas',label:'Cuentas corrientes',page:'mas',title:'Cuentas corrientes',text:'Consultá los saldos pendientes y las deudas habilitadas para tu cuenta.'},
-  {key:'terceros',label:'Trabajos externos',page:'mas',title:'Trabajos externos',text:'Consultá proveedores, permanencias y costos externos autorizados.'},
-  {key:'gastos',label:'Autorizaciones de gastos',page:'mas',title:'Autorizaciones de gastos',text:'Revisá los gastos que requieren autorización si esta función está habilitada.'}
+  {key:'tareas',label:'Tareas',page:'taller',title:'Tareas',text:'Consultá las tareas que tenés asignadas y revisá qué queda pendiente.'},
+  {key:'asistencias',label:'Control horario',page:'taller',title:'Control horario',text:'Consultá los registros horarios y, según tus permisos, revisá fichajes y alertas del equipo.'},
+  {key:'recepciones',label:'Recepción',page:'taller',title:'Recepción',text:'Consultá o registrá la recepción de vehículos según las acciones autorizadas.'},
+  {key:'diagnosticos',label:'Diagnósticos',page:'taller',title:'Diagnósticos',text:'Revisá los diagnósticos que tu cuenta puede consultar o registrar.'},
+  {key:'presupuestos',label:'Presupuestos',page:'gestion',title:'Presupuestos',text:'Consultá o prepará presupuestos según los permisos de tu cuenta.'},
+  {key:'agenda',label:'Agenda',page:'gestion',title:'Agenda',text:'Consultá los turnos y recordatorios disponibles para tu cuenta.'},
+  {key:'avisos',label:'Avisos internos',page:'taller',title:'Avisos internos',text:'Revisá faltantes, roturas, demoras y avisos habilitados para tu cuenta.'},
+  {key:'caja',label:'Caja',page:'gestion',title:'Caja',text:'Consultá los ingresos y egresos si tenés acceso a este módulo.'},
+  {key:'cuentas',label:'Cuentas corrientes',page:'gestion',title:'Cuentas corrientes',text:'Consultá los saldos pendientes y las deudas habilitadas para tu cuenta.'},
+  {key:'terceros',label:'Trabajos externos',page:'taller',title:'Trabajos externos',text:'Consultá proveedores, permanencias y costos externos autorizados.'},
+  {key:'gastos',label:'Autorizaciones de gastos',page:'taller',title:'Autorizaciones de gastos',text:'Revisá los gastos que requieren autorización si esta función está habilitada.'}
  ].filter(item=>smeCan(item.key,'view'));
  const byKey=key=>candidates.find(item=>item.key===key);
  const steps=[{
@@ -2760,7 +2801,7 @@ function smeBuildVisualTour(){
  const workAccess=smeCan('trabajos','view');
  const usedKeys=new Set(['inicio']);
  if(workAccess){steps.push({key:'trabajos',page:'trabajos',title:'Trabajos y órdenes',text:'Consultá y continuá las órdenes del taller que tu cuenta tiene autorizadas.',selectors:['#app .section-title','#nav [data-page="trabajos"]']});usedKeys.add('trabajos')}
- // Los primeros pasos explican funciones cotidianas; se reserva el último para Gestión.
+ // Los primeros pasos explican funciones cotidianas; el cierre presenta Más, donde quedan permisos y respaldos.
  const individualPriority=['tareas','asistencias','recepciones','diagnosticos','presupuestos','agenda','avisos','caja','cuentas','terceros','gastos'];
  for(const key of individualPriority){
   if(steps.length>=4)break;
@@ -2769,13 +2810,12 @@ function smeBuildVisualTour(){
   steps.push({key:item.key,page:item.page,title:item.title,text:item.text,selectors:['#app [data-go="'+item.key+'"]']});
   usedKeys.add(key);
  }
- const managementPriority=['avisos','caja','cuentas','gastos','terceros','presupuestos','agenda','recepciones','diagnosticos','asistencias','tareas'];
- const managementTargets=managementPriority.map(byKey).filter(Boolean).filter(item=>!usedKeys.has(item.key)).slice(0,3);
- if(managementTargets.length){
+ const canShowMore=smeCan('usuarios','view')||smeCanBackup('view');
+ if(canShowMore&&steps.length<5){
   steps.push({
-   key:'gestion',page:'mas',title:'Gestión: herramientas según tus permisos',
-   text:'En Gestión encontrás las funciones habilitadas para tu cuenta. Los puntos iluminados muestran accesos útiles; lo que no tenés permitido no aparece en este recorrido.',
-   selectors:managementTargets.map(item=>'#app [data-go="'+item.key+'"]')
+   key:'mas',page:'mas',title:'Más: permisos y respaldos',
+   text:'En Más están la administración de cuentas y los respaldos. La restauración completa está reservada al administrador principal, y las opciones visibles dependen de los permisos de tu cuenta.',
+   selectors:['#app [data-go="usuarios"]','#app [data-go="respaldos"]']
   });
  }
  return steps.slice(0,5);
