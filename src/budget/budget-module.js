@@ -18,6 +18,7 @@ export function renderBudgetModule(ctx) {
   };
   const money = value => new Intl.NumberFormat('es-AR', {minimumFractionDigits:0, maximumFractionDigits:2}).format(Number(value) || 0);
   const moneyInput = value => {
+    if (String(value ?? '').trim() === '') return '';
     const n = parseMoney(value);
     if (!Number.isFinite(n)) return '';
     const parts = Math.abs(n).toFixed(2).replace(/0+$/, '').replace(/\.$/, '').split('.');
