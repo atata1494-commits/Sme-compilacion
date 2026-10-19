@@ -78,7 +78,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
     def test_grouped_average_clutch_catalog_covers_sedan_and_two_pickup_groups(self):
         self.assertIn("id:'clutch-sedan'", SHELL)
         self.assertIn("id:'clutch-pickup-4x2'", SHELL)
-        self.assertIn("id:'clutch-pickup-4x4', SHELL)
+        self.assertIn("id:'clutch-pickup-4x4'", SHELL)
 
     def test_more_everyday_grouped_jobs_have_reference_hours(self):
         for entry in ("oil-pan-gasket", "head-bench", "brakes-discs-pads", "rear-drum-brakes", "fuel-pump"):
