@@ -868,8 +868,17 @@ function fieldHTML(key,name,label,type,value){
  return '<label>'+label+'<input name="'+name+'" type="'+(isMoney?'text':type)+'" '+(isMoney?'inputmode="numeric" autocomplete="off"':'')+' value="'+esc(v||(type==='date'?todayLocal():type==='time'&&name==='hora'?new Date().toTimeString().slice(0,5):name==='cuotas'?'1':''))+'" '+(['patente','nombre','fecha','titulo','concepto'].includes(name)?'required':'')+' '+(type==='number'&&!isMoney?'min="0" step="0.01"':'')+'></label>';
 }
 function parseMoneyInput(value){const raw=String(value??'').trim().replace(/\s/g,'');if(!raw)return 0;let normalized=raw;if(normalized.includes(',')){normalized=normalized.replace(/\./g,'').replace(',','.')}else{normalized=normalized.replace(/\./g,'')}const n=Number(normalized);return Number.isFinite(n)?n:0}
-function formatMoneyInput(value){const n=parseMoneyInput(value);return new Intl.NumberFormat('es-AR',{maximumFractionDigits:2}).format(n)}
-function formatMoneyWhileTyping(value){const raw=String(value??'').replace(/[^0-9,]/g,'');if(!raw)return '';const hasComma=raw.includes(',');const parts=raw.split(',');const integerDigits=(parts.shift()||'').replace(/\D/g,'');const fractionDigits=parts.join('').replace(/\D/g,'').slice(0,2);const integer=integerDigits?new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(Number(integerDigits)):'';return hasComma?integer+','+fractionDigits:integer}
+function formatMoneyInput(value){
+ const n=parseMoneyInput(value);if(!Number.isFinite(n))return '';
+ const fixed=Math.abs(n).toFixed(2),parts=fixed.split('.'),integer=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'),fraction=parts[1].replace(/0+$/,'');
+ return (n<0?'-':'')+integer+(fraction?','+fraction:'');
+}
+function formatMoneyWhileTyping(value){
+ const raw=String(value??'').replace(/[^0-9,]/g,'');if(!raw)return '';
+ const hasComma=raw.includes(','),parts=raw.split(','),integerDigits=(parts.shift()||'').replace(/\D/g,''),fractionDigits=parts.join('').replace(/\D/g,'').slice(0,2);
+ const integer=integerDigits.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+ return hasComma?integer+','+fractionDigits:integer;
+}
 function bindMoneyInput(input){if(!input||input.readOnly||input.dataset.moneyBound)return;input.type='text';input.inputMode='numeric';input.autocomplete='off';input.dataset.moneyBound='1';input.value=input.value?formatMoneyInput(input.value):'';input.addEventListener('input',()=>{const old=input.value,caret=input.selectionStart??old.length,digitsBefore=old.slice(0,caret).replace(/\D/g,'').length,commaBefore=old.slice(0,caret).includes(',');const formatted=formatMoneyWhileTyping(old);input.value=formatted;let seen=0,pos=0;while(pos<formatted.length&&seen<digitsBefore){if(/\d/.test(formatted[pos]))seen++;pos++}if(commaBefore&&formatted[pos]===',')pos++;try{input.setSelectionRange(pos,pos)}catch(_){}});input.addEventListener('blur',()=>{if(input.value)input.value=formatMoneyInput(input.value)})}
 function bindMoneyFields(form){Array.from(form.querySelectorAll('input[name="importe"],input[name="manoObra"],input[name="repuestos"],input[name="otrosConceptos"],input[name="comision"],input[name="estimacionMinima"],input[name="estimacionMaxima"],input[name="quickTarifaHora"],input[name="quickCostMin"],input[name="quickCostMax"],input[name="hourlyCost"],input[name="partsCost"],input[name="externalCost"],input[name="consumablesCost"],input[name="shippingCost"],input[name="overheadCost"],input[name="paymentFeeFixed"],input[name="actualLaborCost"],input[name="actualPartsCost"],input[name="actualOtherCost"]')).forEach(bindMoneyInput)}
 function formatKilometers(value){const digits=String(value??'').replace(/\D/g,'');return digits?new Intl.NumberFormat('es-AR',{maximumFractionDigits:0}).format(Number(digits)):''}
