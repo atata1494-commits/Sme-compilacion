@@ -87,6 +87,10 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("const paintFormalInstallments=()=>", SOURCE)
         self.assertIn("const formalInstallmentsHtml=!orientative&&formalInstallmentOffer", SOURCE)
 
+    def test_formal_installment_choices_are_visible_before_optional_details(self):
+        self.assertLess(SOURCE.index('class="sme-formal-installments"'), SOURCE.index('class="sme-formal-client-details"'))
+        self.assertIn("Ofrecer cuotas fijas sin interés al cliente (según las condiciones del medio de pago)", SOURCE)
+
     def test_save_errors_do_not_discard_session(self):
         self.assertIn("let beforeSnapshot=null,wasSaved=false;try{const obj=Object.fromEntries", SOURCE)
         self.assertIn("if(smeAuthenticated)smeResetIdleTimer()", SOURCE)
