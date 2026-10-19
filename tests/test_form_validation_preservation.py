@@ -54,8 +54,8 @@ class FormValidationPreservationTests(unittest.TestCase):
     def test_android_back_from_subpage_returns_to_parent_menu(self):
         handler = SOURCE.split("async function smeHandleHardwareBack(){", 1)[1].split("async function save()", 1)[0]
         self.assertIn("const SME_BACK_PARENT_BY_PAGE=Object.freeze({", SOURCE)
-        self.assertIn("asistencias:'mas'", SOURCE)
-        self.assertIn("presupuestos:'mas'", SOURCE)
+        self.assertIn("asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller'", SOURCE)
+        self.assertIn("presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion'", SOURCE)
         self.assertIn("const parentPage=SME_BACK_PARENT_BY_PAGE[page]||'inicio';", handler)
         self.assertIn("smeNavigateTo(parentPage);", handler)
         self.assertNotIn("pageHistory", SOURCE)
