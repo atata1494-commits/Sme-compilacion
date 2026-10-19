@@ -111,6 +111,12 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("const resumeIdleTimer=!!smeAuthenticated;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
         self.assertIn("finally{if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}", SOURCE)
 
+    def test_background_session_lock_waits_ten_seconds_and_respects_active_save(self):
+        self.assertIn("const SME_BACKGROUND_GRACE_MS=10000;", SOURCE)
+        self.assertIn("let smeIdleTimer=null,smeSaveInProgressCount=0;", SOURCE)
+        self.assertIn("smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
+        self.assertIn("if(smeSaveInProgressCount>0){smeBackgroundLockTimer=setTimeout(tryLockAfterBackgroundGrace,1000);return}", SOURCE)
+
     def test_labor_table_button_has_one_nonduplicated_handler(self):
         self.assertNotIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
         self.assertIn("const openLaborTimesButton=document.getElementById('smeOpenLaborTimesFromQuick')", SOURCE)
