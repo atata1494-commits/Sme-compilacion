@@ -5,6 +5,7 @@ on:
     branches:
       - security-access-test
       - sme-integracion-completa-test
+      - fixes-budget-rebuild-validation-20261019
       - fixes-caja-tareas-teclado-horario
   pull_request:
     branches:
