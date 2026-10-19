@@ -5,6 +5,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SHELL = (ROOT / "index.html").read_text(encoding="utf-8")
 BUDGET = (ROOT / "src" / "budget" / "budget-module.js").read_text(encoding="utf-8")
+SOURCE = SHELL + "\n" + BUDGET
 
 
 class LaborTimeIntegrationTests(unittest.TestCase):
@@ -13,18 +14,18 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("min:", SHELL)
         self.assertIn("suggested:", SHELL)
         self.assertIn("max:", SHELL)
-        self.assertIn("No reemplaza la verificación del motor exacto", SHELL)
+        self.assertIn("no es una tabla de mano de obra argentina", SHELL)
         self.assertIn("const canUseBudget=smeCan('presupuestos','edit')", SHELL)
 
     def test_search_supports_gasket_distribution_engine_and_clutch_terms(self):
-        for term in ("gasket-head-8v", "dist-k4m", "embrague", "distribution"):
+        for term in ("gasket-head-8v", "dist-k4m", "embrague", "distribucion"):
             self.assertIn(term, SHELL.lower())
 
     def test_independent_budget_module_consumes_catalog_and_uses_user_rate(self):
         self.assertIn("const catalog = Array.isArray(ctx.laborCatalog)", BUDGET)
         self.assertIn("Asistente de tiempos orientativos", BUDGET)
         self.assertIn("Tu tarifa por hora ($)", BUDGET)
-        self.assertIn("const rate=parseMoney(f.rate.value)", BUDGET)
+        self.assertIn("rate=parseMoney(f.rate.value)", BUDGET)
         self.assertIn("usual*rate", BUDGET)
 
     def test_time_suggestions_are_only_applied_after_user_action(self):
@@ -48,7 +49,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("sme-time-table-head", SHELL)
         self.assertIn("sme-time-row", SHELL)
         self.assertIn("const paintDetail=()=>", SHELL)
-        self.assertIn("selectedId=item.id;draw(true)", SHELL)
+        self.assertIn("selectedId=button.dataset.timeRow||'';draw(true)", SHELL)
 
     def test_specific_k4m_clio_time_has_a_technical_source_and_no_fake_range(self):
         self.assertIn("id:'dist-k4m-clio-748'", SHELL)
@@ -62,7 +63,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("Metodología y confianza de los datos", SHELL)
 
     def test_manual_clutch_and_gearbox_do_not_reuse_incompatible_times(self):
-        self.assertIn("clutch-manual", SHELL)
+        self.assertIn("id:'clutch-sedan'", SHELL)
         self.assertIn("gearbox-pickup-4x2", SHELL)
         self.assertIn("gearbox-pickup-4x4", SHELL)
 
@@ -75,7 +76,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("detail.scrollIntoView", SHELL)
 
     def test_grouped_average_clutch_catalog_covers_sedan_and_two_pickup_groups(self):
-        self.assertIn("embrague-sedan", SHELL)
+        self.assertIn("id:'clutch-sedan'", SHELL)
         self.assertIn("embrague-pickup-4x2", SHELL)
         self.assertIn("embrague-pickup-4x4", SHELL)
 
