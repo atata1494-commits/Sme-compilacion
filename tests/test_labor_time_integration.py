@@ -199,7 +199,6 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn('id="smeQuickInstallmentPreview"', SOURCE)
         self.assertIn("const repaintQuickInstallments=()=>", SOURCE)
         self.assertIn("count+' cuotas de '+smeOrientativePriceLabel(low,high)+' cada una", SOURCE)
-        self.assertIn("quantity", SOURCE) if False else None
 
 
 if __name__ == "__main__":
