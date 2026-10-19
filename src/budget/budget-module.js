@@ -63,7 +63,7 @@ export function renderBudgetModule(ctx) {
       add('Vehículo / referencia',q.vehiculoReferencia); add('Trabajo consultado',q.trabajoOrientativo);
       add('Estimación preliminar de costo',q.usarRangoPrecio && Math.abs(parseMoney(q.estimacionMaxima)-parseMoney(q.estimacionMinima))>.005 ? amount(q.estimacionMinima)+' a '+amount(q.estimacionMaxima) : amount(q.estimacionMinima));
       add('Alcance preliminar / puntos por confirmar',q.alcanceOrientativo);
-      add('Importante — requiere evaluación','ESTIMACIÓN ORIENTATIVA, NO DEFINITIVA. El vehículo debe ser evaluado para confirmar diagnóstico, alcance, repuestos y costo final. Toda variación o trabajo adicional será informado y requerirá autorización del cliente antes de realizarse.');
+      add('Importante — requiere evaluación','ESTIMACIÓN ORIENTATIVA, NO DEFINITIVA. El vehículo debe ser evaluado para confirmar diagnóstico, alcance, repuestos y costo final. Toda variación será informada al cliente. No se realizarán trabajos adicionales sin autorización del cliente.');
     } else {
       add('Cliente',customerName(q.clienteId)); add('Vehículo',q.vehiculoId ? vehicleName(q.vehiculoId) : q.vehiculoReferencia);
       add('Orden relacionada',q.trabajoId ? workName(q.trabajoId) : '');
