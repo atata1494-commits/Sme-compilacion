@@ -77,6 +77,9 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("total.setAttribute('value',total.value)", SOURCE)
         self.assertIn("function formatMoneyWhileTyping(value)", SOURCE)
         self.assertIn("input.type='text';input.inputMode='numeric';input.autocomplete='off'", SOURCE)
+        self.assertIn(r"integer=integerDigits.replace(/\B(?=(\d{3})+(?!\d))/g,'.')", SOURCE)
+        self.assertIn(r"replace(/\B(?=(\d{3})+(?!\d))/g,'.')", SOURCE)
+        self.assertIn("const fixed=Math.abs(n).toFixed(2)", SOURCE)
 
     def test_formal_installments_are_configurable_calculated_and_printed(self):
         for fragment in ('name="ofrecerCuotasFormal"', 'name="cantidadCuotasFormal"', 'name="condicionesCuotasFormal"', 'id="smeFormalInstallmentPreview"'):
