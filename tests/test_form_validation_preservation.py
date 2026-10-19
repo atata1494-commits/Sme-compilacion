@@ -31,7 +31,7 @@ class FormValidationPreservationTests(unittest.TestCase):
         self.assertIn("smeFormError(form,'Ya existe un usuario con ese nombre.','username');return", SOURCE)
 
     def test_save_failure_keeps_visible_error_instead_of_rebuilding_form(self):
-        self.assertIn("async function save(){const resumeIdleTimer=!!smeAuthenticated;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);return true}catch(e)", SOURCE)
+        self.assertIn("async function save(){const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);return true}catch(e)", SOURCE)
         self.assertIn("if(!(await save())){db=JSON.parse(before);return}render()", SOURCE)
 
 
