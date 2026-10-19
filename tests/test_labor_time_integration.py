@@ -191,7 +191,7 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("PRECIO ESTIMADO", SOURCE)
 
     def test_quick_estimator_draft_refreshes_search_and_table_navigation_is_resilient(self):
-        self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
+        self.assertIn("restored.forEach(el=>{try{if(el.matches&&el.matches(SME_MONEY_INPUT_SELECTOR)&&!el.readOnly&&el.value)el.value=formatMoneyInput(el.value);el.dispatchEvent(new Event", SOURCE)
         self.assertIn("smeInitQuickLaborEstimate(form)", SOURCE)
         self.assertIn("function smeLaborTimeSearchText(item)", SOURCE)
         self.assertNotIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
