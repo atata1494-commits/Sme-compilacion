@@ -108,7 +108,7 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn('id="smeQuickLaborResults" class="sme-budget-time-results"', SOURCE)
 
     def test_saving_pauses_idle_lock_and_restores_timer(self):
-        self.assertIn("const resumeIdleTimer=!!smeAuthenticated;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
+        self.assertIn("const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
         self.assertIn("finally{if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}", SOURCE)
 
     def test_background_session_lock_waits_ten_seconds_and_respects_active_save(self):
