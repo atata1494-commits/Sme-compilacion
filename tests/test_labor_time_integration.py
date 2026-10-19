@@ -192,7 +192,8 @@ class LaborTimeIntegrationTests(unittest.TestCase):
         self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
         self.assertIn("smeInitQuickLaborEstimate(form)", SOURCE)
         self.assertIn("function smeLaborTimeSearchText(item)", SOURCE)
-        self.assertIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
+        self.assertNotIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
+        self.assertIn("const openLaborTimesButton=document.getElementById('smeOpenLaborTimesFromQuick')", SOURCE)
         self.assertIn("smeReturnToQuickQuote=true;smeNavigateTo('tiempos')", SOURCE)
 
     def test_quick_installment_offer_shows_calculated_amount_per_payment(self):
