@@ -184,7 +184,6 @@ export function renderBudgetModule(ctx) {
     root.querySelectorAll('[data-budget-open-times]').forEach(button=>button.addEventListener('click',()=>ctx.navigate('tiempos')));
     root.querySelectorAll('[data-budget-cancel-edit]').forEach(button=>button.addEventListener('click',()=>{editingQuote=null;draw(activeTab)}));
     bindQuickForm(); bindFormalForm(); bindCostForm(); bindHistory();
-    if(activeTab==='quick'||activeTab==='formal') initializeLaborAssist(activeTab);
     if(ctx.clearPendingLaborId&&pendingLaborId){ctx.clearPendingLaborId();pendingLaborId='';}
   }
   function bindMoneyInputs(scope) {
@@ -367,18 +366,22 @@ export function renderBudgetModule(ctx) {
     form.onsubmit=async event=>{
       event.preventDefault();if(!canEditCosts)return;
       const q=chosen();if(!q){summary.innerHTML='<p class="sme-budget-v2-warning">Seleccioná un presupuesto formal válido.</p>';return}
-      const old=[...db.presupuestos];q.analisisInterno=Object.fromEntries(names.map(name=>[name,String(form.elements[name]?.value??'0')]));
+      const previousAnalysis=q.analisisInterno?{...q.analisisInterno}:null;
+      q.analisisInterno=Object.fromEntries(names.map(name=>[name,String(form.elements[name]?.value??'0')]));
       q.analisisInterno.updatedAt=new Date().toISOString();q.analisisInterno.updatedByUser=String(ctx.currentUser?.id||ctx.currentUser?.username||'');
-      if(!(await ctx.save())){db.presupuestos.splice(0,db.presupuestos.length,...old);summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">No se confirmó el guardado del análisis. Revisá el mensaje de almacenamiento.</p>');return}
+      if(!(await ctx.save())){if(previousAnalysis)q.analisisInterno=previousAnalysis;else delete q.analisisInterno;summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">No se confirmó el guardado del análisis. Revisá el mensaje de almacenamiento.</p>');return}
       paintSummary();summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-success">Análisis interno guardado. No se incluyó en el documento para el cliente.</p>');
     };
     root.querySelector('#sme-budget-apply-price')?.addEventListener('click',async()=>{
       if(!canEditCosts)return;const r=calc();
       if(!r.q||String(r.q.estado||'Borrador')!=='Borrador'){summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">Solo se puede aplicar el precio sugerido a un presupuesto en estado Borrador.</p>');return}
       if(!Number.isFinite(r.suggested)||r.suggested<=0){summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">No se pudo obtener un precio sugerido válido.</p>');return}
-      const old=[...db.presupuestos], previousPrice=parseMoney(r.q.importe), newPrice=Math.ceil(Math.max(previousPrice,r.suggested));
-      r.q.importe=String(newPrice);r.q.analisisInterno=Object.assign({},r.q.analisisInterno||{},{lastAppliedAt:new Date().toISOString(),lastAppliedPrice:String(newPrice),analysisPriceBeforeApply:String(previousPrice)});
-      if(!(await ctx.save())){db.presupuestos.splice(0,db.presupuestos.length,...old);summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">No se confirmó el cambio de precio; se restauraron los datos anteriores.</p>');return}
+      const previousQuote={...r.q,analisisInterno:r.q.analisisInterno?{...r.q.analisisInterno}:undefined};
+      const previousPrice=parseMoney(r.q.importe), lineTotal=parseMoney(r.q.manoObra)+parseMoney(r.q.repuestos)+parseMoney(r.q.otrosConceptos), newPrice=Math.ceil(Math.max(previousPrice,r.suggested,lineTotal));
+      r.q.manoObra=String(parseMoney(r.q.manoObra)+Math.max(0,newPrice-lineTotal));
+      r.q.importe=String(parseMoney(r.q.manoObra)+parseMoney(r.q.repuestos)+parseMoney(r.q.otrosConceptos));
+      r.q.analisisInterno=Object.assign({},r.q.analisisInterno||{},{lastAppliedAt:new Date().toISOString(),lastAppliedPrice:String(newPrice),analysisPriceBeforeApply:String(previousPrice)});
+      if(!(await ctx.save())){const restoredIndex=db.presupuestos.findIndex(item=>String(item.id)===String(previousQuote.id));if(restoredIndex>=0)db.presupuestos[restoredIndex]=previousQuote;summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-warning">No se confirmó el cambio de precio; se restauraron los datos anteriores.</p>');return}
       paintSummary();summary.insertAdjacentHTML('beforeend','<p class="sme-budget-v2-success">Precio actualizado al mínimo sugerido, sin reducir un precio que ya era mayor. Revisá el presupuesto antes de compartirlo.</p>');
     });
     setFromQuote();
