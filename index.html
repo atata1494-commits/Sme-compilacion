@@ -330,7 +330,7 @@ function smeResetNavigation(){
 }
 const SME_RESUME_PAGE_KEY='sme_resume_page_v1';
 const SME_FORM_DRAFT_PREFIX='sme_form_draft_v1:';
-function smeRememberCurrentPage(){try{if(smeAuthenticated&&page&&page!=='inicio')localStorage.setItem(SME_RESUME_PAGE_KEY,page)}catch(error){console.warn('No se pudo recordar la pantalla SME:',error)}}
+function smeRememberCurrentPage(){try{if(smeAuthenticated&&page)localStorage.setItem(SME_RESUME_PAGE_KEY,page)}catch(error){console.warn('No se pudo recordar la pantalla SME:',error)}}
 function smeGetResumePage(){
  try{const saved=localStorage.getItem(SME_RESUME_PAGE_KEY);return saved&&smeCan(saved,'view')?saved:'inicio'}catch(_){return 'inicio'}
 }
@@ -351,6 +351,17 @@ function smeRestoreFormDrafts(){
 document.addEventListener('input',e=>{const form=e.target?.closest?.('#app form');if(form)smeSaveFormDraft(form)},true);
 document.addEventListener('change',e=>{const form=e.target?.closest?.('#app form');if(form)smeSaveFormDraft(form)},true);
 document.addEventListener('submit',e=>{const form=e.target;if(form?.matches?.('#app form')){try{localStorage.removeItem(smeDraftKey(form))}catch(_){}}},true);
+function smeSetOrientativeBudgetExpanded(toggle){
+ const body=document.getElementById('smeOrientativeBudgetBody'),form=document.getElementById('smeOrientativeBudgetForm');
+ if(!toggle||!body||!form){console.warn('No se encontró el formulario de consulta orientativa.');return}
+ const opening=body.hidden;body.hidden=!opening;toggle.setAttribute('aria-expanded',String(opening));toggle.textContent=opening?'− Ocultar consulta orientativa':'＋ Crear consulta orientativa';
+ if(opening)setTimeout(()=>{const field=form.elements.namedItem('vehiculoReferencia');if(field&&typeof field.focus==='function')field.focus()},40);
+}
+document.addEventListener('click',event=>{
+ const toggle=event.target?.closest?.('#smeToggleOrientativeBudget');
+ if(!toggle||toggle.dataset.smeQuickToggleBound==='1')return;
+ event.preventDefault();smeSetOrientativeBudgetExpanded(toggle);
+},true);
 function smeNavigateTo(nextPage){
  if(nextPage==='inicio'){
   smeResetNavigation();
@@ -482,16 +493,23 @@ function iconSvg(name,size=28){const originalIcons={cleaning:'/cleaning-icon.web
  cleaning:'<path d="M3 15 8.5 12.5 12 15l-2 6H4z"/><path d="m5 17 4 2"/><path d="M15 8h4l2 4v8H13v-8z"/><path d="M15 8V6h3l2 2"/><path d="M16 12h3"/><path d="M10 5h3M9 7l3 1M10 9l2 0.5"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
  laborStopwatch:'<circle cx="10.5" cy="13.2" r="7"/><path d="M10.5 9.2v4l2.7 1.6"/><path d="M8.5 3.1h4M10.5 3.1v3"/><path d="m15.2 6.2 1.4-1.4"/>',
- expenseApproval:'<rect x="5" y="3" width="13" height="18" rx="1.5"/><path d="M9 3v4h4V3M8 11h7M8 14h4"/><circle cx="17.5" cy="17" r="3.2"/><path d="m16.1 17 1 1 1.8-2"/>',
+
+ carReception:'<path d="m4.5 10 2-4h11l2 4"/><path d="M3.5 10h17v6h-17z"/><circle cx="7" cy="14" r="1"/><circle cx="17" cy="14" r="1"/><path d="M8 18h8M12 16v4M9.5 18.5 12 21l2.5-2.5"/>',
+ databaseBackup:'<ellipse cx="10" cy="5" rx="6.5" ry="2.7"/><path d="M3.5 5v5.5c0 1.5 2.9 2.7 6.5 2.7 1.1 0 2.2-.1 3.1-.4"/><path d="M3.5 10.5V16c0 1.5 2.9 2.7 6.5 2.7 1 0 2-.1 2.9-.4"/><path d="M16 11a4.5 4.5 0 1 1-2.4 8.3"/><path d="M13.5 16.2 13 19.4l3.1-.6"/>',
+ activeOrders:'<path d="M3 7.5 12 3l9 4.5-9 4.5z"/><path d="M3 7.5V17l9 4 9-4V7.5M12 12v9"/><path d="m7.5 5.3 9 4.5"/>',
+ vehiclesAtWork:'<path d="M4 11.5 6 7h12l2 4.5"/><path d="M3.5 11.5h17v5.5h-17z"/><circle cx="7" cy="14.5" r="1"/><circle cx="17" cy="14.5" r="1"/><path d="M6 19v2M18 19v2M8 4h8M10 2.5v3M14 2.5v3"/>',
+ budgetFollowUp:'<path d="M4 3h11l4 4v7"/><path d="M15 3v4h4M7 10h7M7 13h5"/><path d="M14 17h7M17.5 14v6"/>',
+ upcomingAppointment:'<rect x="3" y="5" width="13" height="16" rx="2"/><path d="M7 2.5v5M12 2.5v5M3 9h13"/><circle cx="17.5" cy="16.5" r="4"/><path d="M17.5 14.4v2.3l1.5.8"/>',,
+ expenseApproval:'<path d="M4 3h11l3 3v6"/><path d="M14.5 3v4h3.5M7 10h5M7 13h4"/><circle cx="16.5" cy="17" r="5"/><path d="M16.5 14.2v5.6M18 15.5c-.6-.8-3.1-.8-3.1.4s3.1 1 3.1 2.2-2.5 1.4-3.2.4M13.2 21H6a2 2 0 0 1-2-2V3"/>',
  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>'
 };return '<svg class="line-icon" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(shapes[name]||shapes.wrench)+'</svg>'}
-function tile(icon,name,desc,target){const symbol=target==='clientes'?'userRound':target==='vehiculos'?'car':target==='recepciones'?'clipboardList':target==='trabajos'?'clipboardList':target==='diagnosticos'?'diagnosticScan':target==='usuarios'?'users':target==='terceros'?'briefcase':target==='asistencias'?'clock':target==='tiempos'?'laborStopwatch':target==='tareas'?'listChecks':target==='avisos'?'bell':target==='gastos'?'expenseApproval':target==='respaldos'?'clipboardList':iconName(icon);return '<button class="tile" data-go="'+target+'"><span class="tile-icon">'+iconSvg(symbol,40)+'</span><strong>'+name+'</strong><small>'+desc+'</small></button>'}
+function tile(icon,name,desc,target){const symbol=target==='clientes'?'userRound':target==='vehiculos'?'car':target==='recepciones'?'carReception':target==='trabajos'?'clipboardList':target==='diagnosticos'?'diagnosticScan':target==='usuarios'?'users':target==='terceros'?'briefcase':target==='asistencias'?'clock':target==='tiempos'?'laborStopwatch':target==='tareas'?'listChecks':target==='avisos'?'bell':target==='gastos'?'expenseApproval':target==='respaldos'?'databaseBackup':iconName(icon);return '<button class="tile" data-go="'+target+'"><span class="tile-icon">'+iconSvg(symbol,40)+'</span><strong>'+name+'</strong><small>'+desc+'</small></button>'}
 function customerName(id){const c=db.clientes.find(x=>String(x.id)===String(id));return c?(c.nombre+(c.empresa?' · '+c.empresa:'')):'Sin cliente asignado'}
 function customerDocument(id){const c=db.clientes.find(x=>String(x.id)===String(id));return c&&c.documento?c.documento:'—'}
 function vehicleName(id){const v=db.vehiculos.find(x=>String(x.id)===String(id));return v?[v.patente,v.marca,v.modelo,v.anio?('Año '+v.anio):''].filter(Boolean).join(' · '):'Sin vehículo asignado'}
 function options(items,labelFn,selected){return '<option value="">— Seleccionar —</option>'+items.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(selected)?'selected':'')+'>'+esc(labelFn(x))+'</option>').join('')}
 function friendlyDate(value){if(!value)return 'Sin fecha';const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(value)}
-function dashboardMetric(icon,label,value,target){const symbol=label.startsWith('Vehículos')?'car':label.startsWith('Órdenes')?'clipboardList':label.startsWith('Presupuestos')?'receipt':'calendar';return '<button class="dashboard-stat" data-go="'+target+'"><span class="stat-icon">'+iconSvg(symbol,29)+'</span><span class="stat-value">'+esc(value)+'</span><span class="stat-label">'+esc(label)+'</span></button>'}
+function dashboardMetric(icon,label,value,target){const symbol=label.startsWith('Vehículos')?'vehiclesAtWork':label.startsWith('Órdenes')?'activeOrders':label.startsWith('Presupuestos')?'budgetFollowUp':'upcomingAppointment';return '<button class="dashboard-stat" data-go="'+target+'"><span class="stat-icon">'+iconSvg(symbol,29)+'</span><span class="stat-value">'+esc(value)+'</span><span class="stat-label">'+esc(label)+'</span></button>'}
 function renderDashboard(){
  const active=['Pendiente','En diagnóstico','Esperando repuesto','En reparación'],uid=String(smeCurrentUser&&smeCurrentUser.id||''),today=todayLocal();
  const j=smeCan('trabajos','view')?[...db.trabajos].filter(x=>active.includes(x.estado)).sort((a,b)=>String(b.fecha||'').localeCompare(String(a.fecha||''))):[];
@@ -1620,12 +1638,12 @@ app.innerHTML=html;
   }
   const toggle=document.getElementById('smeToggleOrientativeBudget'),body=document.getElementById('smeOrientativeBudgetBody'),quickForm=document.getElementById('smeOrientativeBudgetForm');
   if(quickForm)bindMoneyFields(quickForm);
-  if(quickForm&&smeCan('tiempos','view'))smeInitQuickLaborEstimate(quickForm);
+  if(toggle&&body&&quickForm&&!toggle.dataset.smeQuickToggleBound){toggle.dataset.smeQuickToggleBound='1';toggle.addEventListener('click',()=>smeSetOrientativeBudgetExpanded(toggle))}
+  try{if(quickForm&&smeCan('tiempos','view'))smeInitQuickLaborEstimate(quickForm)}catch(error){console.error('No se pudo iniciar el calculador de tiempos de la consulta rápida:',error)}
   const installmentCheck=document.getElementById('smeQuickOfferInstallments'),installmentWrap=document.getElementById('smeQuickInstallmentCountWrap');
   installmentCheck?.addEventListener('change',()=>{if(installmentWrap)installmentWrap.hidden=!installmentCheck.checked});
   const openLaborTimesButton=document.getElementById('smeOpenLaborTimesFromQuick');
   openLaborTimesButton?.addEventListener('click',()=>{if(!smeCan('tiempos','view'))return;smeSaveFormDraft(quickForm);smeReturnToQuickQuote=true;smeNavigateTo('tiempos')});
-  toggle?.addEventListener('click',()=>{const opening=body.hidden;body.hidden=!opening;toggle.setAttribute('aria-expanded',String(opening));toggle.textContent=opening?'− Ocultar consulta orientativa':'＋ Consulta orientativa rápida';if(opening)quickForm.elements.vehiculoReferencia.focus()});
   document.getElementById('smeCancelOrientativeBudget')?.addEventListener('click',()=>{quickForm.reset();body.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.textContent='＋ Consulta orientativa rápida'});
   quickForm?.addEventListener('submit',async ev=>{
    ev.preventDefault();const fd=new FormData(quickForm),min=parseMoneyInput(fd.get('estimacionMinima')),max=parseMoneyInput(fd.get('estimacionMaxima')),vehicle=String(fd.get('vehiculoReferencia')||'').trim(),job=String(fd.get('trabajoOrientativo')||'').trim(),scope=String(fd.get('alcanceOrientativo')||'').trim(),proposalParts=[];const conditions=String(fd.get('condicionesRevision')||'').trim(),extraBenefit=String(fd.get('beneficioExtra')||'').trim();if(fd.get('ofrecerRevision')==='on')proposalParts.push('Revisión/control posterior: podemos coordinar un control después de la reparación'+(conditions?' ('+conditions+')':'; fecha, alcance y condiciones a coordinar con el taller')+'.');if(fd.get('ofrecerCuotas')==='on'){const count=Math.max(2,Math.min(12,Number(fd.get('cantidadCuotas')||3)));proposalParts.push('Alternativa de pago: hasta '+count+' cuotas sin interés, sujeto a disponibilidad real del medio de pago y a sus condiciones. Sobre este rango, la cuota sería aproximadamente de '+smeOrientativeAmount(Math.ceil(min/count))+' a '+smeOrientativeAmount(Math.ceil(max/count))+' por cuota.');}if(extraBenefit)proposalParts.push('Otro beneficio ofrecido por el taller: '+extraBenefit+'.');const proposalText=proposalParts.join('\n');
@@ -2610,7 +2628,7 @@ let SME_IDLE_TIMEOUT_MS=SME_IDLE_TIMEOUT_SECONDS*1000;
    smeCurrentUser=user;smeSelectedLoginUsername=null;smePrimarySessionUser=null;smeAdminOverride=false;smeAuthenticated=true;
    localStorage.setItem(SME_LAST_ACCOUNT_KEY,user.username);smeRequirePasswordForSwitch(false);
    if(smeAuthOverlay){smeAuthOverlay.remove();smeAuthOverlay=null}
-   page='inicio';smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();
+   page=smeGetResumePage();smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();
   if(smeCanSeeFaatraReference()){smeRenderFaatraUpdateNotice();void smeCheckFaatraReference()}
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){console.info('Autenticación biométrica cancelada o fallida:',error);const code=error&&error.code;if(code&&/userCancel|systemCancel/i.test(String(code)))return;smeAuthShowInlineError('No se pudo validar la huella. Podés ingresar la contraseña de esta cuenta.','password')}
