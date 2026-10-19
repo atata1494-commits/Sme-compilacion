@@ -89,6 +89,25 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("if(smeAuthenticated)smeResetIdleTimer()", SOURCE)
         self.assertIn("La sesión se mantiene abierta. Revisá los datos", SOURCE)
 
+    def test_quick_budget_defaults_to_one_price_and_enables_range_explicitly(self):
+        self.assertIn('id="smeQuickUsePriceRange" name="usarRangoPrecio"', SOURCE)
+        self.assertIn('id="smeQuickPriceRangeFields" hidden', SOURCE)
+        self.assertIn("rangeRequested=fd.get('usarRangoPrecio')==='on'", SOURCE)
+        self.assertIn("rangeRequested&&(!maxRaw||max<min)", SOURCE)
+
+    def test_quick_labor_estimator_shows_suggestions_and_uses_tolerant_search(self):
+        self.assertIn("Trabajos sugeridos para empezar. También podés buscar por motor u operación.", SOURCE)
+        self.assertIn("ranked.filter(entry=>entry.score>0)", SOURCE)
+        self.assertIn('id="smeQuickLaborResults" class="sme-budget-time-results"', SOURCE)
+
+    def test_saving_pauses_idle_lock_and_restores_timer(self):
+        self.assertIn("const resumeIdleTimer=!!smeAuthenticated;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
+        self.assertIn("finally{if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}", SOURCE)
+
+    def test_labor_table_button_has_one_nonduplicated_handler(self):
+        self.assertNotIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
+        self.assertIn("const openLaborTimesButton=document.getElementById('smeOpenLaborTimesFromQuick')", SOURCE)
+
 
 if __name__ == "__main__":
     unittest.main()
