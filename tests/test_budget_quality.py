@@ -44,7 +44,9 @@ class BudgetQualityTests(unittest.TestCase):
     def test_suggested_price_application_is_explicit_and_draft_only(self):
         self.assertIn("data-apply-cost-price", SOURCE)
         self.assertIn("String(liveQuote.estado||'Borrador')!=='Borrador'", SOURCE)
-        self.assertIn("Math.max(originalTotal,currentResult.suggestedMinimum)", SOURCE)
+        self.assertIn("originalTotal>=currentResult.suggestedMinimum", SOURCE)
+        self.assertIn("const target=Math.round(currentResult.suggestedMinimum)", SOURCE)
+        self.assertIn("result.salePrice<result.suggestedMinimum", SOURCE)
         self.assertIn("Aplicar precio recomendado", SOURCE)
         self.assertIn("Los costos internos no se mostrarán al cliente.", SOURCE)
         self.assertIn("Cambios de precio registrados", SOURCE)
