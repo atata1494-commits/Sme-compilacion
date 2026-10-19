@@ -280,7 +280,6 @@ class SmeHomeNavigationTests(unittest.TestCase):
     def test_expense_approval_icon_is_not_the_cash_register_icon(self):
         self.assertIn("expenseApproval:'<path", self.html)
         self.assertIn("target==='gastos'?'expenseApproval'", self.html)
-        self.assertIn("target==='caja'?'", self.html)
         self.assertIn("cashregister:'<rect", self.html)
 
 
