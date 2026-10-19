@@ -1016,6 +1016,7 @@ function smeOpenOrientativePreview(quoteId){
  overlay.querySelector('[data-orientative-image]').addEventListener('click',async()=>{close();try{await smeCreateAndShareOrientativeImage(quote)}catch(error){await smeOrientativeFileError('imagen',error)}});
  document.body.appendChild(overlay);
 }
+// navigator.share queda reservado para acciones explícitas; al guardar no se abre ni se copia nada automáticamente.
 function smeOpenOrientativeShareDialog(quoteId){
  const quote=db.presupuestos.find(item=>String(item.id)===String(quoteId)&&item.tipo==='Orientativo');if(!quote)return;
  const overlay=document.createElement('div');overlay.className='sme-dialog-backdrop';overlay.setAttribute('role','presentation');
