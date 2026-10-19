@@ -155,7 +155,7 @@ export function renderBudgetModule(ctx) {
   }
   function costField(name,label,defaultValue,type='text') {
     const numeric=type==='number';
-    return '<label>'+esc(label)+'<input name="'+name+'" data-cost-field="'+name+'" type="'+(numeric?'number':'text')+'"'+(numeric?' step="0.25" min="0" inputmode="decimal"':' data-money inputmode="numeric")+' value="'+esc(defaultValue)+'"'+(canEditCosts?'':' disabled')+'></label>';
+    return '<label>'+esc(label)+'<input name="'+name+'" data-cost-field="'+name+'" type="'+(numeric?'number':'text')+'"'+(numeric?' step="0.25" min="0" inputmode="decimal"':' data-money inputmode="numeric"')+' value="'+esc(defaultValue)+'"'+(canEditCosts?'':' disabled')+'></label>';
   }
   const costMarkup = () => {
     const quotes=formalQuotes();
