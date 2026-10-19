@@ -182,7 +182,9 @@ class LaborTimeIntegrationTests(unittest.TestCase):
 
 
     def test_quick_quote_supports_single_price_and_ranges(self):
-        self.assertIn('placeholder="Opcional: dejalo vacío para ofrecer un precio único"', SOURCE)
+        self.assertIn('id="smeQuickUsePriceRange" name="usarRangoPrecio"', SOURCE)
+        self.assertIn('id="smeQuickPriceRangeFields" hidden', SOURCE)
+        self.assertIn("rangeRequested=fd.get('usarRangoPrecio')==='on'", SOURCE)
         self.assertIn("max=maxRaw?maxEntered:min", SOURCE)
         self.assertIn("smeOrientativePriceLabel(min,max)", SOURCE)
         self.assertIn("Importe único sujeto a inspección y confirmación del alcance", SOURCE)
