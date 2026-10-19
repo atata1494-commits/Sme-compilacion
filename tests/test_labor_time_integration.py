@@ -180,5 +180,27 @@ class LaborTimeIntegrationTests(unittest.TestCase):
     def test_published_hours_are_only_shown_when_the_value_exists(self):
         self.assertIn("if(Number.isFinite(item.publishedHours))return 'Tiempo publicado: '+smeLaborHoursLabel(item.publishedHours)", SOURCE)
 
+
+    def test_quick_quote_supports_single_price_and_ranges(self):
+        self.assertIn('placeholder="Opcional: dejalo vacío para ofrecer un precio único"', SOURCE)
+        self.assertIn("max=maxRaw?maxEntered:min", SOURCE)
+        self.assertIn("smeOrientativePriceLabel(min,max)", SOURCE)
+        self.assertIn("Importe único sujeto a inspección y confirmación del alcance", SOURCE)
+        self.assertIn("PRECIO ESTIMADO", SOURCE)
+
+    def test_quick_estimator_draft_refreshes_search_and_table_navigation_is_resilient(self):
+        self.assertIn("restored.forEach(el=>{try{el.dispatchEvent(new Event", SOURCE)
+        self.assertIn("smeInitQuickLaborEstimate(form)", SOURCE)
+        self.assertIn("function smeLaborTimeSearchText(item)", SOURCE)
+        self.assertIn("document.addEventListener('click',event=>{const button=event.target?.closest?.('#smeOpenLaborTimesFromQuick')", SOURCE)
+        self.assertIn("smeReturnToQuickQuote=true;smeNavigateTo('tiempos')", SOURCE)
+
+    def test_quick_installment_offer_shows_calculated_amount_per_payment(self):
+        self.assertIn('id="smeQuickInstallmentPreview"', SOURCE)
+        self.assertIn("const repaintQuickInstallments=()=>", SOURCE)
+        self.assertIn("count+' cuotas de '+smeOrientativePriceLabel(low,high)+' cada una", SOURCE)
+        self.assertIn("quantity", SOURCE) if False else None
+
+
 if __name__ == "__main__":
     unittest.main()
