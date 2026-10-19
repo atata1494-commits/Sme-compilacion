@@ -118,7 +118,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
     def test_dashboard_uses_distinct_icons_for_tasks_and_active_orders(self):
         self.assertIn("listChecks:'<path", self.html)
         self.assertIn("clipboardList:'<rect", self.html)
-        self.assertIn("label.startsWith('Órdenes')?'clipboardList'", self.html)
+        self.assertIn("label.startsWith('Órdenes')?'activeOrders'", self.html)
         self.assertIn("iconSvg('listChecks',22)", self.html)
         self.assertIn("target==='tareas'?'listChecks'", self.html)
 
@@ -251,6 +251,37 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("Exportar copia completa SQLite (.db)", self.html)
         self.assertIn("Restaurar copia completa (.db)", self.html)
         self.assertIn("hasta 7 copias diarias y 60 mensuales", self.html)
+
+
+
+    def test_session_lock_restores_the_last_section_after_biometric_unlock(self):
+        self.assertIn("function smeRememberCurrentPage()", self.html)
+        self.assertIn("if(smeAuthenticated&&page)localStorage.setItem(SME_RESUME_PAGE_KEY,page)", self.html)
+        self.assertIn("page=smeGetResumePage();smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();", self.html)
+
+    def test_quick_orientative_button_has_resilient_click_handling(self):
+        self.assertIn("function smeSetOrientativeBudgetExpanded(toggle)", self.html)
+        self.assertIn("event.target?.closest?.('#smeToggleOrientativeBudget')", self.html)
+        self.assertIn("toggle.dataset.smeQuickToggleBound==='1'", self.html)
+        self.assertIn("toggle.addEventListener('click',()=>smeSetOrientativeBudgetExpanded(toggle))", self.html)
+        self.assertIn("try{if(quickForm&&smeCan('tiempos','view'))smeInitQuickLaborEstimate(quickForm)}catch(error)", self.html)
+
+    def test_workshop_tiles_and_dashboard_metrics_use_distinct_icons(self):
+        self.assertIn("target==='recepciones'?'carReception'", self.html)
+        self.assertIn("target==='trabajos'?'clipboardList'", self.html)
+        self.assertIn("target==='respaldos'?'databaseBackup'", self.html)
+        self.assertIn("label.startsWith('Órdenes')?'activeOrders'", self.html)
+        self.assertIn("label.startsWith('Vehículos')?'vehiclesAtWork'", self.html)
+        self.assertIn("label.startsWith('Presupuestos')?'budgetFollowUp'", self.html)
+        self.assertIn("'upcomingAppointment'", self.html)
+        for icon_key in ("carReception:", "databaseBackup:", "activeOrders:", "vehiclesAtWork:", "budgetFollowUp:", "upcomingAppointment:"):
+            self.assertIn(icon_key, self.html)
+
+    def test_expense_approval_icon_is_not_the_cash_register_icon(self):
+        self.assertIn("expenseApproval:'<path", self.html)
+        self.assertIn("target==='gastos'?'expenseApproval'", self.html)
+        self.assertIn("target==='caja'?'", self.html)
+        self.assertIn("cashregister:'<rect", self.html)
 
 
 if __name__ == "__main__":
