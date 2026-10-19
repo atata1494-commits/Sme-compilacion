@@ -76,7 +76,7 @@ class BudgetQualityTests(unittest.TestCase):
 
     def test_only_draft_budgets_can_receive_suggested_price_and_price_is_never_reduced(self):
         self.assertIn("String(r.q.estado||'Borrador')!=='Borrador'", MODULE)
-        self.assertIn("Math.max(previousPrice,r.suggested)", MODULE)
+        self.assertIn("Math.ceil(Math.max(previousPrice,r.suggested,lineTotal))", MODULE)
         self.assertIn("lastAppliedPrice", MODULE)
 
     def test_module_keeps_customer_vehicle_work_relationships(self):
