@@ -111,8 +111,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
         self.assertIn("finally{smeSaveInProgressCount=Math.max(0,smeSaveInProgressCount-1);if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}", SOURCE)
 
-    def test_background_session_lock_waits_ten_seconds_and_respects_active_save(self):
-        self.assertIn("const SME_BACKGROUND_GRACE_MS=10000;", SOURCE)
+    def test_background_session_lock_preserves_short_grace_and_respects_active_save(self):
+        self.assertIn("const SME_BACKGROUND_GRACE_MS=2500;", SOURCE)
         self.assertIn("let smeIdleTimer=null,smeSaveInProgressCount=0;", SOURCE)
         self.assertIn("smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer()", SOURCE)
         self.assertIn("if(smeSaveInProgressCount>0){smeBackgroundLockTimer=setTimeout(tryLockAfterBackgroundGrace,1000);return}", SOURCE)
