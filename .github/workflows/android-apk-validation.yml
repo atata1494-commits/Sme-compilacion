@@ -46,6 +46,11 @@ jobs:
       - name: Build web application
         run: npm run build
 
+      - name: Give test APK an isolated app identity
+        run: |
+          sed -i "s/appId: 'com.serviciosmecanicosenzo.app'/appId: 'com.serviciosmecanicosenzo.test'/" capacitor.config.ts
+          sed -i "s/appName: 'SME'/appName: 'SME Pruebas'/" capacitor.config.ts
+
       - name: Add Android platform if absent
         run: |
           if [ ! -d android ]; then
