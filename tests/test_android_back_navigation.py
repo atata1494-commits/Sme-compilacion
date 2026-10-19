@@ -39,9 +39,9 @@ class AndroidBackNavigationTests(unittest.TestCase):
         self.assertIn("node scripts/generate-android-icons.mjs", workflow)
         self.assertIn("node scripts/configure-android-splash.mjs", workflow)
 
-    def test_recent_apps_return_grace_period_is_ten_seconds(self):
+    def test_recent_apps_return_grace_period_is_2_5_seconds(self):
         index = INDEX.read_text(encoding="utf-8")
-        self.assertIn("const SME_BACKGROUND_GRACE_MS=10000;", index)
+        self.assertIn("const SME_BACKGROUND_GRACE_MS=2500;", index)
         self.assertIn("document.visibilityState==='hidden'&&smeAuthenticated", index)
         self.assertIn("document.visibilityState==='visible'", index)
         self.assertIn("clearTimeout(smeBackgroundLockTimer)", index)
