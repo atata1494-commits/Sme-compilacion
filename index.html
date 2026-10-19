@@ -483,7 +483,7 @@ async function smeHandleHardwareBack(){
  exitBackPressedAt=now;
  smeShowBackExitPrompt();
 }
-async function save(){const resumeIdleTimer=!!smeAuthenticated;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);return true}catch(e){console.error('Error guardando datos:',e);alert('No se pudieron guardar los datos. Conservá tu respaldo. Detalle técnico: '+String(e?.message||e||'Error sin detalle'));return false}finally{if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}}
+async function save(){const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);return true}catch(e){console.error('Error guardando datos:',e);alert('No se pudieron guardar los datos. Conservá tu respaldo. Detalle técnico: '+String(e?.message||e||'Error sin detalle'));return false}finally{smeSaveInProgressCount=Math.max(0,smeSaveInProgressCount-1);if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function money(n){return (Number(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function iconName(glyph){return ({'⌂':'home','♙':'pawn','👥':'users','▣':'car','🔧':'wrench','🧾':'receipt','💰':'moneybag','▤':'cashregister','↔':'ledger','📅':'calendar','🚘':'receptionForm','🧰':'diagnosticScan','🕒':'clock','☰':'menu'})[glyph]||'wrench'}
@@ -2684,7 +2684,7 @@ let SME_IDLE_TIMEOUT_MS=SME_IDLE_TIMEOUT_SECONDS*1000;
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){console.info('Autenticación biométrica cancelada o fallida:',error);const code=error&&error.code;if(code&&/userCancel|systemCancel/i.test(String(code)))return;smeAuthShowInlineError('No se pudo validar la huella. Podés ingresar la contraseña de esta cuenta.','password')}
  }
-let smeIdleTimer=null;
+let smeIdleTimer=null,smeSaveInProgressCount=0;
 function smeClearIdleTimer(){
  if(smeIdleTimer!==null){clearTimeout(smeIdleTimer);smeIdleTimer=null}
 }
@@ -3500,16 +3500,18 @@ function requireLocalAdmin(){
  }
  smeAuthScreen(mode, '', !!smeSelectedLoginUsername && !smeForcePasswordForNextLogin);
  let smeBackgroundLockTimer=null;
- const SME_BACKGROUND_GRACE_MS=2500;
+ const SME_BACKGROUND_GRACE_MS=10000;
  document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden'&&smeAuthenticated){
    // No bloquear por un toque accidental en Aplicaciones recientes: dar 10 segundos para volver.
    if(smeFilePickerPending)return;
    if(smeBackgroundLockTimer!==null)clearTimeout(smeBackgroundLockTimer);
-   smeBackgroundLockTimer=setTimeout(()=>{
+   smeBackgroundLockTimer=setTimeout(function tryLockAfterBackgroundGrace(){
+    if(document.visibilityState!=='hidden'||!smeAuthenticated||smeFilePickerPending){smeBackgroundLockTimer=null;return}
+    // No cerrar la sesión mientras SQLite todavía está guardando el presupuesto u otro registro.
+    if(smeSaveInProgressCount>0){smeBackgroundLockTimer=setTimeout(tryLockAfterBackgroundGrace,1000);return}
     smeBackgroundLockTimer=null;
-    if(document.visibilityState==='hidden'&&smeAuthenticated&&!smeFilePickerPending)
-     smeLockSession('La sesión se bloqueó después de permanecer fuera de SME.');
+    smeLockSession('La sesión se bloqueó después de permanecer fuera de SME.');
    },SME_BACKGROUND_GRACE_MS);
    return;
   }
