@@ -32,7 +32,7 @@ class LaborCatalogTransferTests(unittest.TestCase):
         self.assertIn("Vista previa de importación", SHELL)
         self.assertIn("Las operaciones ausentes del archivo nunca se eliminan.", SHELL)
         self.assertIn("smeLaborCatalogComparable", SHELL)
-        self.assertIn("Aceptar: actualizar esas operaciones", SHELL.lower())
+        self.assertIn("aceptar: actualizar esas operaciones", SHELL.lower())
 
     def test_imported_additions_and_overrides_persist_between_sessions(self):
         self.assertIn("sme_labor_catalog_additions_v1", SHELL)
