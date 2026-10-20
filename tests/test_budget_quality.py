@@ -66,20 +66,19 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("db.presupuestos.splice(0,db.presupuestos.length,...old);", MODULE)
         self.assertIn("Los datos del formulario siguen disponibles", MODULE)
 
-    def test_customer_pdf_has_clear_budget_terms_and_no_internal_footer(self):
+    def test_customer_pdf_keeps_original_design_and_omits_internal_footer(self):
         start = MODULE.index("const customerDocument = q =>")
         end = MODULE.index("const filteredQuotes =", start)
         document = MODULE[start:end]
         for field in ("hourlyCost", "partsCost", "targetMarginPct", "paymentFeePct", "analisisInterno"):
             self.assertNotIn(field, document)
         self.assertNotIn("Los costos, márgenes y cálculos internos del taller", document)
-        self.assertIn("Estimación preliminar de costo", document)
-        self.assertIn("PRESUPUESTO ORIENTATIVO", document)
-        self.assertIn("PRESUPUESTO DE REPARACIÓN", document)
-        self.assertIn("No se realizarán trabajos adicionales sin autorización del cliente", document)
-        self.assertIn('content:"SME"', document)
-        self.assertIn("rgba(23,58,62,.055)", document)
-        self.assertIn("Documento preparado para el cliente", document)
+        self.assertIn("Precio estimado", document)
+        self.assertIn("Consulta orientativa", document)
+        self.assertIn("Presupuesto de reparación", document)
+        self.assertIn("No se realizarán trabajos adicionales sin autorización", document)
+        self.assertIn("border-bottom:3px solid #b99861", document)
+        self.assertNotIn('content:"SME"', document)
 
     def test_internal_profitability_analysis_is_permission_gated(self):
         self.assertIn("const canReadCosts = can('presupuestos', 'costs');", MODULE)
