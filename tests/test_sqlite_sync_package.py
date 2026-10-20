@@ -68,7 +68,7 @@ class SQLiteSyncPackageTests(unittest.TestCase):
 
     def test_import_validation_is_non_mutating_and_checks_integrity(self):
         start = self.source.index("async function validateSyncPackage(input)")
-        end = self.source.index("\\n  async function prepareSyncPackage()", start)
+        end = self.source.index("  async function prepareSyncPackage()", start)
         body = self.source[start:end]
         self.assertIn("pkg.formato !== 'SME_SYNC_PACKAGE'", body)
         self.assertIn("pkg.version_formato !== 1", body)
