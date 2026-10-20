@@ -298,7 +298,7 @@ export async function openSMEStorage(storageKey) {
       dispositivo_origen: deviceId,
       creado_at_utc: createdAt,
       tipo: 'incremental',
-      cambios
+      cambios: changes
     };
     const hash = await sha256Hex(JSON.stringify(unsignedPackage));
     const packageData = { ...unsignedPackage, sha256_hex: hash };
