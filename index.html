@@ -1982,6 +1982,8 @@ function smeApplyPermissions(){
  if(restoreButton&&!smeCanBackup('edit'))restoreButton.hidden=true;
  if(restoreDatabaseButton&&!smeCanBackup('edit'))restoreDatabaseButton.hidden=true;
  if(restoreInput&&!smeCanBackup('edit'))restoreInput.hidden=true;
+ const catalogImportButton=document.getElementById('laborCatalogImportBtn');if(catalogImportButton&&!smeCanBackup('edit'))catalogImportButton.hidden=true;
+ const catalogImportInput=document.getElementById('laborCatalogImportFile');if(catalogImportInput&&!smeCanBackup('edit'))catalogImportInput.hidden=true;
  smeRenderFaatraUpdateNotice();
 }
 const SME_IDLE_TIMEOUT_KEY='sme_idle_timeout_seconds_v1';
