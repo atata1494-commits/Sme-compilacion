@@ -156,8 +156,10 @@ public final class SmeBackupPlugin extends Plugin {
     public void saveJsonBackup(PluginCall call) {
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/json");
-        intent.putExtra(Intent.EXTRA_TITLE, call.getString("filename", "respaldo-servicios-enzo.json"));
+        String filename = call.getString("filename", "respaldo-servicios-enzo.json");
+        intent.setType(filename != null && filename.toLowerCase(Locale.ROOT).endsWith(".csv")
+            ? "text/csv" : "application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, filename);
         startActivityForResult(call, intent, "handleSaveJsonBackup");
     }
 
