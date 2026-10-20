@@ -20,6 +20,8 @@ class LaborCatalogTransferTests(unittest.TestCase):
         self.assertIn("format:'SME_LABOR_TIME_CATALOG',schemaVersion:1", SHELL)
         self.assertIn("sourceLinks", SHELL)
         self.assertIn("smeLaborCatalogCsv(items)", SHELL)
+        self.assertIn("numericText.toLowerCase()", SHELL)
+        self.assertIn("Number(numericText)", SHELL)
         self.assertIn("SME-catalogo-tiempos-v1.json", SHELL)
         self.assertIn("SME-catalogo-tiempos-v1.csv", SHELL)
         plugin = (Path(__file__).resolve().parents[1] / "scripts" / "templates" / "SmeBackupPlugin.java.template").read_text(encoding="utf-8")
