@@ -247,6 +247,33 @@ export async function openSMEStorage(storageKey) {
     return result;
   }
 
+  async function getDeviceId() {
+    const result = await connection.query("SELECT value FROM app_metadata WHERE key = 'device_id'");
+    const existingId = result.values?.[0]?.value;
+    if (existingId) return String(existingId);
+
+    const generatedId = globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : 'device-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    await run("INSERT OR IGNORE INTO app_metadata(key, value) VALUES ('device_id', ?)", [generatedId]);
+    const saved = await connection.query("SELECT value FROM app_metadata WHERE key = 'device_id'");
+    if (!saved.values?.[0]?.value) throw new Error('No se pudo establecer el identificador de este dispositivo.');
+    return String(saved.values[0].value);
+  }
+
+  async function recordSyncChange({ key, id, operation, baseRevision, revision, deviceId, payload }) {
+    const changeId = globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : 'change-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    await run(
+      'INSERT INTO cambios_sync (change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        changeId, key, String(id), operation, baseRevision ?? null, revision,
+        deviceId, new Date().toISOString(), payload == null ? null : JSON.stringify(payload), 'pendiente'
+      ]
+    );
+  }
+
   async function upsertRecord(key, record) {
     const config = TABLES[key];
     const explicit = config.fields(record);
@@ -328,6 +355,7 @@ export async function openSMEStorage(storageKey) {
   async function persistSnapshot(snapshot) {
     validateSnapshot(snapshot);
     const changes = new Set();
+    const deviceId = await getDeviceId();
 
     await connection.beginTransaction();
     try {
@@ -338,6 +366,13 @@ export async function openSMEStorage(storageKey) {
 
         for (const id of before.keys()) {
           if (!after.has(id)) {
+            const previousRecord = (lastSnapshot[key] || []).find(item => String(item.id) === id);
+            const baseRevision = revisions[key].get(id) || 1;
+            const nextRevision = baseRevision + 1;
+            await recordSyncChange({
+              key, id, operation: 'DELETE', baseRevision, revision: nextRevision,
+              deviceId, payload: previousRecord ? { ...previousRecord, deletedAt: new Date().toISOString() } : null
+            });
             await run('DELETE FROM ' + table + ' WHERE id = ?', [id]);
             revisions[key].delete(id);
             changes.add(key);
@@ -347,8 +382,14 @@ export async function openSMEStorage(storageKey) {
         for (const record of snapshot[key]) {
           const id = String(record.id);
           if (before.get(id) !== after.get(id)) {
-            await upsertRecord(key, record);
             const previous = (lastSnapshot[key] || []).find(item => String(item.id) === id);
+            const baseRevision = revisions[key].get(id) || 0;
+            await upsertRecord(key, record);
+            const nextRevision = revisions[key].get(id) || baseRevision + 1;
+            await recordSyncChange({
+              key, id, operation: previous ? 'UPDATE' : 'INSERT', baseRevision,
+              revision: nextRevision, deviceId, payload: record
+            });
             await persistAppendOnlyEvents(key, record, previous);
             changes.add(key);
           }
