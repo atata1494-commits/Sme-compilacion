@@ -78,6 +78,11 @@ class SQLiteSyncPackageTests(unittest.TestCase):
         self.assertIn("No se aplicaron cambios a la base local.", body)
         self.assertNotIn("connection.beginTransaction()", body)
         self.assertIn("async validateSyncPackage(input)", self.source)
+        self.assertIn("async function inspectSyncPackage(input)", self.source)
+        self.assertIn("cambios_recibidos WHERE change_id = ?", self.source)
+        self.assertIn("La revisión local cambió desde la revisión base del paquete.", self.source)
+        self.assertIn("No se aplicaron cambios ni se modificó la base local.", self.source)
+        self.assertIn("async inspectSyncPackage(input)", self.source)
 
 
 if __name__ == "__main__":
