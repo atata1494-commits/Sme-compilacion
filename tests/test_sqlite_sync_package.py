@@ -66,6 +66,19 @@ class SQLiteSyncPackageTests(unittest.TestCase):
     def test_package_creation_waits_for_queued_saves(self):
         self.assertIn("await saveQueue;\n      return prepareSyncPackage();", self.source)
 
+    def test_import_validation_is_non_mutating_and_checks_integrity(self):
+        start = self.source.index("async function validateSyncPackage(input)")
+        end = self.source.index("\\n  async function prepareSyncPackage()", start)
+        body = self.source[start:end]
+        self.assertIn("pkg.formato !== 'SME_SYNC_PACKAGE'", body)
+        self.assertIn("pkg.version_formato !== 1", body)
+        self.assertIn("await sha256Hex(JSON.stringify(unsignedPackage))", body)
+        self.assertIn("El paquete contiene identificadores de cambio duplicados.", body)
+        self.assertIn("El contenido del cambio no coincide con su identificador.", body)
+        self.assertIn("No se aplicaron cambios a la base local.", body)
+        self.assertNotIn("connection.beginTransaction()", body)
+        self.assertIn("async validateSyncPackage(input)", self.source)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
