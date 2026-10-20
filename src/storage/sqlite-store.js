@@ -270,6 +270,57 @@ export async function openSMEStorage(storageKey) {
     return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
   }
 
+  async function validateSyncPackage(input) {
+    let pkg = input;
+    if (typeof pkg === 'string') {
+      try { pkg = JSON.parse(pkg); } catch (_) { throw new Error('El archivo no contiene JSON válido.'); }
+    }
+    if (!pkg || typeof pkg !== 'object' || Array.isArray(pkg)) throw new Error('El paquete debe ser un objeto JSON.');
+    if (pkg.formato !== 'SME_SYNC_PACKAGE' || pkg.version_formato !== 1 || pkg.tipo !== 'incremental') {
+      throw new Error('El formato o la versión del paquete SME no son compatibles.');
+    }
+    for (const field of ['package_id', 'dispositivo_origen', 'creado_at_utc', 'sha256_hex']) {
+      if (typeof pkg[field] !== 'string' || !pkg[field].trim()) throw new Error('Falta un campo obligatorio del paquete: ' + field);
+    }
+    if (!/^[a-f0-9]{64}$/i.test(pkg.sha256_hex)) throw new Error('La huella SHA-256 del paquete no tiene un formato válido.');
+    if (!Array.isArray(pkg.cambios)) throw new Error('La lista de cambios del paquete no es válida.');
+    const allowedOperations = new Set(['INSERT', 'UPDATE', 'DELETE']);
+    const seen = new Set();
+    const changes = pkg.cambios.map((change, index) => {
+      if (!change || typeof change !== 'object' || Array.isArray(change)) throw new Error('El cambio número ' + (index + 1) + ' no es válido.');
+      for (const field of ['change_id', 'entidad_tipo', 'entidad_id', 'operacion', 'dispositivo_id', 'fecha_utc']) {
+        if (typeof change[field] !== 'string' || !change[field].trim()) throw new Error('Falta ' + field + ' en el cambio número ' + (index + 1) + '.');
+      }
+      if (!Object.prototype.hasOwnProperty.call(TABLES, change.entidad_tipo)) throw new Error('El paquete contiene una entidad no permitida: ' + change.entidad_tipo);
+      if (!allowedOperations.has(change.operacion)) throw new Error('Operación no permitida en el cambio número ' + (index + 1) + '.');
+      if (!Number.isSafeInteger(Number(change.revision)) || Number(change.revision) < 1) throw new Error('Revisión no válida en el cambio número ' + (index + 1) + '.');
+      if (change.revision_base !== null && change.revision_base !== undefined && (!Number.isSafeInteger(Number(change.revision_base)) || Number(change.revision_base) < 0)) {
+        throw new Error('Revisión base no válida en el cambio número ' + (index + 1) + '.');
+      }
+      if (seen.has(change.change_id)) throw new Error('El paquete contiene identificadores de cambio duplicados.');
+      seen.add(change.change_id);
+      if (change.operacion !== 'DELETE' && (!change.payload || typeof change.payload !== 'object' || Array.isArray(change.payload) || String(change.payload.id) !== change.entidad_id)) {
+        throw new Error('El contenido del cambio no coincide con su identificador.');
+      }
+      return {
+        change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
+        operacion: change.operacion, revision_base: change.revision_base ?? null, revision: Number(change.revision),
+        dispositivo_id: change.dispositivo_id, fecha_utc: change.fecha_utc, payload: change.payload ?? null
+      };
+    });
+    const unsignedPackage = {
+      formato: pkg.formato, version_formato: pkg.version_formato, package_id: pkg.package_id,
+      dispositivo_origen: pkg.dispositivo_origen, creado_at_utc: pkg.creado_at_utc, tipo: pkg.tipo, cambios: changes
+    };
+    const calculatedHash = await sha256Hex(JSON.stringify(unsignedPackage));
+    if (calculatedHash.toLowerCase() !== pkg.sha256_hex.toLowerCase()) throw new Error('La huella SHA-256 no coincide. El paquete pudo haber sido alterado o dañado.');
+    return {
+      valido: true, package_id: pkg.package_id, dispositivo_origen: pkg.dispositivo_origen,
+      creado_at_utc: pkg.creado_at_utc, cambios: changes.length, sha256_hex: calculatedHash,
+      advertencia: 'Paquete validado únicamente. No se aplicaron cambios a la base local.'
+    };
+  }
+
   async function prepareSyncPackage() {
     const deviceId = await getDeviceId();
     const pending = await connection.query(
@@ -494,6 +545,9 @@ export async function openSMEStorage(storageKey) {
         }
       }
       return snapshot;
+    },
+    async validateSyncPackage(input) {
+      return validateSyncPackage(input);
     },
     async prepareSyncPackage() {
       await saveQueue;
