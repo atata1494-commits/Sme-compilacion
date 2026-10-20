@@ -261,6 +261,61 @@ export async function openSMEStorage(storageKey) {
     return String(saved.values[0].value);
   }
 
+  async function sha256Hex(value) {
+    if (!globalThis.crypto?.subtle || typeof TextEncoder === 'undefined') {
+      throw new Error('Este dispositivo no dispone de SHA-256 para validar el paquete de sincronización.');
+    }
+    const bytes = new TextEncoder().encode(value);
+    const digest = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function prepareSyncPackage() {
+    const deviceId = await getDeviceId();
+    const pending = await connection.query(
+      "SELECT change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json FROM cambios_sync WHERE estado = 'pendiente' ORDER BY fecha_utc, change_id"
+    );
+    const rows = pending.values || [];
+    const packageId = globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : 'package-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+    const createdAt = new Date().toISOString();
+    const changes = rows.map(row => ({
+      change_id: String(row.change_id),
+      entidad_tipo: String(row.entidad_tipo),
+      entidad_id: String(row.entidad_id),
+      operacion: String(row.operacion),
+      revision_base: row.revision_base == null ? null : Number(row.revision_base),
+      revision: Number(row.revision),
+      dispositivo_id: String(row.dispositivo_id),
+      fecha_utc: String(row.fecha_utc),
+      payload: row.payload_json == null ? null : JSON.parse(row.payload_json)
+    }));
+    const unsignedPackage = {
+      formato: 'SME_SYNC_PACKAGE',
+      version_formato: 1,
+      package_id: packageId,
+      dispositivo_origen: deviceId,
+      creado_at_utc: createdAt,
+      tipo: 'incremental',
+      cambios
+    };
+    const hash = await sha256Hex(JSON.stringify(unsignedPackage));
+    const packageData = { ...unsignedPackage, sha256_hex: hash };
+    await connection.beginTransaction();
+    try {
+      await run(
+        'INSERT INTO paquetes_intercambio (package_id, dispositivo_origen, creado_at_utc, version_esquema, tipo, sha256_hex, estado) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [packageId, deviceId, createdAt, 1, 'incremental', hash, 'preparado']
+      );
+      await connection.commitTransaction();
+    } catch (error) {
+      try { await connection.rollbackTransaction(); } catch (_) {}
+      throw error;
+    }
+    return packageData;
+  }
+
   async function recordSyncChange({ key, id, operation, baseRevision, revision, deviceId, payload }) {
     const changeId = globalThis.crypto?.randomUUID
       ? globalThis.crypto.randomUUID()
@@ -439,6 +494,10 @@ export async function openSMEStorage(storageKey) {
         }
       }
       return snapshot;
+    },
+    async prepareSyncPackage() {
+      await saveQueue;
+      return prepareSyncPackage();
     },
     async save(snapshot) {
       const captured = normalizeSnapshot(clone(snapshot), () => Object.fromEntries(COLLECTIONS.map(k => [k, []])));
