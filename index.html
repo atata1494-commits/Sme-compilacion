@@ -1085,14 +1085,14 @@ function smeLaborTimeMetadata(item){
 }
 SME_LABOR_TIME_CATALOG.forEach(smeLaborTimeMetadata);
 const SME_LABOR_CATALOG_STORAGE_KEY='sme_labor_catalog_additions_v1';
+const SME_LABOR_CATALOG_BASE_IDS=new Set(SME_LABOR_TIME_CATALOG.map(item=>String(item.id)));
 function smeLoadLaborCatalogAdditions(){
  try{const saved=JSON.parse(localStorage.getItem(SME_LABOR_CATALOG_STORAGE_KEY)||'[]');if(!Array.isArray(saved))return;const known=new Set(SME_LABOR_TIME_CATALOG.map(item=>String(item.id)));for(const item of saved){if(!item||typeof item.id!=='string'||!item.id.trim()||known.has(item.id))continue;smeLaborTimeMetadata(item);SME_LABOR_TIME_CATALOG.push(item);known.add(item.id)}}catch(error){console.warn('No se pudieron cargar las operaciones adicionales del catálogo SME:',error)}
 }
 smeLoadLaborCatalogAdditions();
 function smeLaborCatalogComparable(item){const normalized={};for(const key of Object.keys(item||{}).sort()){let value=item[key];if(value===undefined||value===null||value==='')continue;if(['min','suggested','max','publishedHours'].includes(key)){value=Number(value);if(!Number.isFinite(value))continue}normalized[key]=value}return smeLaborCatalogCanonical(normalized)}
 function smePersistLaborCatalogAdditions(){
- const baseIds=new Set(SME_LABOR_TIME_CATALOG.filter(item=>!String(item.id).startsWith('custom-')).map(item=>String(item.id)));
- const additions=SME_LABOR_TIME_CATALOG.filter(item=>!baseIds.has(String(item.id)));
+ const additions=SME_LABOR_TIME_CATALOG.filter(item=>!SME_LABOR_CATALOG_BASE_IDS.has(String(item.id)));
  localStorage.setItem(SME_LABOR_CATALOG_STORAGE_KEY,JSON.stringify(additions));
 }
 
