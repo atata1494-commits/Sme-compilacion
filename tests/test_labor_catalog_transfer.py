@@ -22,6 +22,8 @@ class LaborCatalogTransferTests(unittest.TestCase):
         self.assertIn("smeLaborCatalogCsv(items)", SHELL)
         self.assertIn("SME-catalogo-tiempos-v1.json", SHELL)
         self.assertIn("SME-catalogo-tiempos-v1.csv", SHELL)
+        plugin = (Path(__file__).resolve().parents[1] / "scripts" / "templates" / "SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn('"text/csv"', plugin)
 
     def test_import_validates_ids_and_detects_duplicates(self):
         self.assertIn("identificadores duplicados", SHELL)
