@@ -321,6 +321,34 @@ export async function openSMEStorage(storageKey) {
     };
   }
 
+
+  async function inspectSyncPackage(input) {
+    const validated = await validateSyncPackage(input);
+    let pkg = input;
+    if (typeof pkg === 'string') pkg = JSON.parse(pkg);
+    const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, conflictos: [] };
+    for (const change of pkg.cambios) {
+      const received = await connection.query('SELECT change_id FROM cambios_recibidos WHERE change_id = ?', [change.change_id]);
+      if (received.values?.length) { plan.ya_recibidos++; continue; }
+      const config = TABLES[change.entidad_tipo];
+      const localResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ?', [change.entidad_id]);
+      const local = localResult.values?.[0] || null;
+      if (change.operacion === 'INSERT') {
+        if (local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro ya existe en este dispositivo.' });
+        else plan.nuevas++;
+      } else if (change.operacion === 'UPDATE') {
+        if (!local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere actualizar no existe localmente.' });
+        else if (change.revision_base != null && Number(local.revision) !== Number(change.revision_base)) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'La revisión local cambió desde la revisión base del paquete.' });
+        else plan.actualizables++;
+      } else if (change.operacion === 'DELETE') {
+        if (!local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro a eliminar no existe localmente; se requiere revisar la eliminación.' });
+        else if (change.revision_base != null && Number(local.revision) !== Number(change.revision_base)) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'La revisión local cambió antes de la eliminación.' });
+        else plan.eliminaciones++;
+      }
+    }
+    return { ...validated, plan, listo_para_aplicar: plan.conflictos.length === 0, solo_analisis: true, advertencia: 'Análisis previo únicamente. No se aplicaron cambios ni se modificó la base local.' };
+  }
+
   async function prepareSyncPackage() {
     const deviceId = await getDeviceId();
     const pending = await connection.query(
@@ -548,6 +576,9 @@ export async function openSMEStorage(storageKey) {
     },
     async validateSyncPackage(input) {
       return validateSyncPackage(input);
+    },
+    async inspectSyncPackage(input) {
+      return inspectSyncPackage(input);
     },
     async prepareSyncPackage() {
       await saveQueue;
