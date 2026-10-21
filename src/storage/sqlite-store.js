@@ -327,7 +327,20 @@ export async function openSMEStorage(storageKey) {
     let pkg = input;
     if (typeof pkg === 'string') pkg = JSON.parse(pkg);
     const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, conflictos: [] };
+    const seenEntities = new Set();
+    const packageReceipt = await connection.query('SELECT package_id FROM cambios_recibidos WHERE package_id = ? LIMIT 1', [pkg.package_id]);
+    if (packageReceipt.values?.length) {
+      plan.paquete_ya_recibido = true;
+      plan.ya_recibidos = pkg.cambios.length;
+      return { ...validated, plan, listo_para_aplicar: false, solo_analisis: true, advertencia: 'Este paquete ya fue recibido anteriormente. No se aplicaron cambios ni se modificó la base local.' };
+    }
     for (const change of pkg.cambios) {
+      const entityKey = change.entidad_tipo + ':' + change.entidad_id;
+      if (seenEntities.has(entityKey)) {
+        plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El paquete contiene más de un cambio para el mismo registro; se debe ordenar y resolver antes de aplicarlo.' });
+        continue;
+      }
+      seenEntities.add(entityKey);
       const received = await connection.query('SELECT change_id FROM cambios_recibidos WHERE change_id = ?', [change.change_id]);
       if (received.values?.length) { plan.ya_recibidos++; continue; }
       const config = TABLES[change.entidad_tipo];
