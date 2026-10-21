@@ -6,7 +6,7 @@
   "description": "Aplicación de gestión para Servicios Mecánicos Enzo",
   "scripts": {
     "build": "vite build",
-    "test": "python -m unittest discover -s tests -p \"test_*.py\" -v",
+    "test": "python -m unittest discover -s tests -p \"test_*.py\" -v && node --test tests/*.test.js",
     "cap:sync": "npm run build && cap sync android"
   },
   "dependencies": {

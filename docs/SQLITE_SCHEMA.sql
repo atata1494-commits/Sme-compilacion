@@ -198,7 +198,8 @@ CREATE TABLE IF NOT EXISTS cambios_sync (
   dispositivo_id TEXT NOT NULL,
   fecha_utc TEXT NOT NULL,
   payload_json TEXT,
-  estado TEXT NOT NULL DEFAULT 'pendiente'
+  estado TEXT NOT NULL DEFAULT 'pendiente',
+  version_vector_json TEXT
 );
 
 -- Hace que volver a importar el mismo paquete sea idempotente.
@@ -207,6 +208,15 @@ CREATE TABLE IF NOT EXISTS cambios_recibidos (
   package_id TEXT NOT NULL,
   dispositivo_origen TEXT NOT NULL,
   aplicado_at_utc TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sync_entity_versions (
+  entidad_tipo TEXT NOT NULL,
+  entidad_id TEXT NOT NULL,
+  version_vector_json TEXT NOT NULL DEFAULT '{}',
+  deleted_at_utc TEXT,
+  updated_at_utc TEXT NOT NULL,
+  PRIMARY KEY (entidad_tipo, entidad_id)
 );
 
 CREATE TABLE IF NOT EXISTS paquetes_intercambio (

@@ -347,16 +347,44 @@ export async function openSMEStorage(storageKey) {
       const localResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ?', [change.entidad_id]);
       const local = localResult.values?.[0] || null;
       if (change.operacion === 'INSERT') {
-        if (local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro ya existe en este dispositivo.' });
-        else plan.nuevas++;
-      } else if (change.operacion === 'UPDATE') {
-        if (!local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere actualizar no existe localmente.' });
-        else if (change.revision_base != null && Number(local.revision) !== Number(change.revision_base)) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'La revisión local cambió desde la revisión base del paquete.' });
-        else plan.actualizables++;
-      } else if (change.operacion === 'DELETE') {
-        if (!local) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro a eliminar no existe localmente; se requiere revisar la eliminación.' });
-        else if (change.revision_base != null && Number(local.revision) !== Number(change.revision_base)) plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'La revisión local cambió antes de la eliminación.' });
-        else plan.eliminaciones++;
+        if (local) {
+          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro ya existe en este dispositivo.' });
+        } else if (!change.version_vector) {
+          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El paquete no contiene un vector causal; requiere revisión manual antes de aplicarse.' });
+        } else {
+          plan.nuevas++;
+        }
+      } else if (change.operacion === 'UPDATE' || change.operacion === 'DELETE') {
+        if (!local) {
+          const action = change.operacion === 'DELETE' ? 'eliminar' : 'actualizar';
+          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere ' + action + ' no existe localmente.' });
+        } else {
+          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
+          if (!change.version_vector || !localVersion.known) {
+            const revisionMismatch = change.revision_base != null && Number(local.revision) !== Number(change.revision_base);
+            plan.conflictos.push({
+              change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
+              motivo: revisionMismatch
+                ? 'La revisión local cambió desde la revisión base del paquete y falta un historial causal verificable.'
+                : 'Falta un vector de versiones verificable en el paquete o en el registro local; requiere revisión manual.'
+            });
+          } else {
+            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
+            if (relation === 'dominates') {
+              if (change.operacion === 'DELETE') plan.eliminaciones++;
+              else plan.actualizables++;
+            } else if (relation === 'dominated') {
+              plan.obsoletas++;
+            } else {
+              plan.conflictos.push({
+                change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
+                motivo: relation === 'concurrent'
+                  ? 'Los dispositivos modificaron este registro por separado; deben conservarse ambas versiones para que el administrador resuelva el conflicto.'
+                  : 'El vector de versiones entrante coincide con el local, pero el identificador del cambio es distinto; requiere revisión.'
+              });
+            }
+          }
+        }
       }
     }
     return { ...validated, plan, listo_para_aplicar: plan.conflictos.length === 0, solo_analisis: true, advertencia: 'Análisis previo únicamente. No se aplicaron cambios ni se modificó la base local.' };
