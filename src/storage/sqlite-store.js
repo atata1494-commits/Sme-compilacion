@@ -2,6 +2,8 @@ import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import schemaSQL from '../../docs/SQLITE_SCHEMA.sql?raw';
 import migrationV3SQL from '../../docs/SQLITE_MIGRATION_V3_TAREAS_AVISOS.sql?raw';
+import migrationV4SQL from '../../docs/SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql?raw';
+import { normalizeVersionVector, incrementVersionVector, compareVersionVectors } from './sync-version-vector.js';
 
 const DATABASE_NAME = 'sme_taller';
 const COLLECTIONS = [
@@ -204,6 +206,14 @@ export async function openSMEStorage(storageKey) {
   sqlError(schemaResult, 'No se pudo crear la estructura SQLite');
   const migrationResult = await connection.execute(migrationV3SQL);
   sqlError(migrationResult, 'No se pudo actualizar la estructura SQLite a la versión 3');
+  const migrationV4Result = await connection.execute(migrationV4SQL);
+  sqlError(migrationV4Result, 'No se pudo actualizar la estructura SQLite a la versión 4');
+
+  const syncChangeColumns = await connection.query('PRAGMA table_info(cambios_sync)');
+  if (!(syncChangeColumns.values || []).some(column => String(column.name) === 'version_vector_json')) {
+    const altered = await connection.execute('ALTER TABLE cambios_sync ADD COLUMN version_vector_json TEXT');
+    sqlError(altered, 'No se pudo agregar el vector de versiones al registro de sincronización');
+  }
 
   // Compatibilidad defensiva: las tablas nuevas de tareas/avisos/gastos también
   // participan del lector y escritor genérico, que requiere una columna revision.
@@ -261,6 +271,25 @@ export async function openSMEStorage(storageKey) {
     return String(saved.values[0].value);
   }
 
+  async function readEntityVersion(key, id) {
+    const result = await connection.query('SELECT version_vector_json, deleted_at_utc FROM sync_entity_versions WHERE entidad_tipo = ? AND entidad_id = ?', [key, String(id)]);
+    const row = result.values?.[0];
+    if (!row) return { vector: {}, deletedAt: null, known: false };
+    let vector = {};
+    if (row.version_vector_json) {
+      try { vector = normalizeVersionVector(JSON.parse(row.version_vector_json)); }
+      catch (_) { throw new Error('El historial de versiones de sincronización está dañado para ' + key + ':' + id + '.'); }
+    }
+    return { vector, deletedAt: row.deleted_at_utc ?? null, known: true };
+  }
+
+  async function advanceEntityVersion(key, id, deviceId, deletedAt = null) {
+    const current = await readEntityVersion(key, id);
+    const vector = incrementVersionVector(current.vector, deviceId);
+    await run('INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = excluded.deleted_at_utc, updated_at_utc = excluded.updated_at_utc', [key, String(id), JSON.stringify(vector), deletedAt, new Date().toISOString()]);
+    return vector;
+  }
+
   async function sha256Hex(value) {
     if (!globalThis.crypto?.subtle || typeof TextEncoder === 'undefined') {
       throw new Error('Este dispositivo no dispone de SHA-256 para validar el paquete de sincronización.');
@@ -302,10 +331,16 @@ export async function openSMEStorage(storageKey) {
       if (change.operacion !== 'DELETE' && (!change.payload || typeof change.payload !== 'object' || Array.isArray(change.payload) || String(change.payload.id) !== change.entidad_id)) {
         throw new Error('El contenido del cambio no coincide con su identificador.');
       }
+      let versionVector;
+      if (Object.prototype.hasOwnProperty.call(change, 'version_vector') && change.version_vector != null) {
+        try { versionVector = normalizeVersionVector(change.version_vector); }
+        catch (_) { throw new Error('El vector de versiones no es válido en el cambio número ' + (index + 1) + '.'); }
+      }
       return {
         change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
         operacion: change.operacion, revision_base: change.revision_base ?? null, revision: Number(change.revision),
-        dispositivo_id: change.dispositivo_id, fecha_utc: change.fecha_utc, payload: change.payload ?? null
+        dispositivo_id: change.dispositivo_id, fecha_utc: change.fecha_utc, payload: change.payload ?? null,
+        ...(versionVector ? { version_vector: versionVector } : {})
       };
     });
     const unsignedPackage = {
@@ -326,7 +361,7 @@ export async function openSMEStorage(storageKey) {
     const validated = await validateSyncPackage(input);
     let pkg = input;
     if (typeof pkg === 'string') pkg = JSON.parse(pkg);
-    const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, conflictos: [] };
+    const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, obsoletas: 0, conflictos: [] };
     const seenEntities = new Set();
     const packageReceipt = await connection.query('SELECT package_id FROM cambios_recibidos WHERE package_id = ? LIMIT 1', [pkg.package_id]);
     if (packageReceipt.values?.length) {
@@ -393,7 +428,7 @@ export async function openSMEStorage(storageKey) {
   async function prepareSyncPackage() {
     const deviceId = await getDeviceId();
     const pending = await connection.query(
-      "SELECT change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json FROM cambios_sync WHERE estado = 'pendiente' ORDER BY fecha_utc, change_id"
+      "SELECT change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, version_vector_json FROM cambios_sync WHERE estado = 'pendiente' ORDER BY fecha_utc, change_id"
     );
     const rows = pending.values || [];
     const packageId = globalThis.crypto?.randomUUID
@@ -409,7 +444,8 @@ export async function openSMEStorage(storageKey) {
       revision: Number(row.revision),
       dispositivo_id: String(row.dispositivo_id),
       fecha_utc: String(row.fecha_utc),
-      payload: row.payload_json == null ? null : JSON.parse(row.payload_json)
+      payload: row.payload_json == null ? null : JSON.parse(row.payload_json),
+      ...(row.version_vector_json ? { version_vector: normalizeVersionVector(JSON.parse(row.version_vector_json)) } : {})
     }));
     const unsignedPackage = {
       formato: 'SME_SYNC_PACKAGE',
@@ -436,15 +472,16 @@ export async function openSMEStorage(storageKey) {
     return packageData;
   }
 
-  async function recordSyncChange({ key, id, operation, baseRevision, revision, deviceId, payload }) {
+  async function recordSyncChange({ key, id, operation, baseRevision, revision, deviceId, payload, versionVector }) {
     const changeId = globalThis.crypto?.randomUUID
       ? globalThis.crypto.randomUUID()
       : 'change-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
     await run(
-      'INSERT INTO cambios_sync (change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO cambios_sync (change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, estado, version_vector_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         changeId, key, String(id), operation, baseRevision ?? null, revision,
-        deviceId, new Date().toISOString(), payload == null ? null : JSON.stringify(payload), 'pendiente'
+        deviceId, new Date().toISOString(), payload == null ? null : JSON.stringify(payload), 'pendiente',
+        versionVector == null ? null : JSON.stringify(normalizeVersionVector(versionVector))
       ]
     );
   }
@@ -544,9 +581,11 @@ export async function openSMEStorage(storageKey) {
             const previousRecord = (lastSnapshot[key] || []).find(item => String(item.id) === id);
             const baseRevision = revisions[key].get(id) || 1;
             const nextRevision = baseRevision + 1;
+            const deletedAt = new Date().toISOString();
+            const versionVector = await advanceEntityVersion(key, id, deviceId, deletedAt);
             await recordSyncChange({
               key, id, operation: 'DELETE', baseRevision, revision: nextRevision,
-              deviceId, payload: previousRecord ? { ...previousRecord, deletedAt: new Date().toISOString() } : null
+              deviceId, versionVector, payload: previousRecord ? { ...previousRecord, deletedAt } : null
             });
             await run('DELETE FROM ' + table + ' WHERE id = ?', [id]);
             revisions[key].delete(id);
@@ -561,9 +600,10 @@ export async function openSMEStorage(storageKey) {
             const baseRevision = revisions[key].get(id) || 0;
             await upsertRecord(key, record);
             const nextRevision = revisions[key].get(id) || baseRevision + 1;
+            const versionVector = await advanceEntityVersion(key, id, deviceId, null);
             await recordSyncChange({
               key, id, operation: previous ? 'UPDATE' : 'INSERT', baseRevision,
-              revision: nextRevision, deviceId, payload: record
+              revision: nextRevision, deviceId, versionVector, payload: record
             });
             await persistAppendOnlyEvents(key, record, previous);
             changes.add(key);
