@@ -400,7 +400,7 @@ export async function openSMEStorage(storageKey) {
             plan.conflictos.push({
               change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
               motivo: revisionMismatch
-                ? 'La revisión local cambió desde la revisión base del paquete y falta un historial causal verificable.'
+                ? 'La revisión local cambió desde la revisión base del paquete. Además, falta un historial causal verificable.'
                 : 'Falta un vector de versiones verificable en el paquete o en el registro local; requiere revisión manual.'
             });
           } else {
