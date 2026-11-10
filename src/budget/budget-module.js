@@ -63,7 +63,7 @@ export function renderBudgetModule(ctx) {
       add('Vehículo / referencia',q.vehiculoReferencia); add('Trabajo consultado',q.trabajoOrientativo);
       add('Precio estimado',q.usarRangoPrecio && Math.abs(parseMoney(q.estimacionMaxima)-parseMoney(q.estimacionMinima))>.005 ? amount(q.estimacionMinima)+' a '+amount(q.estimacionMaxima) : amount(q.estimacionMinima));
       if(q.ofrecerCuotasQuick && Number(q.cantidadCuotasQuick)>1){
-        add('Alternativa de pago',q.cantidadCuotasQuick+' cuotas estimadas de '+amount(total/Number(q.cantidadCuotasQuick)));
+        add('Alternativa de pago',q.cantidadCuotasQuick+' cuotas estimadas de '+amount(parseMoney(q.estimacionMinima)/Number(q.cantidadCuotasQuick)));
         add('Condición del medio de pago',q.condicionesCuotasQuick);
       }
       add('Qué podría incluir / qué falta confirmar',q.alcanceOrientativo);
