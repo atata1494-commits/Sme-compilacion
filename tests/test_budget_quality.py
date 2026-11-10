@@ -76,6 +76,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertIn("Precio estimado", document)
         self.assertIn("Consulta orientativa", document)
         self.assertIn("if(q.ofrecerCuotasQuick && Number(q.cantidadCuotasQuick)>1)", document)
+        self.assertIn("amount(parseMoney(q.estimacionMinima)/Number(q.cantidadCuotasQuick))", document)
+        self.assertNotIn("amount(total/Number(q.cantidadCuotasQuick))", document)
         self.assertIn("Condición del medio de pago", document)
         self.assertIn("Presupuesto de reparación", document)
         self.assertIn("No se realizarán trabajos adicionales sin autorización", document)
