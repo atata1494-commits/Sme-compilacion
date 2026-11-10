@@ -75,6 +75,8 @@ class BudgetQualityTests(unittest.TestCase):
         self.assertNotIn("Los costos, márgenes y cálculos internos del taller", document)
         self.assertIn("Precio estimado", document)
         self.assertIn("Consulta orientativa", document)
+        self.assertIn("if(q.ofrecerCuotasQuick && Number(q.cantidadCuotasQuick)>1)", document)
+        self.assertIn("Condición del medio de pago", document)
         self.assertIn("Presupuesto de reparación", document)
         self.assertIn("No se realizarán trabajos adicionales sin autorización", document)
         self.assertIn("border-bottom:3px solid #b99861", document)
