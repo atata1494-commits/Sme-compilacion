@@ -83,7 +83,8 @@ class SQLiteSyncPackageTests(unittest.TestCase):
         self.assertIn("La revisión local cambió desde la revisión base del paquete.", self.source)
         self.assertIn("No se aplicaron cambios ni se modificó la base local.", self.source)
         self.assertIn("async inspectSyncPackage(input)", self.source)
-        self.assertIn("SELECT package_id FROM cambios_recibidos WHERE package_id = ? LIMIT 1", self.source)
+        self.assertIn("SELECT COUNT(*) AS total FROM cambios_recibidos WHERE package_id = ?", self.source)
+        self.assertIn("receivedCount >= pkg.cambios.length", self.source)
         self.assertIn("El paquete contiene más de un cambio para el mismo registro", self.source)
 
 
