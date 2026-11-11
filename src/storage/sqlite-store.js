@@ -215,6 +215,15 @@ export async function openSMEStorage(storageKey) {
     sqlError(altered, 'No se pudo agregar el vector de versiones al registro de sincronización');
   }
 
+  const conflictColumns = await connection.query('PRAGMA table_info(conflictos_sync)');
+  const knownConflictColumns = new Set((conflictColumns.values || []).map(column => String(column.name)));
+  for (const [column, definition] of [['paquete_id', 'TEXT'], ['dispositivo_origen', 'TEXT']]) {
+    if (!knownConflictColumns.has(column)) {
+      const altered = await connection.execute('ALTER TABLE conflictos_sync ADD COLUMN ' + column + ' ' + definition);
+      sqlError(altered, 'No se pudo ampliar el historial de conflictos (' + column + ')');
+    }
+  }
+
   // Compatibilidad defensiva: las tablas nuevas de tareas/avisos/gastos también
   // participan del lector y escritor genérico, que requiere una columna revision.
   // En instalaciones que ya tenían v3, CREATE TABLE IF NOT EXISTS no agrega
@@ -363,8 +372,9 @@ export async function openSMEStorage(storageKey) {
     if (typeof pkg === 'string') pkg = JSON.parse(pkg);
     const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, obsoletas: 0, conflictos: [] };
     const seenEntities = new Set();
-    const packageReceipt = await connection.query('SELECT package_id FROM cambios_recibidos WHERE package_id = ? LIMIT 1', [pkg.package_id]);
-    if (packageReceipt.values?.length) {
+    const packageReceipt = await connection.query('SELECT COUNT(*) AS total FROM cambios_recibidos WHERE package_id = ?', [pkg.package_id]);
+    const receivedCount = Number(packageReceipt.values?.[0]?.total || 0);
+    if (receivedCount >= pkg.cambios.length) {
       plan.paquete_ya_recibido = true;
       plan.ya_recibidos = pkg.cambios.length;
       return { ...validated, plan, listo_para_aplicar: false, solo_analisis: true, advertencia: 'Este paquete ya fue recibido anteriormente. No se aplicaron cambios ni se modificó la base local.' };
@@ -460,7 +470,7 @@ export async function openSMEStorage(storageKey) {
       try {
         for (const conflict of inspection.plan.conflictos) {
           const existing = await connection.query(
-            'SELECT conflict_id FROM conflictos_sync WHERE change_id_entrante = ? AND resuelto_at_utc IS NULL LIMIT 1',
+            'SELECT conflict_id FROM conflictos_sync WHERE change_id_entrante = ? LIMIT 1',
             [conflict.change_id]
           );
           if (existing.values?.length) continue;
@@ -480,11 +490,12 @@ export async function openSMEStorage(storageKey) {
             ? globalThis.crypto.randomUUID()
             : 'conflict-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
           await run(
-            'INSERT INTO conflictos_sync (conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc, resuelto_at_utc, resolucion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)',
+            'INSERT INTO conflictos_sync (conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc, resuelto_at_utc, resolucion, paquete_id, dispositivo_origen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)',
             [
               conflictId, conflict.entidad_tipo, conflict.entidad_id, conflict.change_id,
               conflict.motivo, localRecord == null ? null : JSON.stringify(localRecord),
-              change == null ? null : JSON.stringify(change), new Date().toISOString()
+              change == null ? null : JSON.stringify(change), new Date().toISOString(),
+              pkgWithConflicts.package_id, pkgWithConflicts.dispositivo_origen
             ]
           );
         }
@@ -800,6 +811,83 @@ export async function openSMEStorage(storageKey) {
     }
   }
 
+  async function resolveSyncConflict({ conflictId, choice, resolvedByUserId }) {
+    if (typeof conflictId !== 'string' || !conflictId.trim()) throw new Error('Se necesita un conflicto válido.');
+    if (choice !== 'local' && choice !== 'incoming') throw new Error('La resolución debe elegir la versión local o la entrante.');
+    if (typeof resolvedByUserId !== 'string' || !resolvedByUserId.trim()) throw new Error('Se necesita identificar al usuario administrador que resuelve el conflicto.');
+
+    const conflictResult = await connection.query('SELECT * FROM conflictos_sync WHERE conflict_id = ? LIMIT 1', [conflictId]);
+    const conflict = conflictResult.values?.[0];
+    if (!conflict) throw new Error('El conflicto ya no existe.');
+    if (conflict.resuelto_at_utc) return { resuelto: false, repetido: true, mensaje: 'Este conflicto ya fue resuelto.' };
+
+    const key = String(conflict.entidad_tipo);
+    const id = String(conflict.entidad_id);
+    const config = TABLES[key];
+    if (!config) throw new Error('El tipo de registro del conflicto no es compatible.');
+    const incoming = conflict.registro_entrante_json ? JSON.parse(conflict.registro_entrante_json) : null;
+    if (!incoming || incoming.change_id !== conflict.change_id_entrante || String(incoming.entidad_id) !== id || !incoming.version_vector) {
+      throw new Error('La versión entrante guardada no es válida o no tiene vector causal verificable.');
+    }
+    const incomingVector = normalizeVersionVector(incoming.version_vector);
+
+    await connection.beginTransaction();
+    try {
+      const currentResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ? LIMIT 1', [id]);
+      const currentRow = currentResult.values?.[0] || null;
+      const currentRecord = currentRow ? JSON.parse(currentRow.payload_json) : null;
+      const savedLocal = conflict.registro_local_json ? JSON.parse(conflict.registro_local_json) : null;
+      if (JSON.stringify(currentRecord) !== JSON.stringify(savedLocal)) {
+        throw new Error('El registro local cambió desde que se detectó el conflicto. Se necesita una nueva revisión.');
+      }
+      const localVersion = await readEntityVersion(key, id);
+      if (!localVersion.known || compareVersionVectors(localVersion.vector, incomingVector) !== 'concurrent') {
+        throw new Error('La relación causal cambió o no puede verificarse. Se necesita volver a analizar el paquete.');
+      }
+
+      const selectedRecord = choice === 'local' ? currentRecord : (incoming.operacion === 'DELETE' ? null : incoming.payload);
+      if (selectedRecord && String(selectedRecord.id) !== id) throw new Error('El registro entrante no coincide con el identificador.');
+      const deviceId = await getDeviceId();
+      const resolvedVector = incrementVersionVector(mergeVersionVectors(localVersion.vector, incomingVector), deviceId);
+      const now = new Date().toISOString();
+      const baseRevision = Number(currentRow?.revision || 0);
+      let revision = baseRevision + 1;
+      let operation;
+
+      if (selectedRecord) {
+        await upsertRecord(key, selectedRecord);
+        revision = revisions[key].get(id) || revision;
+        await run('INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, NULL, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = NULL, updated_at_utc = excluded.updated_at_utc', [key, id, JSON.stringify(resolvedVector), now]);
+        await persistAppendOnlyEvents(key, selectedRecord, currentRecord);
+        operation = currentRecord ? 'UPDATE' : 'INSERT';
+      } else {
+        await run('DELETE FROM ' + config.table + ' WHERE id = ?', [id]);
+        revisions[key].delete(id);
+        await run('INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = excluded.deleted_at_utc, updated_at_utc = excluded.updated_at_utc', [key, id, JSON.stringify(resolvedVector), now, now]);
+        operation = 'DELETE';
+      }
+
+      await recordSyncChange({ key, id, operation, baseRevision, revision, deviceId, versionVector: resolvedVector, payload: selectedRecord || { ...(currentRecord || savedLocal || incoming.payload || {}), deletedAt: now } });
+      await run('INSERT OR IGNORE INTO cambios_recibidos (change_id, package_id, dispositivo_origen, aplicado_at_utc) VALUES (?, ?, ?, ?)', [incoming.change_id, conflict.paquete_id || 'resolved-' + conflict.conflict_id, conflict.dispositivo_origen || incoming.dispositivo_id || 'unknown', now]);
+      await run('UPDATE conflictos_sync SET resuelto_at_utc = ?, resolucion = ? WHERE conflict_id = ? AND resuelto_at_utc IS NULL', [now, JSON.stringify({ eleccion: choice, usuario_id: resolvedByUserId.trim(), resuelto_at_utc: now, version_vector: resolvedVector }), conflictId]);
+
+      if (key === 'cuentas') await rebuildPayments(await readSnapshotForRemoteApply());
+      const refreshedSnapshot = await readSnapshotForRemoteApply();
+      await connection.commitTransaction();
+      lastSnapshot = clone(refreshedSnapshot);
+      return { resuelto: true, conflict_id: conflictId, eleccion: choice, version_vector: resolvedVector, mensaje: 'Conflicto resuelto y decisión registrada como un nuevo cambio causal saliente.' };
+    } catch (error) {
+      try { await connection.rollbackTransaction(); } catch (_) {}
+      try {
+        for (const collection of COLLECTIONS) {
+          const rows = await connection.query('SELECT id, revision FROM ' + TABLES[collection].table);
+          revisions[collection] = new Map((rows.values || []).map(row => [String(row.id), Number(row.revision) || 1]));
+        }
+      } catch (_) {}
+      throw error;
+    }
+  }
+
   return {
     isNative: true,
     async load(emptyDB) {
@@ -834,6 +922,11 @@ export async function openSMEStorage(storageKey) {
     },
     async applySyncPackage(input) {
       const operation = saveQueue.then(() => applySyncPackage(input));
+      saveQueue = operation.catch(() => {});
+      return operation;
+    },
+    async resolveSyncConflict(input) {
+      const operation = saveQueue.then(() => resolveSyncConflict(input));
       saveQueue = operation.catch(() => {});
       return operation;
     },
