@@ -26,6 +26,20 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertNotIn('recordSyncChange(', apply_code)
         self.assertIn('async applySyncPackage(input)', source)
 
+    def test_sync_conflicts_are_persisted_with_both_versions_for_review(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function applySyncPackage(input)')
+        end = source.index('  async function prepareSyncPackage()', start)
+        apply_code = source[start:end]
+        self.assertIn('INSERT INTO conflictos_sync', apply_code)
+        self.assertIn('registro_local_json', apply_code)
+        self.assertIn('registro_entrante_json', apply_code)
+        self.assertIn('resuelto_at_utc IS NULL', apply_code)
+        self.assertIn('Los conflictos quedaron guardados para revisión.', apply_code)
+        self.assertIn('async listSyncConflicts()', source)
+        self.assertIn('registro_local: row.registro_local_json', source)
+        self.assertIn('registro_entrante: row.registro_entrante_json', source)
+
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
         migration = (ROOT / 'docs' / 'SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql').read_text(encoding='utf-8')
