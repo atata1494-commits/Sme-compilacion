@@ -211,6 +211,7 @@ form button{margin-top:10px;width:100%}
 </nav>
 <script type="module">
 import { openSMEStorage } from './src/storage/sqlite-store.js';
+import { nextWorkOrderNumber } from './src/storage/work-order-number.js';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Printer } from '@capgo/capacitor-printer';
 import { Share } from '@capacitor/share';
@@ -222,8 +223,25 @@ import { renderBudgetModule } from './src/budget/budget-module.js';
 const KEY='sme_taller_v1';
 const emptyDB=()=>({clientes:[],vehiculos:[],trabajos:[],presupuestos:[],movimientos:[],eventos:[],recepciones:[],diagnosticos:[],cuentas:[],asistencias:[],terceros:[],trabajosExternos:[],configHorarios:[],tareas:[],avisos:[],solicitudesGasto:[]});
 let storage,db;
+function getWorkOrderDeviceCode(){
+  const key='sme_work_order_device_code_v1';
+  let code='';
+  try { code=String(localStorage.getItem(key)||'').trim().toUpperCase(); } catch (_) {}
+  if(/^[A-F0-9]{12}$/.test(code))return code;
+  const bytes=new Uint8Array(6);
+  if(globalThis.crypto?.getRandomValues)globalThis.crypto.getRandomValues(bytes);
+  else {
+    const fallback=String(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36)).replace(/[^a-f0-9]/gi,'').toUpperCase();
+    code=fallback.slice(0,12).padEnd(12,'0');
+  }
+  if(!code)code=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
+  try { localStorage.setItem(key,code); } catch (_) { throw new Error('No se pudo guardar el identificador de este dispositivo. No se crearán órdenes para evitar numeraciones duplicadas.'); }
+  return code;
+}
+let workOrderDeviceCode;
 try {
   storage=await openSMEStorage(KEY);
+  workOrderDeviceCode=getWorkOrderDeviceCode();
   db=await storage.load(emptyDB);
 } catch(error) {
   console.error('Error de almacenamiento SME:',error);
@@ -863,7 +881,7 @@ function normalizeSearch(value){return String(value??'').normalize('NFD').replac
 function searchableRecordText(key,o){return [recordTitle(key,o),...displayValues(key,o).map(x=>x[1]),JSON.stringify(o)].join(' ')}
 function bindKilometerInput(input){if(!input)return;input.type='text';input.inputMode='numeric';input.autocomplete='off';input.value=formatKilometers(input.value);input.addEventListener('input',()=>{const old=input.value,caret=input.selectionStart??old.length,digitsBefore=old.slice(0,caret).replace(/\D/g,'').length;input.value=formatKilometers(old);let seen=0,pos=0;while(pos<input.value.length&&seen<digitsBefore){if(/\d/.test(input.value[pos]))seen++;pos++}try{input.setSelectionRange(pos,pos)}catch(_){}});}
 function bindKilometerFields(form){Array.from(form.querySelectorAll('input[name="kilometros"]')).forEach(bindKilometerInput)}
-function nextWorkNumber(){return 'OT-'+String((db.trabajos.reduce((m,x)=>Math.max(m,Number(String(x.numero||'').replace(/\D/g,''))||0),0))+1).padStart(4,'0')}
+function nextWorkNumber(){return nextWorkOrderNumber(workOrderDeviceCode,db.trabajos)}
 function cashNumbers(){
  const incomes=db.movimientos.filter(x=>x.tipo==='Ingreso'),outflows=db.movimientos.filter(x=>x.tipo==='Egreso');
  const grossIncome=incomes.reduce((n,x)=>n+(Number(x.importe)||0),0),directExpenses=outflows.reduce((n,x)=>n+(Number(x.importe)||0),0);
