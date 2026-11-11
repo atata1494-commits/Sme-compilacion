@@ -462,7 +462,7 @@ export async function openSMEStorage(storageKey) {
     if (typeof pkg === 'string') pkg = JSON.parse(pkg);
     const changes = pkg.cambios.map(change => ({
       ...change,
-      version_vector: normalizeVersionVector(change.version_vector)
+      version_vector: change.version_vector == null ? null : normalizeVersionVector(change.version_vector)
     }));
     const alreadyReceived = new Set();
     for (const change of changes) {
