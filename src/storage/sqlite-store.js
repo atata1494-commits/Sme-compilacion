@@ -933,7 +933,7 @@ export async function openSMEStorage(storageKey) {
     async listSyncConflicts() {
       await saveQueue;
       const result = await connection.query(
-        'SELECT conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc FROM conflictos_sync WHERE resuelto_at_utc IS NULL ORDER BY detectado_at_utc, conflict_id'
+        'SELECT conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc, paquete_id, dispositivo_origen FROM conflictos_sync WHERE resuelto_at_utc IS NULL ORDER BY detectado_at_utc, conflict_id'
       );
       return (result.values || []).map(row => ({
         ...row,
