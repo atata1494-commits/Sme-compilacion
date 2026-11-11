@@ -43,7 +43,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
     def test_conflict_resolution_is_causal_atomic_and_auditable(self):
         source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
         start = source.index('  async function resolveSyncConflict(')
-        end = source.index('  return {', start)
+        end = source.index('\n  return {\n    isNative: true,', start)
         resolve_code = source[start:end]
         self.assertIn('compareVersionVectors(localVersion.vector, incomingVector) !== \'concurrent\'', resolve_code)
         self.assertIn('mergeVersionVectors(localVersion.vector, incomingVector)', resolve_code)
