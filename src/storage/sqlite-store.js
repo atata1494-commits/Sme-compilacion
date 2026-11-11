@@ -463,6 +463,8 @@ export async function openSMEStorage(storageKey) {
     }
 
     let refreshedSnapshot = null;
+    let appliedChanges = 0;
+    let skippedStale = 0;
     await connection.beginTransaction();
     try {
       for (const change of changes) {
@@ -478,7 +480,9 @@ export async function openSMEStorage(storageKey) {
           : (change.operacion === 'INSERT' && !local ? 'dominates' : null);
 
         if (change.operacion === 'INSERT' || change.operacion === 'UPDATE') {
-          if (relation !== 'dominated') {
+          if (relation === 'dominated') {
+            skippedStale++;
+          } else {
             const record = change.payload;
             if (!record || String(record.id) !== id) throw new Error('El contenido del cambio remoto no coincide con su identificador.');
             await upsertRecord(key, record);
@@ -490,9 +494,12 @@ export async function openSMEStorage(storageKey) {
               [key, id, JSON.stringify(mergedVector), new Date().toISOString()]
             );
             await persistAppendOnlyEvents(key, record, local ? JSON.parse(local.payload_json) : null);
+            appliedChanges++;
           }
         } else if (change.operacion === 'DELETE') {
-          if (relation !== 'dominated') {
+          if (relation === 'dominated') {
+            skippedStale++;
+          } else {
             await run('DELETE FROM ' + config.table + ' WHERE id = ?', [id]);
             revisions[key].delete(id);
             const mergedVector = localVersion.known
@@ -502,6 +509,7 @@ export async function openSMEStorage(storageKey) {
               'INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = excluded.deleted_at_utc, updated_at_utc = excluded.updated_at_utc',
               [key, id, JSON.stringify(mergedVector), change.payload?.deletedAt || change.fecha_utc || new Date().toISOString(), new Date().toISOString()]
             );
+            appliedChanges++;
           }
         }
 
@@ -525,8 +533,8 @@ export async function openSMEStorage(storageKey) {
       return {
         aplicado: true,
         paquete_id: pkg.package_id,
-        cambios_aplicados: changes.length - alreadyReceived.size,
-        cambios_omitidos: alreadyReceived.size + (inspection.plan.obsoletas || 0),
+        cambios_aplicados: appliedChanges,
+        cambios_omitidos: alreadyReceived.size + skippedStale,
         plan: inspection.plan,
         mensaje: 'Paquete aplicado en una transacción. Los cambios remotos no se registraron como cambios locales salientes.'
       };
