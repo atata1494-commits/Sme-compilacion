@@ -455,7 +455,45 @@ export async function openSMEStorage(storageKey) {
       return { aplicado: false, repetido: true, plan: inspection.plan, mensaje: 'El paquete ya había sido recibido; no se modificó la base.' };
     }
     if (inspection.plan?.conflictos?.length) {
-      return { aplicado: false, requiere_revision: true, plan: inspection.plan, mensaje: 'El paquete contiene conflictos. No se aplicó ningún cambio.' };
+      const pkgWithConflicts = typeof input === 'string' ? JSON.parse(input) : input;
+      await connection.beginTransaction();
+      try {
+        for (const conflict of inspection.plan.conflictos) {
+          const existing = await connection.query(
+            'SELECT conflict_id FROM conflictos_sync WHERE change_id_entrante = ? AND resuelto_at_utc IS NULL LIMIT 1',
+            [conflict.change_id]
+          );
+          if (existing.values?.length) continue;
+          const change = (pkgWithConflicts.cambios || []).find(item => item.change_id === conflict.change_id);
+          const config = change ? TABLES[change.entidad_tipo] : null;
+          let localRecord = null;
+          if (change && config) {
+            const localResult = await connection.query(
+              'SELECT payload_json FROM ' + config.table + ' WHERE id = ? LIMIT 1',
+              [change.entidad_id]
+            );
+            if (localResult.values?.[0]?.payload_json) {
+              localRecord = JSON.parse(localResult.values[0].payload_json);
+            }
+          }
+          const conflictId = globalThis.crypto?.randomUUID
+            ? globalThis.crypto.randomUUID()
+            : 'conflict-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
+          await run(
+            'INSERT INTO conflictos_sync (conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc, resuelto_at_utc, resolucion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)',
+            [
+              conflictId, conflict.entidad_tipo, conflict.entidad_id, conflict.change_id,
+              conflict.motivo, localRecord == null ? null : JSON.stringify(localRecord),
+              change == null ? null : JSON.stringify(change), new Date().toISOString()
+            ]
+          );
+        }
+        await connection.commitTransaction();
+      } catch (error) {
+        try { await connection.rollbackTransaction(); } catch (_) {}
+        throw error;
+      }
+      return { aplicado: false, requiere_revision: true, conflictos_guardados: inspection.plan.conflictos.length, plan: inspection.plan, mensaje: 'Los conflictos quedaron guardados para revisión. No se aplicó ningún cambio del paquete.' };
     }
 
     let pkg = input;
@@ -798,6 +836,17 @@ export async function openSMEStorage(storageKey) {
       const operation = saveQueue.then(() => applySyncPackage(input));
       saveQueue = operation.catch(() => {});
       return operation;
+    },
+    async listSyncConflicts() {
+      await saveQueue;
+      const result = await connection.query(
+        'SELECT conflict_id, entidad_tipo, entidad_id, change_id_entrante, motivo, registro_local_json, registro_entrante_json, detectado_at_utc FROM conflictos_sync WHERE resuelto_at_utc IS NULL ORDER BY detectado_at_utc, conflict_id'
+      );
+      return (result.values || []).map(row => ({
+        ...row,
+        registro_local: row.registro_local_json ? JSON.parse(row.registro_local_json) : null,
+        registro_entrante: row.registro_entrante_json ? JSON.parse(row.registro_entrante_json) : null
+      }));
     },
     async prepareSyncPackage() {
       await saveQueue;
