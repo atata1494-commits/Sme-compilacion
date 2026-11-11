@@ -3,7 +3,7 @@ import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import schemaSQL from '../../docs/SQLITE_SCHEMA.sql?raw';
 import migrationV3SQL from '../../docs/SQLITE_MIGRATION_V3_TAREAS_AVISOS.sql?raw';
 import migrationV4SQL from '../../docs/SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql?raw';
-import { normalizeVersionVector, incrementVersionVector, compareVersionVectors } from './sync-version-vector.js';
+import { normalizeVersionVector, incrementVersionVector, compareVersionVectors, mergeVersionVectors } from './sync-version-vector.js';
 
 const DATABASE_NAME = 'sme_taller';
 const COLLECTIONS = [
@@ -387,7 +387,13 @@ export async function openSMEStorage(storageKey) {
         } else if (!change.version_vector) {
           plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El paquete no contiene un vector causal; requiere revisión manual antes de aplicarse.' });
         } else {
-          plan.nuevas++;
+          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
+          if (localVersion.known) {
+            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
+            if (relation === 'dominates') plan.nuevas++;
+            else if (relation === 'dominated') plan.obsoletas++;
+            else plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El identificador ya tiene un historial de borrado o una versión causal incompatible.' });
+          } else plan.nuevas++;
         }
       } else if (change.operacion === 'UPDATE' || change.operacion === 'DELETE') {
         if (!local) {
@@ -423,6 +429,117 @@ export async function openSMEStorage(storageKey) {
       }
     }
     return { ...validated, plan, listo_para_aplicar: plan.conflictos.length === 0, solo_analisis: true, advertencia: 'Análisis previo únicamente. No se aplicaron cambios ni se modificó la base local.' };
+  }
+
+  async function readSnapshotForRemoteApply() {
+    const out = Object.fromEntries(COLLECTIONS.map(key => [key, []]));
+    for (const key of COLLECTIONS) {
+      const result = await connection.query('SELECT payload_json FROM ' + TABLES[key].table + ' ORDER BY rowid');
+      out[key] = (result.values || []).map(row => JSON.parse(row.payload_json));
+    }
+    return out;
+  }
+
+  async function applySyncPackage(input) {
+    await saveQueue;
+    const inspection = await inspectSyncPackage(input);
+    if (inspection.plan?.paquete_ya_recibido) {
+      return { aplicado: false, repetido: true, plan: inspection.plan, mensaje: 'El paquete ya había sido recibido; no se modificó la base.' };
+    }
+    if (inspection.plan?.conflictos?.length) {
+      return { aplicado: false, requiere_revision: true, plan: inspection.plan, mensaje: 'El paquete contiene conflictos. No se aplicó ningún cambio.' };
+    }
+
+    let pkg = input;
+    if (typeof pkg === 'string') pkg = JSON.parse(pkg);
+    const changes = pkg.cambios.map(change => ({
+      ...change,
+      version_vector: normalizeVersionVector(change.version_vector)
+    }));
+    const alreadyReceived = new Set();
+    for (const change of changes) {
+      const result = await connection.query('SELECT change_id FROM cambios_recibidos WHERE change_id = ? LIMIT 1', [change.change_id]);
+      if (result.values?.length) alreadyReceived.add(change.change_id);
+    }
+
+    let refreshedSnapshot = null;
+    await connection.beginTransaction();
+    try {
+      for (const change of changes) {
+        if (alreadyReceived.has(change.change_id)) continue;
+        const key = change.entidad_tipo;
+        const id = String(change.entidad_id);
+        const config = TABLES[key];
+        const localResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ?', [id]);
+        const local = localResult.values?.[0] || null;
+        const localVersion = await readEntityVersion(key, id);
+        const relation = localVersion.known
+          ? compareVersionVectors(change.version_vector, localVersion.vector)
+          : (change.operacion === 'INSERT' && !local ? 'dominates' : null);
+
+        if (change.operacion === 'INSERT' || change.operacion === 'UPDATE') {
+          if (relation !== 'dominated') {
+            const record = change.payload;
+            if (!record || String(record.id) !== id) throw new Error('El contenido del cambio remoto no coincide con su identificador.');
+            await upsertRecord(key, record);
+            const mergedVector = localVersion.known
+              ? mergeVersionVectors(localVersion.vector, change.version_vector)
+              : change.version_vector;
+            await run(
+              'INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, NULL, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = NULL, updated_at_utc = excluded.updated_at_utc',
+              [key, id, JSON.stringify(mergedVector), new Date().toISOString()]
+            );
+            await persistAppendOnlyEvents(key, record, local ? JSON.parse(local.payload_json) : null);
+          }
+        } else if (change.operacion === 'DELETE') {
+          if (relation !== 'dominated') {
+            await run('DELETE FROM ' + config.table + ' WHERE id = ?', [id]);
+            revisions[key].delete(id);
+            const mergedVector = localVersion.known
+              ? mergeVersionVectors(localVersion.vector, change.version_vector)
+              : change.version_vector;
+            await run(
+              'INSERT INTO sync_entity_versions (entidad_tipo, entidad_id, version_vector_json, deleted_at_utc, updated_at_utc) VALUES (?, ?, ?, ?, ?) ON CONFLICT(entidad_tipo, entidad_id) DO UPDATE SET version_vector_json = excluded.version_vector_json, deleted_at_utc = excluded.deleted_at_utc, updated_at_utc = excluded.updated_at_utc',
+              [key, id, JSON.stringify(mergedVector), change.payload?.deletedAt || change.fecha_utc || new Date().toISOString(), new Date().toISOString()]
+            );
+          }
+        }
+
+        await run(
+          'INSERT INTO cambios_recibidos (change_id, package_id, dispositivo_origen, aplicado_at_utc) VALUES (?, ?, ?, ?)',
+          [change.change_id, pkg.package_id, pkg.dispositivo_origen, new Date().toISOString()]
+        );
+      }
+
+      if (changes.some(change => change.entidad_tipo === 'cuentas' && !alreadyReceived.has(change.change_id))) {
+        const paymentSnapshot = await readSnapshotForRemoteApply();
+        await rebuildPayments(paymentSnapshot);
+      }
+      await run(
+        'INSERT INTO paquetes_intercambio (package_id, dispositivo_origen, creado_at_utc, version_esquema, tipo, sha256_hex, estado) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(package_id) DO UPDATE SET estado = excluded.estado',
+        [pkg.package_id, pkg.dispositivo_origen, pkg.creado_at_utc, 1, 'incremental', pkg.sha256_hex, 'aplicado']
+      );
+      refreshedSnapshot = await readSnapshotForRemoteApply();
+      await connection.commitTransaction();
+      lastSnapshot = clone(refreshedSnapshot);
+      return {
+        aplicado: true,
+        paquete_id: pkg.package_id,
+        cambios_aplicados: changes.length - alreadyReceived.size,
+        cambios_omitidos: alreadyReceived.size + (inspection.plan.obsoletas || 0),
+        plan: inspection.plan,
+        mensaje: 'Paquete aplicado en una transacción. Los cambios remotos no se registraron como cambios locales salientes.'
+      };
+    } catch (error) {
+      try { await connection.rollbackTransaction(); } catch (_) {}
+      try {
+        for (const key of COLLECTIONS) {
+          const rows = await connection.query('SELECT id, revision FROM ' + TABLES[key].table);
+          revisions[key] = new Map((rows.values || []).map(row => [String(row.id), Number(row.revision) || 1]));
+        }
+      } catch (_) {}
+      throw error;
+    }
   }
 
   async function prepareSyncPackage() {
@@ -660,6 +777,11 @@ export async function openSMEStorage(storageKey) {
     },
     async inspectSyncPackage(input) {
       return inspectSyncPackage(input);
+    },
+    async applySyncPackage(input) {
+      const operation = saveQueue.then(() => applySyncPackage(input));
+      saveQueue = operation.catch(() => {});
+      return operation;
     },
     async prepareSyncPackage() {
       await saveQueue;
