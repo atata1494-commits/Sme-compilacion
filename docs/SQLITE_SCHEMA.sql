@@ -239,7 +239,9 @@ CREATE TABLE IF NOT EXISTS conflictos_sync (
   registro_entrante_json TEXT,
   detectado_at_utc TEXT NOT NULL,
   resuelto_at_utc TEXT,
-  resolucion TEXT
+  resolucion TEXT,
+  paquete_id TEXT,
+  dispositivo_origen TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_vehiculos_cliente ON vehiculos(cliente_id);
