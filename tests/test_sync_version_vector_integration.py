@@ -40,6 +40,23 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('registro_local: row.registro_local_json', source)
         self.assertIn('registro_entrante: row.registro_entrante_json', source)
 
+    def test_conflict_resolution_is_causal_atomic_and_auditable(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function resolveSyncConflict(')
+        end = source.index('  return {', start)
+        resolve_code = source[start:end]
+        self.assertIn('compareVersionVectors(localVersion.vector, incomingVector) !== \'concurrent\'', resolve_code)
+        self.assertIn('mergeVersionVectors(localVersion.vector, incomingVector)', resolve_code)
+        self.assertIn('incrementVersionVector(', resolve_code)
+        self.assertIn('recordSyncChange(', resolve_code)
+        self.assertIn('resolvedByUserId.trim()', resolve_code)
+        self.assertIn('resuelto_at_utc = ?', resolve_code)
+        self.assertIn('await connection.rollbackTransaction()', resolve_code)
+        self.assertIn('El registro local cambió desde que se detectó el conflicto.', resolve_code)
+        self.assertIn('paquete_id', source)
+        self.assertIn('dispositivo_origen', source)
+        self.assertIn('async resolveSyncConflict(input)', source)
+
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
         migration = (ROOT / 'docs' / 'SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql').read_text(encoding='utf-8')
