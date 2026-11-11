@@ -441,7 +441,6 @@ export async function openSMEStorage(storageKey) {
   }
 
   async function applySyncPackage(input) {
-    await saveQueue;
     const inspection = await inspectSyncPackage(input);
     if (inspection.plan?.paquete_ya_recibido) {
       return { aplicado: false, repetido: true, plan: inspection.plan, mensaje: 'El paquete ya había sido recibido; no se modificó la base.' };
