@@ -396,9 +396,18 @@ export async function openSMEStorage(storageKey) {
           } else plan.nuevas++;
         }
       } else if (change.operacion === 'UPDATE' || change.operacion === 'DELETE') {
-        if (!local) {
-          const action = change.operacion === 'DELETE' ? 'eliminar' : 'actualizar';
-          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere ' + action + ' no existe localmente.' });
+        if (!local && change.operacion === 'DELETE') {
+          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
+          if (!change.version_vector || !localVersion.known) {
+            plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'No existe el registro ni un historial local verificable del borrado.' });
+          } else {
+            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
+            if (relation === 'dominates') plan.eliminaciones++;
+            else if (relation === 'dominated') plan.obsoletas++;
+            else plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El borrado remoto coincide con una versión local o entra en conflicto con otro borrado.' });
+          }
+        } else if (!local) {
+          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere actualizar no existe localmente.' });
         } else {
           const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
           if (!change.version_vector || !localVersion.known) {
