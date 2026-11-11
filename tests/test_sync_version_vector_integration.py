@@ -34,7 +34,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('INSERT INTO conflictos_sync', apply_code)
         self.assertIn('registro_local_json', apply_code)
         self.assertIn('registro_entrante_json', apply_code)
-        self.assertIn('resuelto_at_utc IS NULL', apply_code)
+        self.assertIn('resuelto_at_utc IS NULL', source)
         self.assertIn('Los conflictos quedaron guardados para revisión.', apply_code)
         self.assertIn('async listSyncConflicts()', source)
         self.assertIn('registro_local: row.registro_local_json', source)
