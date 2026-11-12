@@ -91,6 +91,17 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('SELECT change_id FROM cambios_recibidos WHERE change_id = ?', inspect_code)
         self.assertIn('if (received.values?.length) { plan.ya_recibidos++; continue; }', inspect_code)
 
+    def test_unfinished_budget_forms_are_saved_on_input_and_change_and_restored(self):
+        source = (ROOT / 'index.html').read_text(encoding='utf-8')
+        budget = (ROOT / 'src' / 'budget' / 'budget-module.js').read_text(encoding='utf-8')
+        self.assertIn("document.addEventListener('input',smeCaptureFormDraft,true)", source)
+        self.assertIn("document.addEventListener('change',smeCaptureFormDraft,true)", source)
+        self.assertIn("smeSaveFormDraft(form)", source)
+        self.assertIn("smeRestoreFormDrafts()", source)
+        self.assertIn('id="sme-budget-quick-form"', budget)
+        self.assertIn('name="quickScope"', budget)
+        self.assertIn("localStorage.removeItem('sme_form_draft_v1:presupuestos:'+form.id)", budget)
+
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
         migration = (ROOT / 'docs' / 'SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql').read_text(encoding='utf-8')
