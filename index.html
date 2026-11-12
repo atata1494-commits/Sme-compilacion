@@ -350,6 +350,13 @@ function smeSaveFormDraft(form){
  localStorage.setItem(smeDraftKey(form),JSON.stringify({savedAt:Date.now(),values}));
  }catch(error){console.warn('No se pudo guardar el borrador del formulario:',error)}
 }
+function smeCaptureFormDraft(event){
+  const form=event.target?.closest?.('#app form');
+  if(!form)return;
+  smeSaveFormDraft(form);
+}
+document.addEventListener('input',smeCaptureFormDraft,true);
+document.addEventListener('change',smeCaptureFormDraft,true);
 function smeRestoreFormDrafts(){
  const forms=[...document.querySelectorAll('#app form')];
  forms.forEach(form=>{
