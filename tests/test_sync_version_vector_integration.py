@@ -57,6 +57,40 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('dispositivo_origen', source)
         self.assertIn('async resolveSyncConflict(input)', source)
 
+    def test_multiple_conflicts_are_saved_once_and_block_partial_package_application(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function applySyncPackage(input)')
+        conflict_start = source.index('    if (inspection.plan?.conflictos?.length)', start)
+        normal_apply_start = source.index('    let pkg = input;', conflict_start)
+        conflict_branch = source[conflict_start:normal_apply_start]
+        self.assertIn('for (const conflict of inspection.plan.conflictos)', conflict_branch)
+        self.assertIn('SELECT conflict_id FROM conflictos_sync WHERE change_id_entrante = ?', conflict_branch)
+        self.assertIn('if (existing.values?.length) continue;', conflict_branch)
+        self.assertIn('INSERT INTO conflictos_sync', conflict_branch)
+        self.assertIn('conflictos_guardados: inspection.plan.conflictos.length', conflict_branch)
+        self.assertIn('No se aplicó ningún cambio del paquete.', conflict_branch)
+        self.assertNotIn('INSERT INTO cambios_recibidos', conflict_branch)
+
+    def test_resolving_a_conflict_marks_its_change_received_under_original_package(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function resolveSyncConflict(')
+        end = source.index('\n  return {\n    isNative: true,', start)
+        resolve_code = source[start:end]
+        self.assertIn('INSERT OR IGNORE INTO cambios_recibidos (change_id, package_id, dispositivo_origen, aplicado_at_utc)', resolve_code)
+        self.assertIn('incoming.change_id', resolve_code)
+        self.assertIn('conflict.paquete_id', resolve_code)
+        self.assertIn('conflict.dispositivo_origen', resolve_code)
+
+    def test_partial_package_receipts_do_not_mark_package_as_fully_received(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function inspectSyncPackage(input)')
+        end = source.index('  async function readSnapshotForRemoteApply()', start)
+        inspect_code = source[start:end]
+        self.assertIn('SELECT COUNT(*) AS total FROM cambios_recibidos WHERE package_id = ?', inspect_code)
+        self.assertIn('receivedCount >= pkg.cambios.length', inspect_code)
+        self.assertIn('SELECT change_id FROM cambios_recibidos WHERE change_id = ?', inspect_code)
+        self.assertIn('if (received.values?.length) { plan.ya_recibidos++; continue; }', inspect_code)
+
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
         migration = (ROOT / 'docs' / 'SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql').read_text(encoding='utf-8')
