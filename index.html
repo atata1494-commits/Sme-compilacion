@@ -794,6 +794,36 @@ function smeRenderHubPage(title,intro,groups,extra=''){
  app.innerHTML='<h2 class="section-title">'+esc(title)+'</h2><p class="muted">'+esc(intro)+'</p>'+
   groups.map(group=>'<section class="more-group"><h3 class="more-section-title">'+esc(group.title)+'</h3><p class="more-section-subtitle">'+esc(group.subtitle)+'</p><div class="cards">'+group.tiles.map(item=>tile(item[0],item[1],item[2],item[3])).join('')+'</div></section>').join('')+extra;
 }
+async function smeSyncConflictsPage(){
+ if(!smeCurrentUser?.isPrimary||!storage?.isNative){app.innerHTML='<h2 class="section-title">Conflictos de sincronización</h2><section class="panel">Esta herramienta está disponible únicamente para el administrador principal en Android.</section>';return}
+ app.innerHTML='<h2 class="section-title">Conflictos de sincronización</h2><p class="muted">Revisá las dos versiones antes de decidir cuál conservar. La resolución queda registrada y genera un cambio causal para propagarse a los demás dispositivos.</p><section class="panel"><div class="quick"><button type="button" id="smeSyncConflictsRefresh" class="secondary">Actualizar lista</button></div><p class="muted" id="smeSyncConflictsStatus" role="status" aria-live="polite">Consultando conflictos guardados…</p><div id="smeSyncConflictsList"></div></section>';
+ const list=document.getElementById('smeSyncConflictsList'),status=document.getElementById('smeSyncConflictsStatus');
+ const load=async()=>{
+  status.textContent='Consultando conflictos guardados…';list.innerHTML='';
+  try{
+   const conflicts=await storage.listSyncConflicts();
+   status.textContent=conflicts.length?'Hay '+conflicts.length+' conflicto(s) pendiente(s) de revisión.':'No hay conflictos pendientes.';
+   if(!conflicts.length){list.innerHTML='<p class="muted">Cuando un paquete requiera revisión, los conflictos aparecerán acá. No se aplican automáticamente.</p>';return}
+   list.innerHTML=conflicts.map((c,index)=>{
+    const local=c.registro_local, incoming=c.registro_entrante, deleted=incoming?.operacion==='DELETE';
+    const localJson=local?JSON.stringify(local,null,2):'El registro local no existe.';
+    const incomingJson=deleted?'El paquete entrante solicita eliminar este registro.':JSON.stringify(incoming?.payload??incoming,null,2);
+    return '<article class="item sme-sync-conflict" data-conflict-card="'+esc(c.conflict_id)+'"><strong>Conflicto '+(index+1)+' · '+esc(c.entidad_tipo)+' · '+esc(c.entidad_id)+'</strong><p class="muted">'+esc(c.motivo||'Diferencia causal')+'</p><p class="muted">Paquete: '+esc(c.paquete_id||'Sin referencia')+' · Dispositivo de origen: '+esc(c.dispositivo_origen||'No identificado')+'</p><p class="muted">Detectado: '+esc(c.detectado_at_utc?new Date(c.detectado_at_utc).toLocaleString('es-AR'):'Fecha no disponible')+'</p><div class="form-grid"><section><h4>Versión local</h4><pre class="sme-sync-json">'+esc(localJson)+'</pre></section><section><h4>Versión entrante'+(deleted?' · eliminación':'')+'</h4><pre class="sme-sync-json">'+esc(incomingJson)+'</pre></section></div><div class="quick"><button type="button" data-sync-resolve="local" data-conflict-id="'+esc(c.conflict_id)+'">Conservar versión local</button><button type="button" class="secondary" data-sync-resolve="incoming" data-conflict-id="'+esc(c.conflict_id)+'">Conservar versión entrante</button></div></article>';
+   }).join('');
+  }catch(error){status.textContent='No se pudo consultar la lista: '+String(error?.message||error);list.innerHTML=''}
+ };
+ document.getElementById('smeSyncConflictsRefresh')?.addEventListener('click',load);
+ list.addEventListener('click',async event=>{
+  const button=event.target.closest('[data-sync-resolve]');if(!button)return;
+  if(!smeCurrentUser?.isPrimary){alert('Solo el administrador principal puede resolver conflictos.');return}
+  const id=button.dataset.conflictId,choice=button.dataset.syncResolve,label=choice==='local'?'versión local':'versión entrante';
+  if(!await smeStyledConfirm('Confirmar resolución','Vas a conservar la '+label+'. La otra versión original quedará registrada en el historial del conflicto y la decisión se propagará como un nuevo cambio. ¿Continuar?'))return;
+  button.disabled=true;
+  try{const result=await storage.resolveSyncConflict({conflictId:id,choice,resolvedByUserId:String(smeCurrentUser.id)});if(!result.resuelto)alert(result.mensaje||'El conflicto ya no estaba pendiente.');else alert('Conflicto resuelto. La decisión quedó registrada para sincronizarse.');await load()}
+  catch(error){button.disabled=false;alert('No se pudo resolver el conflicto: '+String(error?.message||error));}
+ });
+ await load();
+}
 function smeBackupPage(){
  app.innerHTML='<h2 class="section-title">Respaldos y restauración</h2><p class="muted">Herramientas para proteger los datos del taller y recuperarlos en un cambio de teléfono o una reinstalación. Revisá qué tipo de copia necesitás antes de importar o restaurar.</p>'+
  '<section class="more-group"><h3 class="more-section-title">Respaldo portable · JSON</h3><p class="more-section-subtitle">Para guardar una copia transportable o incorporar datos desde otro respaldo. La importación JSON combina registros nuevos y no reemplaza los existentes.</p><div class="panel" data-backup-panel><div class="quick"><button id="backup">Exportar respaldo JSON</button><button class="secondary" id="restoreBtn">Importar respaldo JSON</button></div><input id="restoreFile" type="file" accept="application/json" hidden><p class="muted">Incluye los registros y los metadatos protegidos de la cuenta propietaria necesarios para recuperación. Nunca incluye la contraseña en texto plano. Guardá el archivo en un lugar privado.</p></div></section>'+
@@ -804,7 +834,7 @@ function smeBackupPage(){
 function render(){
  smeRememberCurrentPage();
  if(page!=='inicio'&&!smeCan(page,'view')){page='inicio';}
- const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas'};
+ const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas',conflictos:'mas'};
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||navGroupByPage[page]===b.dataset.page));
  if(page==='inicio'){renderDashboard()}
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
@@ -836,9 +866,10 @@ else if(page==='gestion')smeRenderHubPage('Gestión','Presupuestos, finanzas y p
  {title:'Finanzas y organización',subtitle:'Movimientos, cuentas pendientes y turnos.',tiles:[['▤','Caja','Ingresos y egresos','caja'],['↔','Cuentas corrientes y deudas','Lo que te deben y lo que debés','cuentas'],['📅','Agenda','Turnos y recordatorios','agenda']]}
 ],smeFaatraReferenceCardMarkup());
 else if(page==='mas')smeRenderHubPage('Más','Herramientas de acceso y seguridad que no hace falta mostrar en la barra principal.',[
- {title:'Usuarios y datos',subtitle:'Administración de accesos y protección de la información.',tiles:[['👥','Usuarios y permisos','Administrar cuentas y accesos','usuarios'],['▤','Respaldos y restauración','Exportar, importar y recuperar datos','respaldos']]}
+ {title:'Usuarios y datos',subtitle:'Administración de accesos y protección de la información.',tiles:[['👥','Usuarios y permisos','Administrar cuentas y accesos','usuarios'],['▤','Respaldos y restauración','Exportar, importar y recuperar datos','respaldos'],['⚖','Conflictos de sincronización','Comparar y resolver diferencias entre dispositivos','conflictos']]}
 ]);
-else if(page==='respaldos')smeBackupPage();
+else if(page==='conflictos')void smeSyncConflictsPage();
+ else if(page==='respaldos')smeBackupPage();
  smeApplyPermissions();
  smeRestoreFormDrafts();
 }
