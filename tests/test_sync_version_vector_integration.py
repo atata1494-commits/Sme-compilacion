@@ -113,7 +113,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn("Agregar al presupuesto", source)
         self.assertIn("const current=String(target.value||'').trim()", source)
         self.assertIn("target.dispatchEvent(new Event('input',{bubbles:true}))", source)
-        self.assertIn("maxlength=\\"2400\\"", source)
+        self.assertIn('maxlength="2400"', source)
 
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
