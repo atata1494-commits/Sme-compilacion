@@ -105,7 +105,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
 
     def test_budget_scope_suggestions_require_review_before_appending(self):
         source = (ROOT / 'src' / 'budget' / 'budget-module.js').read_text(encoding='utf-8')
-        self.assertIn("data-scope-assist=\\"'+prefix+'\\"", source)
+        self.assertIn("data-scope-assist=\"'+prefix+'\"", source)
         self.assertIn("bindScopeSuggestions('quick')", source)
         self.assertIn("bindScopeSuggestions('formal')", source)
         self.assertIn("Junta de tapa de cilindros · motor nafta 8 válvulas", source)
