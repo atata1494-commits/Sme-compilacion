@@ -98,7 +98,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn("document.addEventListener('change',smeCaptureFormDraft,true)", source)
         self.assertIn("smeSaveFormDraft(form)", source)
         self.assertIn("smeRestoreFormDrafts()", source)
-        self.assertIn("const SME_BACKGROUND_GRACE_MS=10000", source)
+        self.assertIn("const SME_BACKGROUND_GRACE_MS=2500", source)
         self.assertIn('id="sme-budget-quick-form"', budget)
         self.assertIn('name="quickScope"', budget)
         self.assertIn("localStorage.removeItem('sme_form_draft_v1:presupuestos:'+form.id)", budget)
