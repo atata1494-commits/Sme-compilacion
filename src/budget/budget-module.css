@@ -52,3 +52,11 @@
 .sme-budget-v2-success{border-left:3px solid #719a83;padding:8px 10px;background:rgba(70,116,82,.12);color:#c8e1c8}
 .sme-budget-v2 form>button{width:100%;margin-top:9px}
 @media(max-width:520px){.sme-budget-v2-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sme-budget-v2-tabs button{padding:10px 7px}.sme-budget-v2 .sme-budget-v2-grid{grid-template-columns:1fr}.sme-budget-v2-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sme-budget-v2-record-heading{display:block}.sme-budget-v2-record-heading>strong{display:block;margin-top:8px}.sme-budget-v2-time-row{align-items:flex-start}.sme-budget-v2-time-row span:last-child{white-space:normal;text-align:right}}
+
+/* Scope suggestion preview: keep long technical lines inside the mobile viewport. */
+.sme-budget-v2-scope-assist,.sme-budget-v2-scope-assist [data-scope-results],.sme-budget-v2-scope-assist [data-scope-preview],.sme-budget-v2-scope-preview{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+.sme-budget-v2-scope-preview{overflow:hidden;padding:12px;border:1px solid #615641;border-radius:10px;background:rgba(12,29,29,.32)}
+.sme-budget-v2-scope-preview h4{margin:0 0 8px;color:#ead5ad;font:700 17px/1.35 Georgia,serif;overflow-wrap:anywhere}
+.sme-budget-v2-scope-preview p{overflow-wrap:anywhere}
+.sme-budget-v2-scope-preview pre{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:12px 0;padding:0;background:transparent;color:#e8dfcf;font:clamp(12px,3.4vw,15px)/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;overflow-x:hidden}
+.sme-budget-v2-scope-preview button{display:block;width:100%;max-width:100%;box-sizing:border-box;margin:9px 0 0;white-space:normal}
