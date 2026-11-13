@@ -103,6 +103,18 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('name="quickScope"', budget)
         self.assertIn("localStorage.removeItem('sme_form_draft_v1:presupuestos:'+form.id)", budget)
 
+    def test_budget_scope_suggestions_require_review_before_appending(self):
+        source = (ROOT / 'src' / 'budget' / 'budget-module.js').read_text(encoding='utf-8')
+        self.assertIn("data-scope-assist=\\"'+prefix+'\\"", source)
+        self.assertIn("bindScopeSuggestions('quick')", source)
+        self.assertIn("bindScopeSuggestions('formal')", source)
+        self.assertIn("Junta de tapa de cilindros · motor nafta 8 válvulas", source)
+        self.assertIn("Ver sugerencia", source)
+        self.assertIn("Agregar al presupuesto", source)
+        self.assertIn("const current=String(target.value||'').trim()", source)
+        self.assertIn("target.dispatchEvent(new Event('input',{bubbles:true}))", source)
+        self.assertIn("maxlength=\\"2400\\"", source)
+
     def test_schema_and_migration_preserve_per_entity_version_history(self):
         schema = (ROOT / 'docs' / 'SQLITE_SCHEMA.sql').read_text(encoding='utf-8')
         migration = (ROOT / 'docs' / 'SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql').read_text(encoding='utf-8')
