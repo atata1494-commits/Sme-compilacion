@@ -218,7 +218,8 @@ export function renderBudgetModule(ctx) {
   function bindQuickForm() {
     const form=root.querySelector('#sme-budget-quick-form');if(!form)return;
     bindMoneyInputs(form);
-    initializeLaborAssist('quick');\n    bindScopeSuggestions('quick');
+    initializeLaborAssist('quick');
+    bindScopeSuggestions('quick');
     const min=form.elements.quickPrice,max=form.elements.quickPriceMax,useRange=form.elements.usePriceRange,range=form.querySelector('[data-price-range-fields]');
     const total=()=>parseMoney(min.value);
     const paintInstallments=bindInstallments(form,total);
@@ -247,7 +248,8 @@ export function renderBudgetModule(ctx) {
   function bindFormalForm() {
     const form=root.querySelector('#sme-budget-formal-form');if(!form)return;
     bindMoneyInputs(form);
-    initializeLaborAssist('formal');\n    bindScopeSuggestions('formal');
+    initializeLaborAssist('formal');
+    bindScopeSuggestions('formal');
     const client=form.elements.clienteId, vehicle=form.elements.vehiculoId, work=form.elements.trabajoId;
     const labor=form.elements.laborAmount, parts=form.elements.partsAmount, other=form.elements.otherAmount, total=form.elements.budgetTotal;
     const totalValue=()=>parseMoney(labor.value)+parseMoney(parts.value)+parseMoney(other.value);
