@@ -52,7 +52,8 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('resolvedByUserId.trim()', resolve_code)
         self.assertIn('resuelto_at_utc = ?', resolve_code)
         self.assertIn('await connection.rollbackTransaction()', resolve_code)
-        self.assertIn('El registro local cambió desde que se detectó el conflicto.', resolve_code)
+        self.assertNotIn('El registro local cambió desde que se detectó el conflicto.', resolve_code)
+        self.assertIn('const currentRecord = currentRow ? JSON.parse(currentRow.payload_json) : null', resolve_code)
         self.assertIn('paquete_id', source)
         self.assertIn('dispositivo_origen', source)
         self.assertIn('async resolveSyncConflict(input)', source)
@@ -143,6 +144,17 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('blockedEntities.has(entityKey)', inspect_code)
         self.assertIn('continue;', inspect_code)
         self.assertIn('entityStates.set(entityKey', inspect_code)
+
+
+    def test_conflict_resolution_uses_current_local_record_for_later_conflicts(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function resolveSyncConflict(')
+        end = source.index('\\n  return {\\n    isNative: true,', start)
+        resolve_code = source[start:end]
+        self.assertIn('const currentRecord = currentRow ? JSON.parse(currentRow.payload_json) : null', resolve_code)
+        self.assertIn("const selectedRecord = choice === 'local' ? currentRecord", resolve_code)
+        self.assertIn("compareVersionVectors(localVersion.vector, incomingVector) !== 'concurrent'", resolve_code)
+        self.assertNotIn('JSON.stringify(currentRecord) !== JSON.stringify(savedLocal)', resolve_code)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
