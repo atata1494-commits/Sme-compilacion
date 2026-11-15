@@ -149,7 +149,7 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
     def test_conflict_resolution_uses_current_local_record_for_later_conflicts(self):
         source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
         start = source.index('  async function resolveSyncConflict(')
-        end = source.index('\\n  return {\\n    isNative: true,', start)
+        end = source.index('\n  return {\n    isNative: true,', start)
         resolve_code = source[start:end]
         self.assertIn('const currentRecord = currentRow ? JSON.parse(currentRow.payload_json) : null', resolve_code)
         self.assertIn("const selectedRecord = choice === 'local' ? currentRecord", resolve_code)
