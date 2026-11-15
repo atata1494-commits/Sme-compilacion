@@ -6,7 +6,9 @@ export function renderBudgetModule(ctx) {
   const canReadCosts = can('presupuestos', 'costs');
   const canEditCosts = can('presupuestos', 'costs-edit');
   const catalog = Array.isArray(ctx.laborCatalog) ? ctx.laborCatalog : [];
-  let activeTab = ctx.pendingLaborId && canEdit ? 'formal' : (ctx.initialTab || (canEdit ? 'formal' : (canReadCosts ? 'costs' : 'records')));
+  const BUDGET_ACTIVE_TAB_KEY = 'sme_budget_active_tab_v1';
+  const savedBudgetTab = (() => { try { return localStorage.getItem(BUDGET_ACTIVE_TAB_KEY) || ''; } catch (_) { return ''; } })();
+  let activeTab = ctx.pendingLaborId && canEdit ? 'formal' : (ctx.initialTab || savedBudgetTab || (canEdit ? 'formal' : (canReadCosts ? 'costs' : 'records')));
   let editingQuote = null, selectedCostId = '', pendingLaborId = ctx.pendingLaborId || '';
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -173,6 +175,7 @@ export function renderBudgetModule(ctx) {
   };
   function draw(tab=activeTab) {
     activeTab=tab;
+    try { localStorage.setItem(BUDGET_ACTIVE_TAB_KEY, activeTab); } catch (_) {}
     const allowedTabs=[];
     if(canEdit) allowedTabs.push(['quick','Consulta rápida'],['formal','Presupuesto formal']);
     if(canReadCosts) allowedTabs.push(['costs','Costos internos']);
