@@ -371,7 +371,8 @@ export async function openSMEStorage(storageKey) {
     let pkg = input;
     if (typeof pkg === 'string') pkg = JSON.parse(pkg);
     const plan = { nuevas: 0, actualizables: 0, eliminaciones: 0, ya_recibidos: 0, obsoletas: 0, conflictos: [] };
-    const seenEntities = new Set();
+    const entityStates = new Map();
+    const blockedEntities = new Set();
     const packageReceipt = await connection.query('SELECT COUNT(*) AS total FROM cambios_recibidos WHERE package_id = ?', [pkg.package_id]);
     const receivedCount = Number(packageReceipt.values?.[0]?.total || 0);
     if (receivedCount >= pkg.cambios.length) {
@@ -379,70 +380,110 @@ export async function openSMEStorage(storageKey) {
       plan.ya_recibidos = pkg.cambios.length;
       return { ...validated, plan, listo_para_aplicar: false, solo_analisis: true, advertencia: 'Este paquete ya fue recibido anteriormente. No se aplicaron cambios ni se modificó la base local.' };
     }
+
     for (const change of pkg.cambios) {
       const entityKey = change.entidad_tipo + ':' + change.entidad_id;
-      if (seenEntities.has(entityKey)) {
-        plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El paquete contiene más de un cambio para el mismo registro; se debe ordenar y resolver antes de aplicarlo.' });
-        continue;
-      }
-      seenEntities.add(entityKey);
+      if (blockedEntities.has(entityKey)) continue;
+
       const received = await connection.query('SELECT change_id FROM cambios_recibidos WHERE change_id = ?', [change.change_id]);
       if (received.values?.length) { plan.ya_recibidos++; continue; }
-      const config = TABLES[change.entidad_tipo];
-      const localResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ?', [change.entidad_id]);
-      const local = localResult.values?.[0] || null;
+
+      let state = entityStates.get(entityKey);
+      if (!state) {
+        const config = TABLES[change.entidad_tipo];
+        const localResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ?', [change.entidad_id]);
+        const local = localResult.values?.[0] || null;
+        const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
+        state = {
+          exists: Boolean(local),
+          revision: local ? Number(local.revision) || 0 : 0,
+          vector: localVersion.vector,
+          known: localVersion.known
+        };
+        entityStates.set(entityKey, state);
+      }
+
+      const addConflict = (reason) => {
+        plan.conflictos.push({
+          change_id: change.change_id,
+          entidad_tipo: change.entidad_tipo,
+          entidad_id: change.entidad_id,
+          motivo: reason
+        });
+        blockedEntities.add(entityKey);
+      };
+
       if (change.operacion === 'INSERT') {
-        if (local) {
-          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro ya existe en este dispositivo.' });
+        if (state.exists) {
+          addConflict('El registro ya existe en este dispositivo.');
         } else if (!change.version_vector) {
-          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El paquete no contiene un vector causal; requiere revisión manual antes de aplicarse.' });
+          addConflict('El paquete no contiene un vector causal; requiere revisión manual antes de aplicarse.');
+        } else if (state.known) {
+          const relation = compareVersionVectors(change.version_vector, state.vector);
+          if (relation === 'dominates') {
+            plan.nuevas++;
+            state.exists = true;
+            state.revision = change.revision;
+            state.vector = change.version_vector;
+            state.known = true;
+          } else if (relation === 'dominated') {
+            plan.obsoletas++;
+          } else {
+            addConflict('El identificador ya tiene un historial de borrado o una versión causal incompatible.');
+          }
         } else {
-          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
-          if (localVersion.known) {
-            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
-            if (relation === 'dominates') plan.nuevas++;
-            else if (relation === 'dominated') plan.obsoletas++;
-            else plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El identificador ya tiene un historial de borrado o una versión causal incompatible.' });
-          } else plan.nuevas++;
+          plan.nuevas++;
+          state.exists = true;
+          state.revision = change.revision;
+          state.vector = change.version_vector;
+          state.known = true;
         }
       } else if (change.operacion === 'UPDATE' || change.operacion === 'DELETE') {
-        if (!local && change.operacion === 'DELETE') {
-          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
-          if (!change.version_vector || !localVersion.known) {
-            plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'No existe el registro ni un historial local verificable del borrado.' });
+        if (!state.exists && change.operacion === 'DELETE') {
+          if (!change.version_vector || !state.known) {
+            addConflict('No existe el registro ni un historial local verificable del borrado.');
           } else {
-            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
-            if (relation === 'dominates') plan.eliminaciones++;
-            else if (relation === 'dominated') plan.obsoletas++;
-            else plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El borrado remoto coincide con una versión local o entra en conflicto con otro borrado.' });
-          }
-        } else if (!local) {
-          plan.conflictos.push({ change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id, motivo: 'El registro que se quiere actualizar no existe localmente.' });
-        } else {
-          const localVersion = await readEntityVersion(change.entidad_tipo, change.entidad_id);
-          if (!change.version_vector || !localVersion.known) {
-            const revisionMismatch = change.revision_base != null && Number(local.revision) !== Number(change.revision_base);
-            plan.conflictos.push({
-              change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
-              motivo: revisionMismatch
-                ? 'La revisión local cambió desde la revisión base del paquete. Además, falta un historial causal verificable.'
-                : 'Falta un vector de versiones verificable en el paquete o en el registro local; requiere revisión manual.'
-            });
-          } else {
-            const relation = compareVersionVectors(change.version_vector, localVersion.vector);
+            const relation = compareVersionVectors(change.version_vector, state.vector);
             if (relation === 'dominates') {
-              if (change.operacion === 'DELETE') plan.eliminaciones++;
-              else plan.actualizables++;
+              plan.eliminaciones++;
+              state.exists = false;
+              state.revision = change.revision;
+              state.vector = change.version_vector;
             } else if (relation === 'dominated') {
               plan.obsoletas++;
             } else {
-              plan.conflictos.push({
-                change_id: change.change_id, entidad_tipo: change.entidad_tipo, entidad_id: change.entidad_id,
-                motivo: relation === 'concurrent'
-                  ? 'Los dispositivos modificaron este registro por separado; deben conservarse ambas versiones para que el administrador resuelva el conflicto.'
-                  : 'El vector de versiones entrante coincide con el local, pero el identificador del cambio es distinto; requiere revisión.'
-              });
+              addConflict('El borrado remoto coincide con una versión local o entra en conflicto con otro borrado.');
             }
+          }
+        } else if (!state.exists) {
+          addConflict('El registro que se quiere actualizar no existe localmente.');
+        } else if (!change.version_vector || !state.known) {
+          const revisionMismatch = change.revision_base != null && state.revision !== Number(change.revision_base);
+          addConflict(
+            revisionMismatch
+              ? 'La revisión local cambió desde la revisión base del paquete. Además, falta un historial causal verificable.'
+              : 'Falta un vector de versiones verificable en el paquete o en el registro local; requiere revisión manual.'
+          );
+        } else {
+          const relation = compareVersionVectors(change.version_vector, state.vector);
+          if (relation === 'dominates') {
+            if (change.operacion === 'DELETE') {
+              plan.eliminaciones++;
+              state.exists = false;
+            } else {
+              plan.actualizables++;
+              state.exists = true;
+            }
+            state.revision = change.revision;
+            state.vector = change.version_vector;
+          } else if (relation === 'dominated') {
+            plan.obsoletas++;
+          } else {
+            addConflict(
+              relation === 'concurrent'
+                ? 'Los dispositivos modificaron este registro por separado; deben conservarse ambas versiones para que el administrador resuelva el conflicto.'
+                : 'El vector de versiones entrante coincide con el local, pero el identificador del cambio es distinto; requiere revisión.'
+            );
           }
         }
       }
