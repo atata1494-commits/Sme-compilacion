@@ -877,10 +877,10 @@ export async function openSMEStorage(storageKey) {
       const currentResult = await connection.query('SELECT id, revision, payload_json FROM ' + config.table + ' WHERE id = ? LIMIT 1', [id]);
       const currentRow = currentResult.values?.[0] || null;
       const currentRecord = currentRow ? JSON.parse(currentRow.payload_json) : null;
+      // Usar siempre el registro local actual: otro conflicto de la misma entidad
+      // puede haberse resuelto antes. La relación causal vigente valida si aún
+      // corresponde resolver esta versión entrante.
       const savedLocal = conflict.registro_local_json ? JSON.parse(conflict.registro_local_json) : null;
-      if (JSON.stringify(currentRecord) !== JSON.stringify(savedLocal)) {
-        throw new Error('El registro local cambió desde que se detectó el conflicto. Se necesita una nueva revisión.');
-      }
       const localVersion = await readEntityVersion(key, id);
       if (!localVersion.known || compareVersionVectors(localVersion.vector, incomingVector) !== 'concurrent') {
         throw new Error('La relación causal cambió o no puede verificarse. Se necesita volver a analizar el paquete.');
