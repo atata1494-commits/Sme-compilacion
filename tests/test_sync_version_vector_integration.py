@@ -123,5 +123,26 @@ class SyncVersionVectorIntegrationTests(unittest.TestCase):
         self.assertIn('version_vector_json', schema)
         self.assertIn('deleted_at_utc', migration)
 
+
+    def test_package_inspection_simulates_causal_sequences_per_entity(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function inspectSyncPackage(input)')
+        end = source.index('  async function readSnapshotForRemoteApply()', start)
+        inspect_code = source[start:end]
+        self.assertIn('entityStates', inspect_code)
+        self.assertIn('blockedEntities', inspect_code)
+        self.assertIn('compareVersionVectors', inspect_code)
+        self.assertNotIn('seenEntities', inspect_code)
+
+    def test_conflict_blocks_later_changes_for_same_entity_only(self):
+        source = (ROOT / 'src' / 'storage' / 'sqlite-store.js').read_text(encoding='utf-8')
+        start = source.index('  async function inspectSyncPackage(input)')
+        end = source.index('  async function readSnapshotForRemoteApply()', start)
+        inspect_code = source[start:end]
+        self.assertIn('blockedEntities.add(entityKey)', inspect_code)
+        self.assertIn('blockedEntities.has(entityKey)', inspect_code)
+        self.assertIn('continue;', inspect_code)
+        self.assertIn('entityStates.set(entityKey', inspect_code)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
