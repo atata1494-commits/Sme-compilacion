@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { openSMEStorage } from '../src/storage/sqlite-store.js';
-import { databasePaths, cleanupTestDatabases } from './helpers/capacitor-sqlite.mock.mjs';
+import { databasePaths, cleanupTestDatabases, reuseDatabasePath } from './helpers/capacitor-sqlite.mock.mjs';
 
 const emptyDB = () => ({
   clientes: [], vehiculos: [], trabajos: [], presupuestos: [], movimientos: [],
@@ -186,6 +186,47 @@ test('propaga una eliminación y conserva la marca causal del registro borrado',
   } finally {
     if (deviceA) await deviceA.close();
     if (deviceB) await deviceB.close();
+    cleanupTestDatabases();
+  }
+});
+
+
+test('conserva datos, identidad del dispositivo y cambios pendientes al cerrar y reabrir SQLite', async () => {
+  let device;
+  let reopened;
+  try {
+    device = await openSMEStorage('sme-reopen-persistence');
+    const snapshot = await device.load(emptyDB);
+    snapshot.clientes.push({
+      id: 'cliente-persistencia',
+      nombre: 'Persistencia real',
+      telefono: '2974555000'
+    });
+    await device.save(snapshot);
+
+    const beforeClose = await device.prepareSyncPackage();
+    assert.equal(beforeClose.cambios.length, 1);
+    const originalDeviceId = beforeClose.dispositivo_origen;
+    const originalChangeId = beforeClose.cambios[0].change_id;
+    const originalPath = databasePaths.at(-1);
+
+    await device.close();
+    device = null;
+    reuseDatabasePath(originalPath);
+
+    reopened = await openSMEStorage('sme-reopen-persistence');
+    const restored = await reopened.load(emptyDB);
+    assert.equal(restored.clientes.length, 1);
+    assert.equal(restored.clientes[0].nombre, 'Persistencia real');
+
+    const afterReopen = await reopened.prepareSyncPackage();
+    assert.equal(afterReopen.dispositivo_origen, originalDeviceId);
+    assert.equal(afterReopen.cambios.length, 1);
+    assert.equal(afterReopen.cambios[0].change_id, originalChangeId);
+    assert.equal(afterReopen.cambios[0].entidad_id, 'cliente-persistencia');
+  } finally {
+    if (device) await device.close();
+    if (reopened) await reopened.close();
     cleanupTestDatabases();
   }
 });
