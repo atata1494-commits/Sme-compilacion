@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { openSMEStorage } from '../../src/storage/sqlite-store.js';
+import { openSMEStorage } from '../src/storage/sqlite-store.js';
 import { databasePaths, cleanupTestDatabases } from './capacitor-sqlite.mock.mjs';
 
 const emptyDB = () => ({
