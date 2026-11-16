@@ -1,5 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -47,4 +47,5 @@ export class SQLiteConnection {
 export const CapacitorSQLite = {};
 export function cleanupTestDatabases() {
   rmSync(directory, { recursive: true, force: true });
+  mkdirSync(directory, { recursive: true });
 }
