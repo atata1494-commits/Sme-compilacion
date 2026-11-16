@@ -6,6 +6,8 @@ import { join } from 'node:path';
 const directory = mkdtempSync(join(tmpdir(), 'sme-sync-sqlite-'));
 let nextDatabase = 0;
 export const databasePaths = [];
+const reusablePaths = [];
+export function reuseDatabasePath(path) { reusablePaths.push(path); }
 
 class TestConnection {
   constructor(path) {
@@ -35,7 +37,7 @@ export class SQLiteConnection {
   async checkConnectionsConsistency() { return { result: true }; }
   async isConnection() { return { result: false }; }
   async createConnection() {
-    const path = join(directory, `device-${nextDatabase++}.sqlite`);
+    const path = reusablePaths.shift() || join(directory, `device-${nextDatabase++}.sqlite`);
     databasePaths.push(path);
     this.connection = new TestConnection(path);
     return this.connection;
