@@ -230,3 +230,63 @@ test('conserva datos, identidad del dispositivo y cambios pendientes al cerrar y
     cleanupTestDatabases();
   }
 });
+
+
+test('resuelve conflictos sucesivos de la misma entidad manteniendo la causalidad', async () => {
+  let deviceA;
+  let deviceB;
+  try {
+    deviceA = await openSMEStorage('sme-multi-conflict-a');
+    deviceB = await openSMEStorage('sme-multi-conflict-b');
+    const baseA = await deviceA.load(emptyDB);
+    await deviceB.load(emptyDB);
+
+    baseA.clientes.push({ id: 'cliente-multi-conflicto', nombre: 'Base', telefono: '100' });
+    await deviceA.save(baseA);
+    const basePackage = await deviceA.prepareSyncPackage();
+    assert.equal((await deviceB.applySyncPackage(basePackage)).aplicado, true);
+
+    const branchA = await deviceA.load(emptyDB);
+    const branchB = await deviceB.load(emptyDB);
+    branchA.clientes[0].telefono = '200';
+    branchB.clientes[0].telefono = '300';
+    await deviceA.save(branchA);
+    await deviceB.save(branchB);
+
+    const firstPackage = await deviceA.prepareSyncPackage();
+    const firstConflict = await deviceB.applySyncPackage(firstPackage);
+    assert.equal(firstConflict.requiere_revision, true);
+    let conflicts = await deviceB.listSyncConflicts();
+    assert.equal(conflicts.length, 1);
+
+    const firstResolution = await deviceB.resolveSyncConflict({
+      conflictId: conflicts[0].conflict_id,
+      choice: 'incoming',
+      resolvedByUserId: 'admin-test'
+    });
+    assert.equal(firstResolution.resuelto, true);
+    assert.equal((await deviceB.load(emptyDB)).clientes[0].telefono, '200');
+
+    const nextA = await deviceA.load(emptyDB);
+    nextA.clientes[0].telefono = '250';
+    await deviceA.save(nextA);
+    const secondPackage = await deviceA.prepareSyncPackage();
+    const secondConflict = await deviceB.applySyncPackage(secondPackage);
+    assert.equal(secondConflict.requiere_revision, true);
+
+    conflicts = await deviceB.listSyncConflicts();
+    assert.equal(conflicts.length, 1);
+    const secondResolution = await deviceB.resolveSyncConflict({
+      conflictId: conflicts[0].conflict_id,
+      choice: 'incoming',
+      resolvedByUserId: 'admin-test'
+    });
+    assert.equal(secondResolution.resuelto, true);
+    assert.equal((await deviceB.load(emptyDB)).clientes[0].telefono, '250');
+    assert.equal((await deviceB.listSyncConflicts()).length, 0);
+  } finally {
+    if (deviceA) await deviceA.close();
+    if (deviceB) await deviceB.close();
+    cleanupTestDatabases();
+  }
+});
