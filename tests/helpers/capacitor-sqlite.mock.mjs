@@ -8,6 +8,10 @@ let nextDatabase = 0;
 export const databasePaths = [];
 const reusablePaths = [];
 export function reuseDatabasePath(path) { reusablePaths.push(path); }
+export function executeSqlOnDatabase(path, sql) {
+  const db = new DatabaseSync(path);
+  try { db.exec(sql); } finally { db.close(); }
+}
 
 class TestConnection {
   constructor(path) {
