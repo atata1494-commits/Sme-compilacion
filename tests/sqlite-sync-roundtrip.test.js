@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { openSMEStorage } from '../src/storage/sqlite-store.js';
-import { databasePaths, cleanupTestDatabases, reuseDatabasePath } from './helpers/capacitor-sqlite.mock.mjs';
+import { databasePaths, cleanupTestDatabases, reuseDatabasePath, executeSqlOnDatabase } from './helpers/capacitor-sqlite.mock.mjs';
 
 const emptyDB = () => ({
   clientes: [], vehiculos: [], trabajos: [], presupuestos: [], movimientos: [],
@@ -284,6 +284,54 @@ test('resuelve conflictos sucesivos de la misma entidad manteniendo la causalida
     assert.equal(secondResolution.resuelto, true);
     assert.equal((await deviceB.load(emptyDB)).clientes[0].telefono, '250');
     assert.equal((await deviceB.listSyncConflicts()).length, 0);
+  } finally {
+    if (deviceA) await deviceA.close();
+    if (deviceB) await deviceB.close();
+    cleanupTestDatabases();
+  }
+});
+
+
+test('revierte todo el paquete SQLite si falla una escritura intermedia y permite reintentar', async () => {
+  let deviceA;
+  let deviceB;
+  try {
+    deviceA = await openSMEStorage('sme-rollback-a');
+    deviceB = await openSMEStorage('sme-rollback-b');
+    const source = await deviceA.load(emptyDB);
+    await deviceB.load(emptyDB);
+
+    source.clientes.push(
+      { id: 'cliente-rollback-uno', nombre: 'Primer registro', telefono: '111' },
+      { id: 'cliente-rollback-dos', nombre: 'Segundo registro', telefono: '222' }
+    );
+    await deviceA.save(source);
+    const pkg = await deviceA.prepareSyncPackage();
+    assert.equal(pkg.cambios.length, 2);
+
+    const secondChangeId = pkg.cambios[1].entidad_id;
+    const targetPath = databasePaths.at(-1);
+    executeSqlOnDatabase(targetPath,
+      "CREATE TRIGGER fail_second_client BEFORE INSERT ON clientes " +
+      "WHEN NEW.id = '" + secondChangeId + "' " +
+      "BEGIN SELECT RAISE(ABORT, 'fallo SQLite inducido por prueba'); END;"
+    );
+
+    await assert.rejects(() => deviceB.applySyncPackage(pkg), /fallo SQLite inducido por prueba/);
+    assert.deepEqual((await deviceB.load(emptyDB)).clientes, []);
+
+    const outgoingAfterFailure = await deviceB.prepareSyncPackage();
+    assert.equal(outgoingAfterFailure.cambios.length, 0);
+
+    executeSqlOnDatabase(targetPath, 'DROP TRIGGER fail_second_client;');
+    const retry = await deviceB.applySyncPackage(pkg);
+    assert.equal(retry.aplicado, true);
+    assert.equal(retry.cambios_aplicados, 2);
+    const restored = await deviceB.load(emptyDB);
+    assert.deepEqual(
+      restored.clientes.map(record => record.id).sort(),
+      ['cliente-rollback-dos', 'cliente-rollback-uno']
+    );
   } finally {
     if (deviceA) await deviceA.close();
     if (deviceB) await deviceB.close();
