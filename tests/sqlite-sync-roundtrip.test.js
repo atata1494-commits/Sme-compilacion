@@ -395,8 +395,8 @@ test('recupera un envío pendiente tras reiniciar el emisor y tolera reenvíos t
     const preparedBeforeRestart = await sender.prepareSyncPackage();
     assert.equal(preparedBeforeRestart.cambios.length, 1);
     const originalChangeId = preparedBeforeRestart.cambios[0].change_id;
-    const senderPath = databasePaths[0];
-    const receiverPath = databasePaths[1];
+    const senderPath = databasePaths.at(-2);
+    const receiverPath = databasePaths.at(-1);
 
     await sender.close();
     sender = null;
