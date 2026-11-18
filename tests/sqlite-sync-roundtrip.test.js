@@ -324,6 +324,15 @@ test('revierte todo el paquete SQLite si falla una escritura intermedia y permit
     assert.equal(outgoingAfterFailure.cambios.length, 0);
 
     executeSqlOnDatabase(targetPath, 'DROP TRIGGER fail_second_client;');
+
+    // Simula que el receptor pierde la conexión tras el rollback y debe recuperarse.
+    await deviceB.close();
+    deviceB = null;
+    reuseDatabasePath(targetPath);
+    deviceB = await openSMEStorage('sme-rollback-b-reconnected');
+    assert.deepEqual((await deviceB.load(emptyDB)).clientes, []);
+    assert.equal((await deviceB.prepareSyncPackage()).cambios.length, 0);
+
     const retry = await deviceB.applySyncPackage(pkg);
     assert.equal(retry.aplicado, true);
     assert.equal(retry.cambios_aplicados, 2);
