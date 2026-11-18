@@ -276,3 +276,20 @@ INSERT OR IGNORE INTO schema_migrations(version, applied_at_utc, description)
 VALUES (2, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), 'Control horario, configuración de jornada y terceros externos');
 
 PRAGMA user_version = 2;
+
+
+-- Pedidos rápidos de repuestos por cliente, vehículo u orden de trabajo.
+CREATE TABLE IF NOT EXISTS sme_pedidos_repuestos (
+  id TEXT PRIMARY KEY,
+  titulo TEXT NOT NULL,
+  cliente_id TEXT,
+  vehiculo_id TEXT,
+  trabajo_id TEXT,
+  estado TEXT NOT NULL DEFAULT 'pendiente',
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT,
+  payload_json TEXT NOT NULL,
+  revision INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_sme_pedidos_repuestos_estado
+  ON sme_pedidos_repuestos(estado, created_at_utc);
