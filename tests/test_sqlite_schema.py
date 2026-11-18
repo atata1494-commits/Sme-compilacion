@@ -13,7 +13,7 @@ REQUIRED_TABLES = {
     "presupuestos", "movimientos", "eventos", "recepciones", "diagnosticos",
     "cuentas", "pagos_cuenta", "adjuntos", "cambios_sync", "cambios_recibidos",
     "asistencias", "terceros", "trabajos_externos", "config_horarios",
-    "paquetes_intercambio", "conflictos_sync",
+    "paquetes_intercambio", "conflictos_sync", "sme_pedidos_repuestos",
 }
 
 
@@ -91,7 +91,7 @@ class SQLiteSchemaTests(unittest.TestCase):
         for index in (
             "idx_vehiculos_cliente", "idx_trabajos_cliente",
             "idx_movimientos_fecha", "idx_pagos_cuenta_cuenta_fecha",
-            "idx_adjuntos_entidad", "idx_cambios_sync_estado",
+            "idx_adjuntos_entidad", "idx_cambios_sync_estado", "idx_sme_pedidos_repuestos_estado",
         ):
             self.assertIn(index, indexes)
 
