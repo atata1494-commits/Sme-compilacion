@@ -221,7 +221,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import { BiometricAuth, AndroidBiometryStrength } from '@aparajita/capacitor-biometric-auth';
 import { renderBudgetModule } from './src/budget/budget-module.js';
 const KEY='sme_taller_v1';
-const emptyDB=()=>({clientes:[],vehiculos:[],trabajos:[],presupuestos:[],movimientos:[],eventos:[],recepciones:[],diagnosticos:[],cuentas:[],asistencias:[],terceros:[],trabajosExternos:[],configHorarios:[],tareas:[],avisos:[],solicitudesGasto:[]});
+const emptyDB=()=>({clientes:[],vehiculos:[],trabajos:[],presupuestos:[],movimientos:[],eventos:[],recepciones:[],diagnosticos:[],cuentas:[],asistencias:[],terceros:[],trabajosExternos:[],configHorarios:[],tareas:[],avisos:[],solicitudesGasto:[],pedidosRepuestos:[]});
 let storage,db;
 function getWorkOrderDeviceCode(){
   const key='sme_work_order_device_code_v1';
@@ -798,6 +798,55 @@ function gastoPage(){
  }));
 }
 
+
+function smeRepuestosQuickPage(){
+ const records=(db.pedidosRepuestos||[]).slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+ const vehicleOptions='<option value="">Sin asociar por ahora</option>'+(db.vehiculos||[]).map(v=>'<option value="'+esc(v.id)+'">'+esc([v.patente,v.marca,v.modelo].filter(Boolean).join(' · '))+'</option>').join('');
+ app.innerHTML='<h2 class="section-title">Pedido rápido de repuestos</h2>'+
+ '<p class="muted">Anotá lo que necesitás pedirle al dueño. Podés vincularlo a un vehículo ahora o hacerlo más adelante.</p>'+
+ '<section class="panel"><form id="smeQuickPartsForm">'+
+ '<label>Vehículo (opcional)<select name="vehiculoId">'+vehicleOptions+'</select></label>'+
+ '<label>Nombre del dueño (opcional)<input name="destinatario" type="text" placeholder="Ej. Juan"></label>'+
+ '<label>Repuestos solicitados<textarea name="items" rows="6" required placeholder="Un repuesto por renglón. Ejemplo:\nPantógrafo completo con bujes y rótula\nBieleta\nAmortiguador\nCazoleta con crapodina"></textarea></label>'+
+ '<label>Observaciones (opcional)<textarea name="observaciones" rows="2" placeholder="Lado, marca, medida u otra aclaración"></textarea></label>'+
+ '<div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar pedido</button></form></section>'+
+ '<h3 class="more-section-title" style="margin-top:20px">Pedidos guardados</h3><div class="list" id="smeQuickPartsList">'+
+ (records.length?records.map(p=>{
+  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(p.vehiculoId));
+  const vehicleLabel=vehicle?[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' · '):'Sin vehículo asociado';
+  const body=(p.items||[]).map((item,i)=>(i+1)+'. '+item).join('\n');
+  return '<article class="item"><strong>'+esc(p.titulo||'Pedido de repuestos')+'</strong><small class="muted">'+esc(vehicleLabel)+' · '+esc(new Date(p.createdAt||Date.now()).toLocaleDateString('es-AR'))+'</small>'+
+   '<p style="white-space:pre-line">'+esc(body)+'</p>'+(p.observaciones?'<p class="muted">'+esc(p.observaciones)+'</p>':'')+
+   '<div class="quick"><button type="button" data-parts-share="'+esc(p.id)+'">Compartir pedido</button><button type="button" class="secondary" data-parts-close="'+esc(p.id)+'">'+(p.estado==='cerrado'?'Reabrir':'Marcar finalizado')+'</button></div></article>';
+ }).join(''):'<div class="empty">Todavía no hay pedidos guardados.</div>')+'</div>';
+ const form=document.getElementById('smeQuickPartsForm');
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(form);
+  const items=String(fd.get('items')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const error=form.querySelector('[data-form-error]');
+  if(!items.length){error.textContent='Agregá al menos un repuesto.';return}
+  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(fd.get('vehiculoId')||''));
+  const owner=String(fd.get('destinatario')||'').trim();
+  const now=new Date().toISOString();
+  const record={id:globalThis.crypto?.randomUUID?.()||('parts-'+Date.now()+'-'+Math.random().toString(36).slice(2)),titulo:'Pedido de repuestos'+(vehicle?' · '+[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' '):''),vehiculoId:vehicle?.id||null,clienteId:vehicle?.clienteId||null,destinatario:owner,items,observaciones:String(fd.get('observaciones')||'').trim(),estado:'pendiente',createdAt:now,updatedAt:now};
+  db.pedidosRepuestos=db.pedidosRepuestos||[];db.pedidosRepuestos.push(record);
+  if(!(await save())){db.pedidosRepuestos=db.pedidosRepuestos.filter(x=>x.id!==record.id);return}
+  smeRepuestosQuickPage();
+ });
+ document.querySelectorAll('[data-parts-share]').forEach(button=>button.addEventListener('click',async()=>{
+  const p=(db.pedidosRepuestos||[]).find(x=>String(x.id)===button.dataset.partsShare);if(!p)return;
+  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(p.vehiculoId));
+  const lines=['PEDIDO DE REPUESTOS · SERVICIOS MECÁNICOS ENZO',vehicle?'Vehículo: '+[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' · '):'',p.destinatario?'Para: '+p.destinatario:'','',...(p.items||[]).map((x,i)=>(i+1)+'. '+x),p.observaciones?'':'',p.observaciones||''].filter(Boolean);
+  const message=lines.join('\n');
+  try{if(navigator.share)await navigator.share({text:message});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(message);smeShowMessage('Pedido listo','La lista se copió. Ya podés pegarla en WhatsApp.')}else throw new Error('No está disponible compartir o copiar en este dispositivo.')}catch(error){if(error?.name!=='AbortError')smeShowMessage('No se pudo compartir',String(error?.message||error))}
+ }));
+ document.querySelectorAll('[data-parts-close]').forEach(button=>button.addEventListener('click',async()=>{
+  const p=(db.pedidosRepuestos||[]).find(x=>String(x.id)===button.dataset.partsClose);if(!p)return;
+  const previous=p.estado;p.estado=previous==='cerrado'?'pendiente':'cerrado';p.updatedAt=new Date().toISOString();
+  if(!(await save()))p.estado=previous;else smeRepuestosQuickPage();
+ }));
+}
+
 function smeRenderHubPage(title,intro,groups,extra=''){
  app.innerHTML='<h2 class="section-title">'+esc(title)+'</h2><p class="muted">'+esc(intro)+'</p>'+
   groups.map(group=>'<section class="more-group"><h3 class="more-section-title">'+esc(group.title)+'</h3><p class="more-section-subtitle">'+esc(group.subtitle)+'</p><div class="cards">'+group.tiles.map(item=>tile(item[0],item[1],item[2],item[3])).join('')+'</div></section>').join('')+extra;
@@ -842,7 +891,7 @@ function smeBackupPage(){
 function render(){
  smeRememberCurrentPage();
  if(page!=='inicio'&&!smeCan(page,'view')){page='inicio';}
- const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas',conflictos:'mas'};
+ const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas',conflictos:'mas'};
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||navGroupByPage[page]===b.dataset.page));
  if(page==='inicio'){renderDashboard()}
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
@@ -853,6 +902,7 @@ function render(){
  else if(page==='cuentas') accountPage();
  else if(page==='usuarios') smeUserPage();
  else if(page==='agenda') listPage('Agenda','eventos',[['fecha','Fecha','date'],['hora','Hora','time'],['titulo','Tarea / motivo','text'],['clienteId','Cliente (opcional)','customer'],['vehiculoId','Vehículo (opcional)','vehicle'],['notas','Detalle','textarea']],'Guardar evento');
+ else if(page==='pedidosRepuestos') smeRepuestosQuickPage();
  else if(page==='recepciones') recepcionPage();
  else if(page==='diagnosticos') diagnosticoPage();
  else if(page==='asistencias') attendancePage();
@@ -867,6 +917,7 @@ function render(){
 ]);
 else if(page==='taller')smeRenderHubPage('Taller','Ingreso, diagnóstico y coordinación cotidiana del equipo.',[
  {title:'Ingreso y diagnóstico',subtitle:'Recepción e inspección técnica del vehículo.',tiles:[['🚘','Recepción','Ingreso e inspección inicial','recepciones'],['🧰','Diagnóstico técnico','Inspección por sistemas','diagnosticos']]},
+ {title:'Repuestos',subtitle:'Prepará pedidos rápidos para el dueño y consultá los pedidos guardados.',tiles:[['📦','Pedido rápido de repuestos','Armá una lista y compartila por WhatsApp','pedidosRepuestos']]},
  {title:'Seguimiento del trabajo',subtitle:'Coordinación interna y trabajos derivados.',tiles:[['☑','Tareas del equipo','Asignaciones, avances y pendientes','tareas'],['⚑','Avisos internos','Faltantes, roturas y necesidades','avisos'],['🕒','Control horario','Entradas, salidas y alertas','asistencias'],['🧰','Terceros y trabajos externos','Proveedores, permanencia y costos','terceros'],['▤','Autorizaciones de gastos','Solicitudes, aprobación y rendición','gastos']]}
 ]);
 else if(page==='gestion')smeRenderHubPage('Gestión','Presupuestos, finanzas y planificación económica del taller.',[
@@ -1952,7 +2003,7 @@ function smeCan(key,action='view'){
  key=smeModuleKey(key);
  if(key==='inicio'||key==='mas')return true;
  if(key==='registros')return ['clientes','vehiculos','trabajos'].some(module=>smeCan(module,action));
- if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,action));
+ if(key==='taller')return ['pedidosRepuestos','recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,action));
  if(key==='gestion')return ['presupuestos','tiempos','caja','cuentas','agenda'].some(module=>smeCan(module,action))||smeCanSeeFaatraReference();
  if(key==='respaldos')return smeCanBackup(action);
  if(key==='asistencias')return action==='view'||!!smeCurrentUser.isPrimary;
@@ -2011,7 +2062,7 @@ function smeApplyPermissions(){
   const key=button.dataset.page;
   const visible=key==='inicio'
    ||(key==='registros'&&['clientes','vehiculos','trabajos'].some(module=>smeCan(module,'view')))
-   ||(key==='taller'&&['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,'view')))
+   ||(key==='taller'&&['pedidosRepuestos','recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some(module=>smeCan(module,'view')))
    ||(key==='gestion'&&(['presupuestos','tiempos','caja','cuentas','agenda'].some(module=>smeCan(module,'view'))||smeCanSeeFaatraReference()))
    ||(key==='mas'&&(smeCan('usuarios','view')||smeCanBackup('view')));
   button.hidden=!visible;
