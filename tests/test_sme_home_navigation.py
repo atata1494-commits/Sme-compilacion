@@ -30,6 +30,15 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some", self.html)
         self.assertIn("function smeRenderHubPage", self.html)
 
+    def test_quick_parts_request_is_available_from_workshop_and_persisted(self):
+        self.assertIn("pedidosRepuestos:'taller'", self.html)
+        self.assertIn("Pedido rápido de repuestos", self.html)
+        self.assertIn("function smeRepuestosQuickPage()", self.html)
+        self.assertIn("data-parts-share", self.html)
+        self.assertIn("db.pedidosRepuestos.push(record)", self.html)
+        self.assertIn("else if(page==='pedidosRepuestos') smeRepuestosQuickPage();", self.html)
+        self.assertIn("'pedidosRepuestos','recepciones'", self.html)
+
     def test_dashboard_is_asymmetric_and_can_leave_space_empty(self):
         self.assertIn("home-layout", self.html)
         self.assertIn("home-feature", self.html)
