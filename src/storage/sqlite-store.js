@@ -3,13 +3,14 @@ import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import schemaSQL from '../../docs/SQLITE_SCHEMA.sql?raw';
 import migrationV3SQL from '../../docs/SQLITE_MIGRATION_V3_TAREAS_AVISOS.sql?raw';
 import migrationV4SQL from '../../docs/SQLITE_MIGRATION_V4_SYNC_VERSION_VECTORS.sql?raw';
+import migrationV5SQL from '../../docs/SQLITE_MIGRATION_V5_PEDIDOS_REPUESTOS.sql?raw';
 import { normalizeVersionVector, incrementVersionVector, compareVersionVectors, mergeVersionVectors } from './sync-version-vector.js';
 
 const DATABASE_NAME = 'sme_taller';
 const COLLECTIONS = [
   'clientes', 'vehiculos', 'trabajos', 'presupuestos', 'movimientos',
   'eventos', 'recepciones', 'diagnosticos', 'cuentas', 'asistencias', 'terceros', 'trabajosExternos', 'configHorarios',
-  'tareas', 'avisos', 'solicitudesGasto'
+  'tareas', 'avisos', 'solicitudesGasto', 'pedidosRepuestos'
 ];
 
 const TABLES = {
@@ -79,6 +80,10 @@ const TABLES = {
       resolucion_real: r.resolucionReal ?? null, resultado: r.resultado ?? null, created_at_utc: r.createdAt ?? new Date().toISOString(),
       resolved_at_utc: r.resolvedAt ?? null, closed_at_utc: r.closedAt ?? null, deleted_at_utc: r.deletedAt ?? null
     })
+  },
+  pedidosRepuestos: {
+    table: 'sme_pedidos_repuestos',
+    fields: r => ({ titulo: r.titulo ?? 'Pedido de repuestos', cliente_id: ref(r.clienteId), vehiculo_id: ref(r.vehiculoId), trabajo_id: ref(r.trabajoId), estado: r.estado ?? 'pendiente', created_at_utc: r.createdAt ?? new Date().toISOString(), updated_at_utc: r.updatedAt ?? new Date().toISOString() })
   },
   solicitudesGasto: {
     table: 'sme_solicitudes_gasto',
@@ -208,6 +213,8 @@ export async function openSMEStorage(storageKey) {
   sqlError(migrationResult, 'No se pudo actualizar la estructura SQLite a la versión 3');
   const migrationV4Result = await connection.execute(migrationV4SQL);
   sqlError(migrationV4Result, 'No se pudo actualizar la estructura SQLite a la versión 4');
+  const migrationV5Result = await connection.execute(migrationV5SQL);
+  sqlError(migrationV5Result, 'No se pudo actualizar la estructura SQLite a la versión 5');
 
   const syncChangeColumns = await connection.query('PRAGMA table_info(cambios_sync)');
   if (!(syncChangeColumns.values || []).some(column => String(column.name) === 'version_vector_json')) {
