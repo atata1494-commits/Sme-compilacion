@@ -434,7 +434,7 @@ test('recupera un envío pendiente tras reiniciar el emisor y tolera reenvíos t
 });
 
 
-test('ignora paquetes atrasados que llegan fuera de orden sin revertir datos más nuevos', async () => {
+test('tolera la entrega tardía de un paquete parcialmente ya recibido sin duplicar ni revertir datos', async () => {
   let sender;
   let receiver;
   try {
@@ -466,7 +466,7 @@ test('ignora paquetes atrasados que llegan fuera de orden sin revertir datos má
     assert.equal(delayedDelivery.aplicado, true);
     assert.equal(delayedDelivery.cambios_aplicados, 0);
     assert.equal(delayedDelivery.cambios_omitidos, 1);
-    assert.equal(delayedDelivery.plan.obsoletas, 1);
+    assert.equal(delayedDelivery.plan.ya_recibidos, 1);
     assert.equal((await receiver.load(emptyDB)).clientes[0].telefono, '300');
 
     const duplicateDelayedDelivery = await receiver.applySyncPackage(olderPackage);
