@@ -375,3 +375,60 @@ test('guarda y sincroniza pedidos rápidos de repuestos como colección independ
     cleanupTestDatabases();
   }
 });
+
+
+test('recupera un envío pendiente tras reiniciar el emisor y tolera reenvíos tras reiniciar el receptor', async () => {
+  let sender;
+  let receiver;
+  try {
+    sender = await openSMEStorage('sme-restart-sender');
+    receiver = await openSMEStorage('sme-restart-receiver');
+    const senderSnapshot = await sender.load(emptyDB);
+    await receiver.load(emptyDB);
+
+    senderSnapshot.clientes.push({
+      id: 'cliente-reinicio-sync',
+      nombre: 'Persistencia de sincronización',
+      telefono: '2974000000'
+    });
+    await sender.save(senderSnapshot);
+    const preparedBeforeRestart = await sender.prepareSyncPackage();
+    assert.equal(preparedBeforeRestart.cambios.length, 1);
+    const originalChangeId = preparedBeforeRestart.cambios[0].change_id;
+    const senderPath = databasePaths[0];
+    const receiverPath = databasePaths[1];
+
+    await sender.close();
+    sender = null;
+    reuseDatabasePath(senderPath);
+    sender = await openSMEStorage('sme-restart-sender');
+    const preparedAfterRestart = await sender.prepareSyncPackage();
+    assert.equal(preparedAfterRestart.cambios.length, 1);
+    assert.equal(preparedAfterRestart.cambios[0].change_id, originalChangeId);
+
+    const firstDelivery = await receiver.applySyncPackage(preparedAfterRestart);
+    assert.equal(firstDelivery.aplicado, true);
+    assert.equal(firstDelivery.cambios_aplicados, 1);
+    assert.equal((await receiver.load(emptyDB)).clientes[0].nombre, 'Persistencia de sincronización');
+
+    const duplicateDelivery = await receiver.applySyncPackage(preparedAfterRestart);
+    assert.equal(duplicateDelivery.repetido, true);
+
+    await receiver.close();
+    receiver = null;
+    reuseDatabasePath(receiverPath);
+    receiver = await openSMEStorage('sme-restart-receiver');
+    const afterReceiverRestart = await receiver.load(emptyDB);
+    assert.equal(afterReceiverRestart.clientes.length, 1);
+    assert.equal(afterReceiverRestart.clientes[0].id, 'cliente-reinicio-sync');
+
+    const duplicateAfterRestart = await receiver.applySyncPackage(preparedAfterRestart);
+    assert.equal(duplicateAfterRestart.repetido, true);
+    assert.equal((await receiver.load(emptyDB)).clientes.length, 1);
+    assert.equal((await receiver.prepareSyncPackage()).cambios.length, 0);
+  } finally {
+    if (sender) await sender.close();
+    if (receiver) await receiver.close();
+    cleanupTestDatabases();
+  }
+});
