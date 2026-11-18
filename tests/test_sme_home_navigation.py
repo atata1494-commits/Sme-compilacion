@@ -27,7 +27,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         for hub in ("Registros", "Taller", "Gestión"):
             self.assertIn("smeRenderHubPage('" + hub + "'", self.html)
         self.assertIn("if(key==='registros')return ['clientes','vehiculos','trabajos'].some", self.html)
-        self.assertIn("if(key==='taller')return ['recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some", self.html)
+        self.assertIn("if(key==='taller')return ['pedidosRepuestos','recepciones','diagnosticos','asistencias','terceros','tareas','avisos','gastos'].some", self.html)
         self.assertIn("function smeRenderHubPage", self.html)
 
     def test_quick_parts_request_is_available_from_workshop_and_persisted(self):
