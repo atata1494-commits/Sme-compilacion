@@ -451,12 +451,12 @@ test('tolera la entrega tardía de un paquete parcialmente ya recibido sin dupli
     source.clientes[0].telefono = '200';
     await sender.save(source);
     const olderPackage = await sender.prepareSyncPackage();
-    assert.equal(olderPackage.cambios.length, 1);
+    assert.equal(olderPackage.cambios.length, 2);
 
     source.clientes[0].telefono = '300';
     await sender.save(source);
     const newerPackage = await sender.prepareSyncPackage();
-    assert.equal(newerPackage.cambios.length, 2);
+    assert.equal(newerPackage.cambios.length, 3);
 
     const newestDelivery = await receiver.applySyncPackage(newerPackage);
     assert.equal(newestDelivery.aplicado, true);
@@ -465,8 +465,8 @@ test('tolera la entrega tardía de un paquete parcialmente ya recibido sin dupli
     const delayedDelivery = await receiver.applySyncPackage(olderPackage);
     assert.equal(delayedDelivery.aplicado, true);
     assert.equal(delayedDelivery.cambios_aplicados, 0);
-    assert.equal(delayedDelivery.cambios_omitidos, 1);
-    assert.equal(delayedDelivery.plan.ya_recibidos, 1);
+    assert.equal(delayedDelivery.cambios_omitidos, 2);
+    assert.equal(delayedDelivery.plan.ya_recibidos, 2);
     assert.equal((await receiver.load(emptyDB)).clientes[0].telefono, '300');
 
     const duplicateDelayedDelivery = await receiver.applySyncPackage(olderPackage);
