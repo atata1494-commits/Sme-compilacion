@@ -432,3 +432,48 @@ test('recupera un envío pendiente tras reiniciar el emisor y tolera reenvíos t
     cleanupTestDatabases();
   }
 });
+
+
+test('ignora paquetes atrasados que llegan fuera de orden sin revertir datos más nuevos', async () => {
+  let sender;
+  let receiver;
+  try {
+    sender = await openSMEStorage('sme-out-of-order-sender');
+    receiver = await openSMEStorage('sme-out-of-order-receiver');
+    const source = await sender.load(emptyDB);
+    await receiver.load(emptyDB);
+
+    source.clientes.push({ id: 'cliente-orden-paquetes', nombre: 'Base', telefono: '100' });
+    await sender.save(source);
+    const initial = await sender.prepareSyncPackage();
+    assert.equal((await receiver.applySyncPackage(initial)).aplicado, true);
+
+    source.clientes[0].telefono = '200';
+    await sender.save(source);
+    const olderPackage = await sender.prepareSyncPackage();
+    assert.equal(olderPackage.cambios.length, 1);
+
+    source.clientes[0].telefono = '300';
+    await sender.save(source);
+    const newerPackage = await sender.prepareSyncPackage();
+    assert.equal(newerPackage.cambios.length, 2);
+
+    const newestDelivery = await receiver.applySyncPackage(newerPackage);
+    assert.equal(newestDelivery.aplicado, true);
+    assert.equal((await receiver.load(emptyDB)).clientes[0].telefono, '300');
+
+    const delayedDelivery = await receiver.applySyncPackage(olderPackage);
+    assert.equal(delayedDelivery.aplicado, true);
+    assert.equal(delayedDelivery.cambios_aplicados, 0);
+    assert.equal(delayedDelivery.cambios_omitidos, 1);
+    assert.equal(delayedDelivery.plan.obsoletas, 1);
+    assert.equal((await receiver.load(emptyDB)).clientes[0].telefono, '300');
+
+    const duplicateDelayedDelivery = await receiver.applySyncPackage(olderPackage);
+    assert.equal(duplicateDelayedDelivery.repetido, true);
+  } finally {
+    if (sender) await sender.close();
+    if (receiver) await receiver.close();
+    cleanupTestDatabases();
+  }
+});
