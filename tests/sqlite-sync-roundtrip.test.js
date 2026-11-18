@@ -7,7 +7,7 @@ const emptyDB = () => ({
   clientes: [], vehiculos: [], trabajos: [], presupuestos: [], movimientos: [],
   eventos: [], recepciones: [], diagnosticos: [], cuentas: [], asistencias: [],
   terceros: [], trabajosExternos: [], configHorarios: [], tareas: [], avisos: [],
-  solicitudesGasto: []
+  solicitudesGasto: [], pedidosRepuestos: []
 });
 
 test('dos bases SQLite independientes intercambian cambios reales de SME en ambos sentidos', async () => {
@@ -332,6 +332,43 @@ test('revierte todo el paquete SQLite si falla una escritura intermedia y permit
       restored.clientes.map(record => record.id).sort(),
       ['cliente-rollback-dos', 'cliente-rollback-uno']
     );
+  } finally {
+    if (deviceA) await deviceA.close();
+    if (deviceB) await deviceB.close();
+    cleanupTestDatabases();
+  }
+});
+
+
+test('guarda y sincroniza pedidos rápidos de repuestos como colección independiente', async () => {
+  let deviceA;
+  let deviceB;
+  try {
+    deviceA = await openSMEStorage('sme-parts-order-a');
+    deviceB = await openSMEStorage('sme-parts-order-b');
+    const source = await deviceA.load(emptyDB);
+    await deviceB.load(emptyDB);
+    source.pedidosRepuestos.push({
+      id: 'pedido-repuestos-001',
+      titulo: 'Pedido de repuestos · AB123CD',
+      vehiculoId: 'vehiculo-001',
+      destinatario: 'Dueño de prueba',
+      items: ['Pantógrafo completo con bujes y rótula', 'Bieleta', 'Amortiguador'],
+      observaciones: 'Delantero derecho',
+      estado: 'pendiente',
+      createdAt: '2026-11-18T12:00:00.000Z',
+      updatedAt: '2026-11-18T12:00:00.000Z'
+    });
+    await deviceA.save(source);
+    const pkg = await deviceA.prepareSyncPackage();
+    assert.equal(pkg.cambios.length, 1);
+    assert.equal(pkg.cambios[0].entidad_tipo, 'pedidosRepuestos');
+    const result = await deviceB.applySyncPackage(pkg);
+    assert.equal(result.aplicado, true);
+    const received = await deviceB.load(emptyDB);
+    assert.equal(received.pedidosRepuestos.length, 1);
+    assert.deepEqual(received.pedidosRepuestos[0].items, source.pedidosRepuestos[0].items);
+    assert.equal(received.pedidosRepuestos[0].destinatario, 'Dueño de prueba');
   } finally {
     if (deviceA) await deviceA.close();
     if (deviceB) await deviceB.close();
