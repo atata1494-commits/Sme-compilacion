@@ -488,3 +488,50 @@ test('tolera la entrega tardía de un paquete parcialmente ya recibido sin dupli
     cleanupTestDatabases();
   }
 });
+
+
+test('rechaza paquetes alterados o incompletos antes de modificar SQLite', async () => {
+  let sender;
+  let receiver;
+  try {
+    sender = await openSMEStorage('sme-integrity-sender');
+    receiver = await openSMEStorage('sme-integrity-receiver');
+    const source = await sender.load(emptyDB);
+    await receiver.load(emptyDB);
+
+    source.clientes.push({
+      id: 'cliente-paquete-integridad',
+      nombre: 'Contenido original',
+      telefono: '2974000000'
+    });
+    await sender.save(source);
+    const validPackage = await sender.prepareSyncPackage();
+    assert.equal(validPackage.cambios.length, 1);
+
+    const tamperedPackage = structuredClone(validPackage);
+    tamperedPackage.cambios[0].payload.nombre = 'Contenido modificado';
+    await assert.rejects(
+      () => receiver.applySyncPackage(tamperedPackage),
+      /La huella SHA-256 no coincide/
+    );
+    assert.deepEqual((await receiver.load(emptyDB)).clientes, []);
+    assert.equal((await receiver.prepareSyncPackage()).cambios.length, 0);
+
+    const incompletePackage = structuredClone(validPackage);
+    delete incompletePackage.cambios[0].dispositivo_id;
+    await assert.rejects(
+      () => receiver.applySyncPackage(incompletePackage),
+      /Falta dispositivo_id/
+    );
+    assert.deepEqual((await receiver.load(emptyDB)).clientes, []);
+    assert.equal((await receiver.prepareSyncPackage()).cambios.length, 0);
+
+    const intactDelivery = await receiver.applySyncPackage(validPackage);
+    assert.equal(intactDelivery.aplicado, true);
+    assert.equal((await receiver.load(emptyDB)).clientes[0].nombre, 'Contenido original');
+  } finally {
+    if (sender) await sender.close();
+    if (receiver) await receiver.close();
+    cleanupTestDatabases();
+  }
+});
