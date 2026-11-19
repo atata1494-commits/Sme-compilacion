@@ -214,5 +214,9 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn('MessageDigest.getInstance("SHA-256")', worker)
         self.assertIn('if (!sha256(bytes).equalsIgnoreCase(expected))', worker)
 
+    def test_backup_worker_closes_required_tables_cursor_before_json_validation(self):
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        self.assertIn('if (!names.contains(required)) throw new IllegalStateException("Falta la tabla requerida en el respaldo: " + required);\n                }\n            }\n            String[] jsonTables', worker)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
