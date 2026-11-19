@@ -205,5 +205,14 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn('"sme_solicitudes_gasto", "sme_pedidos_repuestos"', plugin)
         self.assertIn('"sme_solicitudes_gasto", "sme_pedidos_repuestos"', worker)
 
+    def test_background_worker_validates_json_rows_and_attachment_hashes(self):
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        self.assertIn('String[] jsonTables = new String[]', worker)
+        self.assertIn('"sme_pedidos_repuestos"', worker)
+        self.assertIn('new JSONTokener(payload).nextValue()', worker)
+        self.assertIn('SELECT datos, sha256_hex FROM adjuntos', worker)
+        self.assertIn('MessageDigest.getInstance("SHA-256")', worker)
+        self.assertIn('if (!sha256(bytes).equalsIgnoreCase(expected))', worker)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

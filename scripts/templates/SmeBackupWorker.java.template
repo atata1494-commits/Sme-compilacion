@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.security.MessageDigest;
+import org.json.JSONTokener;
+import org.json.JSONObject;
 
 public final class SmeBackupWorker extends Worker {
     private static final String DAILY_PREFIX = "SME-auto-diario-";
@@ -104,8 +107,33 @@ public final class SmeBackupWorker extends Worker {
                 for (String required : new String[]{"clientes", "vehiculos", "trabajos", "adjuntos", "pagos_cuenta", "sme_tareas", "sme_avisos", "sme_solicitudes_gasto", "sme_pedidos_repuestos", "sme_auditoria", "sme_tarea_eventos", "sme_aviso_derivaciones", "cambios_sync", "cambios_recibidos", "paquetes_intercambio", "conflictos_sync"}) {
                     if (!names.contains(required)) throw new IllegalStateException("Falta la tabla requerida en el respaldo: " + required);
                 }
+            String[] jsonTables = new String[]{"clientes", "vehiculos", "trabajos", "presupuestos", "movimientos", "eventos", "recepciones", "diagnosticos", "cuentas", "asistencias", "terceros", "trabajos_externos", "config_horarios", "sme_tareas", "sme_avisos", "sme_solicitudes_gasto", "sme_pedidos_repuestos"};
+            for (String table : jsonTables) {
+                try (Cursor rows = db.rawQuery("SELECT payload_json FROM " + table, null)) {
+                    while (rows.moveToNext()) {
+                        String payload = rows.getString(0);
+                        if (payload == null) throw new IllegalStateException("Registro sin payload JSON en " + table);
+                        Object parsed = new JSONTokener(payload).nextValue();
+                        if (!(parsed instanceof JSONObject)) throw new IllegalStateException("Payload JSON inválido en " + table);
+                    }
+                }
+            }
+            try (Cursor attachments = db.rawQuery("SELECT datos, sha256_hex FROM adjuntos", null)) {
+                while (attachments.moveToNext()) {
+                    byte[] bytes = attachments.getBlob(0);
+                    String expected = attachments.getString(1);
+                    if (bytes == null || expected == null || !expected.matches("[0-9a-fA-F]{64}")) throw new IllegalStateException("Adjunto sin datos o huella SHA-256 válida");
+                    if (!sha256(bytes).equalsIgnoreCase(expected)) throw new IllegalStateException("Huella SHA-256 de adjunto no coincide");
+                }
             }
         }
+    }
+
+    private static String sha256(byte[] bytes) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256").digest(bytes);
+        StringBuilder out = new StringBuilder(digest.length * 2);
+        for (byte value : digest) out.append(String.format(Locale.ROOT, "%02x", value & 0xff));
+        return out.toString();
     }
 
     private void publishIfMissing(File snapshot, String name) throws Exception {
