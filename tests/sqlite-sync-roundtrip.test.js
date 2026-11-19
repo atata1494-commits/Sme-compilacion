@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { openSMEStorage } from '../src/storage/sqlite-store.js';
 import { databasePaths, cleanupTestDatabases, reuseDatabasePath, executeSqlOnDatabase } from './helpers/capacitor-sqlite.mock.mjs';
+import { normalizeVersionVector, incrementVersionVector, compareVersionVectors, mergeVersionVectors } from '../src/storage/sync-version-vector.js';
 
 const emptyDB = () => ({
   clientes: [], vehiculos: [], trabajos: [], presupuestos: [], movimientos: [],
@@ -551,4 +552,19 @@ test('rechaza paquetes alterados o incompletos antes de modificar SQLite', async
     if (receiver) await receiver.close();
     cleanupTestDatabases();
   }
+});
+
+
+test('valida vectores causales, normaliza orden y rechaza contadores o identificadores inválidos', () => {
+  assert.deepEqual(normalizeVersionVector({ 'device-b': 2, 'device-a': 1, zero: 0 }), { 'device-a': 1, 'device-b': 2 });
+  assert.deepEqual(incrementVersionVector({ 'device-a': 2 }, 'device-b'), { 'device-a': 2, 'device-b': 1 });
+  assert.equal(compareVersionVectors({ a: 2 }, { a: 1 }), 'dominates');
+  assert.equal(compareVersionVectors({ a: 1 }, { b: 1 }), 'concurrent');
+  assert.deepEqual(mergeVersionVectors({ a: 2, b: 1 }, { a: 1, c: 3 }), { a: 2, b: 1, c: 3 });
+
+  for (const invalid of [null, [], 'vector', { ' ': 1 }, { a: -1 }, { a: 1.5 }, { a: Number.MAX_SAFE_INTEGER + 1 }, { a: '2' }]) {
+    assert.throws(() => normalizeVersionVector(invalid), TypeError);
+  }
+  assert.throws(() => incrementVersionVector({}, ' '), TypeError);
+  assert.throws(() => incrementVersionVector({ a: Number.MAX_SAFE_INTEGER }, 'a'), RangeError);
 });
