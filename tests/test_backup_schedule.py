@@ -213,6 +213,7 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn('SELECT datos, sha256_hex FROM adjuntos', worker)
         self.assertIn('MessageDigest.getInstance("SHA-256")', worker)
         self.assertIn('if (!sha256(bytes).equalsIgnoreCase(expected))', worker)
+        self.assertIn('private void validateSnapshot(File file) throws Exception', worker)
 
     def test_backup_worker_closes_required_tables_cursor_before_json_validation(self):
         worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
