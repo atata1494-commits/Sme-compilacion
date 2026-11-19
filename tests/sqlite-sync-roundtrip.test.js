@@ -568,3 +568,13 @@ test('valida vectores causales, normaliza orden y rechaza contadores o identific
   assert.throws(() => incrementVersionVector({}, ' '), TypeError);
   assert.throws(() => incrementVersionVector({ a: Number.MAX_SAFE_INTEGER }, 'a'), RangeError);
 });
+
+test('preserva identificadores especiales de dispositivos en vectores causales', () => {
+  const specialVector = JSON.parse('{"__proto__":2,"constructor":1,"toString":3}');
+  const normalized = normalizeVersionVector(specialVector);
+  assert.equal(Object.prototype.hasOwnProperty.call(normalized, '__proto__'), true);
+  assert.equal(normalized['__proto__'], 2);
+  assert.equal(normalized.constructor, 1);
+  assert.equal(normalized.toString, 3);
+  assert.deepEqual(JSON.parse(JSON.stringify(normalized)), JSON.parse('{"__proto__":2,"constructor":1,"toString":3}'));
+});
