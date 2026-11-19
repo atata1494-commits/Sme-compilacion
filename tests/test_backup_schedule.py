@@ -197,5 +197,13 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertNotIn("hourlyCost.value=result.value", SOURCE)
         self.assertNotIn("quote.importe=result.value", SOURCE)
 
+
+    def test_sqlite_backups_validate_parts_orders_table_and_json(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        self.assertIn('"sme_pedidos_repuestos"', plugin)
+        self.assertIn('"sme_solicitudes_gasto", "sme_pedidos_repuestos"', plugin)
+        self.assertIn('"sme_solicitudes_gasto", "sme_pedidos_repuestos"', worker)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -52,14 +52,14 @@ public final class SmeBackupPlugin extends Plugin {
         "cuentas", "pagos_cuenta", "adjuntos", "cambios_sync", "cambios_recibidos",
         "paquetes_intercambio", "conflictos_sync", "asistencias", "terceros",
         "trabajos_externos", "config_horarios", "sme_tareas", "sme_avisos",
-        "sme_solicitudes_gasto", "sme_auditoria", "sme_tarea_eventos",
+        "sme_solicitudes_gasto", "sme_pedidos_repuestos", "sme_auditoria", "sme_tarea_eventos",
         "sme_aviso_derivaciones", "sme_tarea_dependencias", "sme_permisos_usuario"
     };
     private static final String[] JSON_TABLES = {
         "clientes", "vehiculos", "trabajos", "presupuestos", "movimientos",
         "eventos", "recepciones", "diagnosticos", "cuentas", "asistencias",
         "terceros", "trabajos_externos", "config_horarios", "sme_tareas",
-        "sme_avisos", "sme_solicitudes_gasto"
+        "sme_avisos", "sme_solicitudes_gasto", "sme_pedidos_repuestos"
     };
 
 
