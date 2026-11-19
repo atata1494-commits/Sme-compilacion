@@ -215,6 +215,13 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn('if (!sha256(bytes).equalsIgnoreCase(expected))', worker)
         self.assertIn('private void validateSnapshot(File file) throws Exception', worker)
 
+    def test_background_worker_requires_same_full_table_set_as_manual_validator(self):
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        for table in ["schema_migrations", "app_metadata", "presupuestos", "sme_tarea_dependencias", "sme_permisos_usuario"]:
+            self.assertIn(table, worker)
+            self.assertIn(table, plugin)
+
     def test_backup_worker_closes_required_tables_cursor_before_json_validation(self):
         worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
         self.assertIn('if (!names.contains(required)) throw new IllegalStateException("Falta la tabla requerida en el respaldo: " + required);\n                }\n            }\n            String[] jsonTables', worker)
