@@ -577,4 +577,13 @@ test('preserva identificadores especiales de dispositivos en vectores causales',
   assert.equal(normalized.constructor, 1);
   assert.equal(normalized.toString, 3);
   assert.deepEqual(JSON.parse(JSON.stringify(normalized)), JSON.parse('{"__proto__":2,"constructor":1,"toString":3}'));
+
+  const incremented = incrementVersionVector(specialVector, 'constructor');
+  assert.equal(Object.prototype.hasOwnProperty.call(incremented, '__proto__'), true);
+  assert.equal(incremented.constructor, 2);
+  assert.equal(incremented.toString, 3);
+  assert.equal(compareVersionVectors(specialVector, JSON.parse('{"__proto__":1,"constructor":1,"toString":2}')), 'dominates');
+
+  const merged = mergeVersionVectors(specialVector, JSON.parse('{"__proto__":1,"constructor":3,"header":4}'));
+  assert.deepEqual(JSON.parse(JSON.stringify(merged)), JSON.parse('{"__proto__":2,"constructor":3,"header":4,"toString":3}'));
 });
