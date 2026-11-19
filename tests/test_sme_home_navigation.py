@@ -35,7 +35,11 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("Pedido rápido de repuestos", self.html)
         self.assertIn("function smeRepuestosQuickPage()", self.html)
         self.assertIn("data-parts-share", self.html)
-        self.assertIn("db.pedidosRepuestos.push(record)", self.html)
+        self.assertIn("data-parts-priority", self.html)
+        self.assertIn("data-parts-state", self.html)
+        self.assertIn("data-parts-add", self.html)
+        self.assertIn("data-parts-share", self.html)
+        self.assertIn("data-parts-close", self.html)
         self.assertIn("else if(page==='pedidosRepuestos') smeRepuestosQuickPage();", self.html)
         self.assertIn("'pedidosRepuestos','recepciones'", self.html)
 
