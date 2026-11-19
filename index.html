@@ -801,50 +801,43 @@ function gastoPage(){
 
 function smeRepuestosQuickPage(){
  const records=(db.pedidosRepuestos||[]).slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
- const vehicleOptions='<option value="">Sin asociar por ahora</option>'+(db.vehiculos||[]).map(v=>'<option value="'+esc(v.id)+'">'+esc([v.patente,v.marca,v.modelo].filter(Boolean).join(' · '))+'</option>').join('');
- app.innerHTML='<h2 class="section-title">Pedido rápido de repuestos</h2>'+
- '<p class="muted">Anotá lo que necesitás pedirle al dueño. Podés vincularlo a un vehículo ahora o hacerlo más adelante.</p>'+
+ const customers=db.clientes||[],vehicles=db.vehiculos||[],works=db.trabajos||[];
+ const priority={alta:'🔴 Alta',normal:'🟡 Normal',baja:'🟢 Stock'};
+ const state={pendiente:'Pendiente',pedido:'Pedido',recibido:'Recibido',disponible:'Disponible'};
+ const itemsOf=p=>(p.items||[]).map(x=>typeof x==='string'?{nombre:x,prioridad:'normal',estado:'pendiente'}:{nombre:x.nombre||x.texto||'',prioridad:x.prioridad||'normal',estado:x.estado||'pendiente'}).filter(x=>x.nombre);
+ const customerOpts=options(customers,x=>x.nombre+(x.empresa?' · '+x.empresa:''),'');
+ const vehicleOpts=options(vehicles,x=>[x.patente,x.marca,x.modelo].filter(Boolean).join(' · '),'');
+ const workOpts=options(works,x=>x.numero+' · '+vehicleName(x.vehiculoId),'');
+ app.innerHTML='<h2 class="section-title">Pedido rápido de repuestos</h2><p class="muted">Pedidos para trabajos o stock general. Priorizá cada ítem y seguí su estado.</p>'+
  '<section class="panel"><form id="smeQuickPartsForm">'+
- '<label>Vehículo (opcional)<select name="vehiculoId">'+vehicleOptions+'</select></label>'+
- '<label>Nombre del dueño (opcional)<input name="destinatario" type="text" placeholder="Ej. Juan"></label>'+
- '<label>Repuestos solicitados<textarea name="items" rows="6" required placeholder="Un repuesto por renglón. Ejemplo:\nPantógrafo completo con bujes y rótula\nBieleta\nAmortiguador\nCazoleta con crapodina"></textarea></label>'+
- '<label>Observaciones (opcional)<textarea name="observaciones" rows="2" placeholder="Lado, marca, medida u otra aclaración"></textarea></label>'+
- '<div class="form-error" data-form-error role="alert" aria-live="polite"></div><button type="submit">Guardar pedido</button></form></section>'+
- '<h3 class="more-section-title" style="margin-top:20px">Pedidos guardados</h3><div class="list" id="smeQuickPartsList">'+
+ '<label>Cliente (opcional)<select name="clienteId">'+customerOpts+'</select></label>'+
+ '<label>Vehículo (opcional)<select name="vehiculoId">'+vehicleOpts+'</select></label>'+
+ '<label>Orden de trabajo (opcional)<select name="trabajoId">'+workOpts+'</select></label>'+
+ '<label>Repuestos solicitados<textarea name="items" rows="5" required placeholder="Un repuesto por renglón"></textarea></label>'+
+ '<label>Prioridad inicial<select name="prioridad"><option value="alta">Alta — primero</option><option value="normal" selected>Normal</option><option value="baja">Stock / sin urgencia</option></select></label>'+
+ '<label>Observaciones<textarea name="observaciones" rows="2" placeholder="Lado, marca, medida…"></textarea></label><div class="form-error" data-form-error role="alert"></div><button type="submit">Guardar pedido</button></form></section>'+
+ '<h3 class="more-section-title" style="margin-top:20px">Pedidos guardados</h3><div class="list">'+
  (records.length?records.map(p=>{
-  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(p.vehiculoId));
-  const vehicleLabel=vehicle?[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' · '):'Sin vehículo asociado';
-  const body=(p.items||[]).map((item,i)=>(i+1)+'. '+item).join('\n');
-  return '<article class="item"><strong>'+esc(p.titulo||'Pedido de repuestos')+'</strong><small class="muted">'+esc(vehicleLabel)+' · '+esc(new Date(p.createdAt||Date.now()).toLocaleDateString('es-AR'))+'</small>'+
-   '<p style="white-space:pre-line">'+esc(body)+'</p>'+(p.observaciones?'<p class="muted">'+esc(p.observaciones)+'</p>':'')+
-   '<div class="quick"><button type="button" data-parts-share="'+esc(p.id)+'">Compartir pedido</button><button type="button" class="secondary" data-parts-close="'+esc(p.id)+'">'+(p.estado==='cerrado'?'Reabrir':'Marcar finalizado')+'</button></div></article>';
+  const v=vehicles.find(x=>String(x.id)===String(p.vehiculoId)),c=customers.find(x=>String(x.id)===String(p.clienteId)),w=works.find(x=>String(x.id)===String(p.trabajoId));
+  const detail=itemsOf(p).map((it,i)=>'<div class="dashboard-entry"><strong>'+esc(it.nombre)+'</strong><small>'+esc(priority[it.prioridad]||priority.normal)+' · '+esc(state[it.estado]||state.pendiente)+'</small><label>Prioridad<select data-parts-priority="'+esc(p.id)+'" data-index="'+i+'"><option value="alta" '+(it.prioridad==='alta'?'selected':'')+'>Alta</option><option value="normal" '+(it.prioridad==='normal'?'selected':'')+'>Normal</option><option value="baja" '+(it.prioridad==='baja'?'selected':'')+'>Stock</option></select></label><label>Estado<select data-parts-state="'+esc(p.id)+'" data-index="'+i+'"><option value="pendiente" '+(it.estado==='pendiente'?'selected':'')+'>Pendiente</option><option value="pedido" '+(it.estado==='pedido'?'selected':'')+'>Pedido</option><option value="recibido" '+(it.estado==='recibido'?'selected':'')+'>Recibido</option><option value="disponible" '+(it.estado==='disponible'?'selected':'')+'>Disponible</option></select></label></div>').join('');
+  return '<article class="item"><strong>'+esc(p.titulo||'Pedido de repuestos')+'</strong><small class="muted">'+esc(c?.nombre||'Stock general')+' · '+esc(v?vehicleName(v.id):'Sin vehículo')+(w?' · OT '+esc(w.numero):'')+' · '+esc(new Date(p.createdAt||Date.now()).toLocaleDateString('es-AR'))+'</small>'+detail+
+  '<form class="quick" data-parts-add="'+esc(p.id)+'"><textarea name="newItems" rows="2" placeholder="Agregar repuestos que aparecieron después (uno por línea)"></textarea><select name="newPriority"><option value="alta">Alta</option><option value="normal" selected>Normal</option><option value="baja">Stock</option></select><button type="submit" class="secondary">Agregar ítems</button></form>'+
+  (p.observaciones?'<p class="muted">'+esc(p.observaciones)+'</p>':'')+'<div class="quick"><button type="button" data-parts-share="'+esc(p.id)+'">Compartir pedido</button><button type="button" class="secondary" data-parts-close="'+esc(p.id)+'">'+(p.estado==='cerrado'?'Reabrir':'Marcar finalizado')+'</button></div></article>';
  }).join(''):'<div class="empty">Todavía no hay pedidos guardados.</div>')+'</div>';
- const form=document.getElementById('smeQuickPartsForm');
- form.addEventListener('submit',async e=>{
-  e.preventDefault();const fd=new FormData(form);
-  const items=String(fd.get('items')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const error=form.querySelector('[data-form-error]');
-  if(!items.length){error.textContent='Agregá al menos un repuesto.';return}
-  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(fd.get('vehiculoId')||''));
-  const owner=String(fd.get('destinatario')||'').trim();
-  const now=new Date().toISOString();
-  const record={id:globalThis.crypto?.randomUUID?.()||('parts-'+Date.now()+'-'+Math.random().toString(36).slice(2)),titulo:'Pedido de repuestos'+(vehicle?' · '+[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' '):''),vehiculoId:vehicle?.id||null,clienteId:vehicle?.clienteId||null,destinatario:owner,items,observaciones:String(fd.get('observaciones')||'').trim(),estado:'pendiente',createdAt:now,updatedAt:now};
-  db.pedidosRepuestos=db.pedidosRepuestos||[];db.pedidosRepuestos.push(record);
-  if(!(await save())){db.pedidosRepuestos=db.pedidosRepuestos.filter(x=>x.id!==record.id);return}
-  smeRepuestosQuickPage();
- });
- document.querySelectorAll('[data-parts-share]').forEach(button=>button.addEventListener('click',async()=>{
-  const p=(db.pedidosRepuestos||[]).find(x=>String(x.id)===button.dataset.partsShare);if(!p)return;
-  const vehicle=(db.vehiculos||[]).find(v=>String(v.id)===String(p.vehiculoId));
-  const lines=['PEDIDO DE REPUESTOS · SERVICIOS MECÁNICOS ENZO',vehicle?'Vehículo: '+[vehicle.patente,vehicle.marca,vehicle.modelo].filter(Boolean).join(' · '):'',p.destinatario?'Para: '+p.destinatario:'','',...(p.items||[]).map((x,i)=>(i+1)+'. '+x),p.observaciones?'':'',p.observaciones||''].filter(Boolean);
-  const message=lines.join('\n');
-  try{if(navigator.share)await navigator.share({text:message});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(message);smeShowMessage('Pedido listo','La lista se copió. Ya podés pegarla en WhatsApp.')}else throw new Error('No está disponible compartir o copiar en este dispositivo.')}catch(error){if(error?.name!=='AbortError')smeShowMessage('No se pudo compartir',String(error?.message||error))}
- }));
- document.querySelectorAll('[data-parts-close]').forEach(button=>button.addEventListener('click',async()=>{
-  const p=(db.pedidosRepuestos||[]).find(x=>String(x.id)===button.dataset.partsClose);if(!p)return;
-  const previous=p.estado;p.estado=previous==='cerrado'?'pendiente':'cerrado';p.updatedAt=new Date().toISOString();
-  if(!(await save()))p.estado=previous;else smeRepuestosQuickPage();
- }));
+ const form=document.getElementById('smeQuickPartsForm'),cs=form.elements.clienteId,vs=form.elements.vehiculoId,ws=form.elements.trabajoId;
+ function filterVehicles(){Array.from(vs.options).forEach(o=>{const v=vehicles.find(x=>String(x.id)===o.value);o.hidden=!!(o.value&&cs.value&&v?.clienteId&&String(v.clienteId)!==cs.value)});if(vs.selectedOptions[0]?.hidden)vs.value=''}
+ cs.addEventListener('change',filterVehicles);
+ vs.addEventListener('change',()=>{const v=vehicles.find(x=>String(x.id)===vs.value);if(v?.clienteId){cs.value=String(v.clienteId);filterVehicles()}Array.from(ws.options).forEach(o=>{const w=works.find(x=>String(x.id)===o.value);o.hidden=!!(o.value&&vs.value&&w&&String(w.vehiculoId)!==vs.value)});if(ws.selectedOptions[0]?.hidden)ws.value=''});
+ ws.addEventListener('change',()=>{const w=works.find(x=>String(x.id)===ws.value);if(w){vs.value=String(w.vehiculoId||'');const v=vehicles.find(x=>String(x.id)===vs.value);if(v?.clienteId)cs.value=String(v.clienteId);filterVehicles()}});
+ form.addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(form),names=String(fd.get('items')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean),err=form.querySelector('[data-form-error]');if(!names.length){err.textContent='Ingresá al menos un repuesto.';return}
+ const v=vehicles.find(x=>String(x.id)===String(fd.get('vehiculoId')||'')),c=customers.find(x=>String(x.id)===String(fd.get('clienteId')||'')),w=works.find(x=>String(x.id)===String(fd.get('trabajoId')||''));
+ if(v&&c&&v.clienteId&&String(v.clienteId)!==String(c.id)){err.textContent='El cliente no coincide con el vehículo.';return}if(w&&v&&String(w.vehiculoId)!==String(v.id)){err.textContent='La orden no corresponde al vehículo seleccionado.';return}
+ const now=new Date().toISOString(),prio=fd.get('prioridad')||'normal',rec={id:globalThis.crypto?.randomUUID?.()||('parts-'+Date.now()),titulo:'Pedido de repuestos'+(v?' · '+[v.patente,v.marca,v.modelo].filter(Boolean).join(' '):''),clienteId:c?.id||v?.clienteId||null,vehiculoId:v?.id||null,trabajoId:w?.id||null,items:names.map(nombre=>({nombre,prioridad:prio,estado:'pendiente',addedAt:now})),observaciones:String(fd.get('observaciones')||'').trim(),estado:'pendiente',createdAt:now,updatedAt:now};
+ db.pedidosRepuestos=db.pedidosRepuestos||[];db.pedidosRepuestos.push(rec);if(!(await save()))db.pedidosRepuestos=db.pedidosRepuestos.filter(x=>x.id!==rec.id);else smeRepuestosQuickPage()});
+ document.querySelectorAll('[data-parts-add]').forEach(f=>f.addEventListener('submit',async e=>{e.preventDefault();const p=db.pedidosRepuestos.find(x=>String(x.id)===f.dataset.partsAdd);if(!p)return;const fd=new FormData(f),names=String(fd.get('newItems')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!names.length)return;const prev=p.items||[],now=new Date().toISOString(),prio=fd.get('newPriority')||'normal';p.items=[...itemsOf(p),...names.map(nombre=>({nombre,prioridad:prio,estado:'pendiente',addedAt:now}))];p.updatedAt=now;if(!(await save()))p.items=prev;else smeRepuestosQuickPage()}));
+ document.querySelectorAll('[data-parts-priority],[data-parts-state]').forEach(sel=>sel.addEventListener('change',async()=>{const p=db.pedidosRepuestos.find(x=>String(x.id)===sel.dataset.partsPriority||String(x.id)===sel.dataset.partsState);if(!p)return;const prev=p.items||[],list=itemsOf(p),i=Number(sel.dataset.index);if(!list[i])return;if(sel.hasAttribute('data-parts-priority'))list[i].prioridad=sel.value;else list[i].estado=sel.value;p.items=list;p.updatedAt=new Date().toISOString();if(!(await save()))p.items=prev;else smeRepuestosQuickPage()}));
+ document.querySelectorAll('[data-parts-share]').forEach(btn=>btn.addEventListener('click',async()=>{const p=db.pedidosRepuestos.find(x=>String(x.id)===btn.dataset.partsShare);if(!p)return;const v=vehicles.find(x=>String(x.id)===String(p.vehiculoId)),c=customers.find(x=>String(x.id)===String(p.clienteId)),w=works.find(x=>String(x.id)===String(p.trabajoId)),lines=['PEDIDO DE REPUESTOS · SERVICIOS MECÁNICOS ENZO',c?'Cliente: '+customerName(c.id):'Stock general',v?'Vehículo: '+vehicleName(v.id):'',w?'Orden de trabajo: '+w.numero:'',...itemsOf(p).map((it,i)=>(i+1)+'. '+it.nombre+' — '+(priority[it.prioridad]||'Normal')+' / '+(state[it.estado]||'Pendiente')),p.observaciones||''].filter(Boolean);const msg=lines.join('\n');try{if(navigator.share)await navigator.share({text:msg});else if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(msg);smeShowMessage('Pedido listo','Copiado para compartir')}else throw new Error('Compartir no disponible')}catch(err){if(err?.name!=='AbortError')smeShowMessage('No se pudo compartir',String(err?.message||err))}}));
+ document.querySelectorAll('[data-parts-close]').forEach(btn=>btn.addEventListener('click',async()=>{const p=db.pedidosRepuestos.find(x=>String(x.id)===btn.dataset.partsClose);if(!p)return;const old=p.estado;p.estado=old==='cerrado'?'pendiente':'cerrado';p.updatedAt=new Date().toISOString();if(!(await save()))p.estado=old;else smeRepuestosQuickPage()}));
 }
 
 function smeRenderHubPage(title,intro,groups,extra=''){
