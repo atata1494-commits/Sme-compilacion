@@ -1,19 +1,23 @@
 const MAX_COUNTER = Number.MAX_SAFE_INTEGER;
 
+const hasOwn = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+const counterFor = (vector, deviceId) => hasOwn(vector, deviceId) ? vector[deviceId] : 0;
+
 export function normalizeVersionVector(input) {
   if (input == null || typeof input !== 'object' || Array.isArray(input)) {
     throw new TypeError('El vector de versiones debe ser un objeto.');
   }
-  const normalized = {};
+  const entries = [];
   for (const deviceId of Object.keys(input).sort()) {
     if (!deviceId.trim()) throw new TypeError('El vector contiene un dispositivo sin identificador.');
     const counter = input[deviceId];
     if (!Number.isSafeInteger(counter) || counter < 0 || counter > MAX_COUNTER) {
       throw new TypeError('El vector contiene un contador inválido.');
     }
-    if (counter > 0) normalized[deviceId] = counter;
+    if (counter > 0) entries.push([deviceId, counter]);
   }
-  return normalized;
+  // Object.fromEntries safely creates own properties even for "__proto__".
+  return Object.fromEntries(entries);
 }
 
 export function incrementVersionVector(input, deviceId) {
@@ -21,10 +25,12 @@ export function incrementVersionVector(input, deviceId) {
     throw new TypeError('Se necesita un identificador de dispositivo válido.');
   }
   const vector = normalizeVersionVector(input);
-  const next = (vector[deviceId] || 0) + 1;
+  const next = counterFor(vector, deviceId) + 1;
   if (!Number.isSafeInteger(next)) throw new RangeError('Se agotó el contador de versiones del dispositivo.');
-  vector[deviceId] = next;
-  return Object.fromEntries(Object.keys(vector).sort().map(key => [key, vector[key]]));
+  const entries = Object.entries(vector).filter(([key]) => key !== deviceId);
+  entries.push([deviceId, next]);
+  entries.sort(([a], [b]) => a.localeCompare(b));
+  return Object.fromEntries(entries);
 }
 
 export function compareVersionVectors(leftInput, rightInput) {
@@ -34,8 +40,8 @@ export function compareVersionVectors(leftInput, rightInput) {
   let leftGreater = false;
   let rightGreater = false;
   for (const deviceId of devices) {
-    const a = left[deviceId] || 0;
-    const b = right[deviceId] || 0;
+    const a = counterFor(left, deviceId);
+    const b = counterFor(right, deviceId);
     if (a > b) leftGreater = true;
     if (b > a) rightGreater = true;
   }
@@ -48,10 +54,10 @@ export function compareVersionVectors(leftInput, rightInput) {
 export function mergeVersionVectors(leftInput, rightInput) {
   const left = normalizeVersionVector(leftInput);
   const right = normalizeVersionVector(rightInput);
-  const merged = {};
+  const entries = [];
   for (const deviceId of [...new Set([...Object.keys(left), ...Object.keys(right)])].sort()) {
-    const counter = Math.max(left[deviceId] || 0, right[deviceId] || 0);
-    if (counter > 0) merged[deviceId] = counter;
+    const counter = Math.max(counterFor(left, deviceId), counterFor(right, deviceId));
+    if (counter > 0) entries.push([deviceId, counter]);
   }
-  return merged;
+  return Object.fromEntries(entries);
 }
