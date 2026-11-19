@@ -96,7 +96,7 @@ public final class SmeBackupWorker extends Worker {
         }
     }
 
-    private void validateSnapshot(File file) {
+    private void validateSnapshot(File file) throws Exception {
         if (!file.isFile() || file.length() < 1024) throw new IllegalStateException("El archivo SQLite de respaldo está vacío o incompleto.");
         try (SQLiteDatabase db = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY)) {
             String integrity = scalar(db, "PRAGMA integrity_check");
