@@ -526,6 +526,23 @@ test('rechaza paquetes alterados o incompletos antes de modificar SQLite', async
     assert.deepEqual((await receiver.load(emptyDB)).clientes, []);
     assert.equal((await receiver.prepareSyncPackage()).cambios.length, 0);
 
+    const invalidOperationPackage = structuredClone(validPackage);
+    invalidOperationPackage.cambios[0].operacion = 'DROP';
+    await assert.rejects(
+      () => receiver.applySyncPackage(invalidOperationPackage),
+      /Operación no permitida/
+    );
+
+    const mismatchedPayloadPackage = structuredClone(validPackage);
+    mismatchedPayloadPackage.cambios[0].payload.id = 'otro-id';
+    await assert.rejects(
+      () => receiver.applySyncPackage(mismatchedPayloadPackage),
+      /El contenido del cambio no coincide/
+    );
+
+    assert.deepEqual((await receiver.load(emptyDB)).clientes, []);
+    assert.equal((await receiver.prepareSyncPackage()).cambios.length, 0);
+
     const intactDelivery = await receiver.applySyncPackage(validPackage);
     assert.equal(intactDelivery.aplicado, true);
     assert.equal((await receiver.load(emptyDB)).clientes[0].nombre, 'Contenido original');
