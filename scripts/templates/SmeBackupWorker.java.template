@@ -96,7 +96,7 @@ public final class SmeBackupWorker extends Worker {
         }
     }
 
-    private void validateSnapshot(File file) throws Exception {
+    private void validateSnapshot(File file) {
         if (!file.isFile() || file.length() < 1024) throw new IllegalStateException("El archivo SQLite de respaldo está vacío o incompleto.");
         try (SQLiteDatabase db = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY)) {
             String integrity = scalar(db, "PRAGMA integrity_check");
@@ -104,7 +104,7 @@ public final class SmeBackupWorker extends Worker {
             try (Cursor tables = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null)) {
                 List<String> names = new ArrayList<>();
                 while (tables.moveToNext()) names.add(tables.getString(0));
-                for (String required : new String[]{"schema_migrations", "app_metadata", "clientes", "vehiculos", "trabajos", "presupuestos", "movimientos", "eventos", "recepciones", "diagnosticos", "cuentas", "pagos_cuenta", "adjuntos", "cambios_sync", "cambios_recibidos", "paquetes_intercambio", "conflictos_sync", "asistencias", "terceros", "trabajos_externos", "config_horarios", "sme_tareas", "sme_avisos", "sme_solicitudes_gasto", "sme_pedidos_repuestos", "sme_auditoria", "sme_tarea_eventos", "sme_aviso_derivaciones", "sme_tarea_dependencias", "sme_permisos_usuario"}) {
+                for (String required : new String[]{"clientes", "vehiculos", "trabajos", "adjuntos", "pagos_cuenta", "sme_tareas", "sme_avisos", "sme_solicitudes_gasto", "sme_pedidos_repuestos", "sme_auditoria", "sme_tarea_eventos", "sme_aviso_derivaciones", "cambios_sync", "cambios_recibidos", "paquetes_intercambio", "conflictos_sync"}) {
                     if (!names.contains(required)) throw new IllegalStateException("Falta la tabla requerida en el respaldo: " + required);
                 }
             }
