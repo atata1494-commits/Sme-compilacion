@@ -42,7 +42,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("Reposición del taller", self.html)
         self.assertIn("Listas guardadas", self.html)
         self.assertIn("data-parts-share", self.html)
-        self.assertIn("target==='pedidosRepuestos'?'partsRequest'", self.html)
+        self.assertIn("pedidosRepuestos:'partsRequest'", self.html)
         self.assertIn("partsRequest:'<path", self.html)
         self.assertIn("function smeEnsurePartsStyles()", self.html)
         self.assertIn(".parts-edit-row{display:grid", self.html)
@@ -147,7 +147,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("clipboardList:'<rect", self.html)
         self.assertIn("label.startsWith('Órdenes')?'activeOrders'", self.html)
         self.assertIn("iconSvg('listChecks',22)", self.html)
-        self.assertIn("target==='tareas'?'listChecks'", self.html)
+        self.assertIn("tareas:'listChecks'", self.html)
 
     def test_quick_access_does_not_duplicate_fixed_bottom_navigation(self):
         self.assertIn("const quickChoices=[['tareas','Tareas','listChecks']", self.html)
@@ -177,8 +177,8 @@ class SmeHomeNavigationTests(unittest.TestCase):
     def test_customer_and_user_icons_are_visually_distinct(self):
         self.assertIn("userRound:'<circle", self.html)
         self.assertIn("idCard:'<rect", self.html)
-        self.assertIn("target==='clientes'?'userRound'", self.html)
-        self.assertIn("target==='usuarios'?'users'", self.html)
+        self.assertIn("clientes:'userRound'", self.html)
+        self.assertIn("usuarios:'users'", self.html)
         self.assertIn("value:'Dirección y Supervisión',icon:'idCard'", self.html)
 
     def test_safety_risk_has_a_distinct_no_risk_option_and_sme_picker(self):
@@ -293,8 +293,8 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertNotIn("function smeSetOrientativeBudgetExpanded(toggle)", self.html)
 
     def test_workshop_tiles_and_dashboard_metrics_use_distinct_icons(self):
-        self.assertIn("target==='recepciones'?'carReception'", self.html)
-        self.assertIn("target==='trabajos'?'clipboardList'", self.html)
+        self.assertIn("recepciones:'carReception'", self.html)
+        self.assertIn("trabajos:'clipboardList'", self.html)
         self.assertIn("carReception:", self.html)
         self.assertIn("stroke-width=\".82\"", self.html)
         self.assertIn("M15.72 4.35", self.html)
@@ -303,7 +303,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("vehiclesAtWork:", self.html)
         self.assertIn("m3.2 12.6", self.html)
         self.assertIn("a3.1 3.1 0 0 0 4.1 4.1l2.4 2.4", self.html)
-        self.assertIn("target==='respaldos'?'databaseBackup'", self.html)
+        self.assertIn("respaldos:'databaseBackup'", self.html)
         self.assertIn("label.startsWith('Órdenes')?'activeOrders'", self.html)
         self.assertIn("label.startsWith('Vehículos')?'vehiclesAtWork'", self.html)
         self.assertIn("label.startsWith('Presupuestos')?'budgetFollowUp'", self.html)
@@ -313,7 +313,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
 
     def test_expense_approval_icon_is_not_the_cash_register_icon(self):
         self.assertIn("expenseApproval:'<path", self.html)
-        self.assertIn("target==='gastos'?'expenseApproval'", self.html)
+        self.assertIn("gastos:'expenseApproval'", self.html)
         self.assertIn("cashregister:'<rect", self.html)
 
 
