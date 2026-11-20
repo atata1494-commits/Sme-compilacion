@@ -38,6 +38,15 @@ header{background-color:#102d31;background-image:
 main{max-width:900px;margin:auto;padding:18px 14px 100px;background-image:url('./logo-watermark.svg');background-repeat:no-repeat;background-position:center 150px;background-size:min(94%,620px) auto}
 .section-title{font-family:Georgia,serif;font-size:23px;margin:8px 0 14px;color:#e5c58f}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+/* Strong mobile containment: form labels, panels, grids and controls may never expand beyond the viewport. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+main{width:100%;max-width:900px;overflow-x:clip}
+main .panel,main form,main form label,main form textarea,main form input,main form select{min-width:0!important;max-width:100%!important;width:100%;box-sizing:border-box!important}
+main .panel{overflow:hidden}
+main .cards{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+main .cards .tile{min-width:0;width:100%;overflow:hidden}
+main textarea{display:block;resize:vertical;overflow-wrap:anywhere}
+@media(max-width:520px){main .cards{grid-template-columns:minmax(0,1fr)}main .tile{width:100%;max-width:100%}}
 /* Responsive containment: prevent card grids and form controls from widening the viewport. */
 main,.panel,.tile,.cards,.list,form,form>*{min-width:0;max-width:100%}
 .cards>*{min-width:0;max-width:100%}
