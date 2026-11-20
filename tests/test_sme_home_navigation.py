@@ -32,8 +32,15 @@ class SmeHomeNavigationTests(unittest.TestCase):
 
     def test_quick_parts_request_is_available_from_workshop_and_persisted(self):
         self.assertIn("pedidosRepuestos:'taller'", self.html)
-        self.assertIn("Pedido rápido de repuestos", self.html)
-        self.assertIn("function smeRepuestosQuickPage()", self.html)
+        self.assertIn("Pedidos de repuestos", self.html)
+        self.assertIn("function smeRepuestosQuickPage(view='pedidos')", self.html)
+        self.assertIn("function smeRepuestosHubPage()", self.html)
+        self.assertIn("repuestosHub", self.html)
+        self.assertIn("repuestosPedidos", self.html)
+        self.assertIn("repuestosReposicion", self.html)
+        self.assertIn("repuestosListas", self.html)
+        self.assertIn("Reposición del taller", self.html)
+        self.assertIn("Listas guardadas", self.html)
         self.assertIn("data-parts-share", self.html)
         self.assertIn("target==='pedidosRepuestos'?'partsRequest'", self.html)
         self.assertIn("partsRequest:'<path", self.html)
