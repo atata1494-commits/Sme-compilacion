@@ -490,7 +490,7 @@ function iconSvg(name,size=28){const originalIcons={cleaning:'/cleaning-icon.web
  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-7h5v7"/>',
  pawn:'<circle cx="12" cy="5.2" r="3"/><path d="M9.3 9.1h5.4l1 4.1 3.6 3.8v2H4.7v-2l3.6-3.8z"/><path d="M3.5 22h17M5.3 19h13.4"/>',
  car:'<path d="m5 11 2-5h10l2 5"/><path d="M3.5 11h17v7h-17z"/><path d="M6 18v2M18 18v2"/><circle cx="7" cy="15" r="1"/><circle cx="17" cy="15" r="1"/>',
- partsRequest:'<rect x="4" y="3" width="15" height="18" rx="1.6"/><path d="M8 3V2h7v1M7.5 8.5l1.5 1.5 3-3M14 8h3M7.5 14l1.5 1.5 3-3M14 14h3M7.5 18h2.5"/><path d="m16.5 15.8 3.8-3.8 2.2 2.2-3.8 3.8M16.3 15.9l-2.3-2.3 2.2-2.2 2.3 2.3"/><path d="M13.8 18.1l-2.1 2.1 2.2 2.2 2.1-2.1"/>', partsBox:'<path d="M3 9 12 4 21 9 12 14z"/><path d="M3 9v11l9 3 9-3V9M12 14v9"/><path d="M7.2 7.1 10 5.6l2.1 1.2-2.8 1.6z"/><path d="M15.2 7.2 17.5 6l2.3 1.2-2.3 1.3z"/><path d="M6 13.8h3.5v3.6H6z"/><path d="M15.2 14.4h3.2v3.2h-3.2z"/><path d="M12.2 8.3v3.4M10.5 10h3.4"/>' ,
+ partsRequest:'<path d="M7 8.5 12 5l5 3.5-5 3.5zM7 8.5v6.2l5 3.2 5-3.2V8.5M12 12v5.9"/><circle cx="12" cy="8.5" r="2.1"/><path d="M18.5 16.5h3M20 15v3"/>', partsBox:'<path d="M3 9 12 4 21 9 12 14z"/><path d="M3 9v11l9 3 9-3V9M12 14v9"/><path d="M7.2 7.1 10 5.6l2.1 1.2-2.8 1.6z"/><path d="M15.2 7.2 17.5 6l2.3 1.2-2.3 1.3z"/><path d="M6 13.8h3.5v3.6H6z"/><path d="M15.2 14.4h3.2v3.2h-3.2z"/><path d="M12.2 8.3v3.4M10.5 10h3.4"/>' ,
  wrench:'<path d="M14.5 6.2a5 5 0 0 0-6.4 6.4L3 17.7 6.3 21l5.2-5.1a5 5 0 0 0 6.4-6.4l-3.3 3.2-3.2-3.2z"/>',
  sync:'<path d="M20 7h-5V2"/><path d="M20 7a8 8 0 0 0-14-2L4 7"/><path d="M4 17h5v5"/><path d="M4 17a8 8 0 0 0 14 2l2-2"/>',
  receipt:'<path d="M5 2.5h10l4 4V21l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2L5 21z"/><path d="M15 2.5V7h4M8 10h8M8 13h4.2"/><path d="M16.6 14.8c-.7-.8-3.2-.8-3.2.4s3.2 1 3.2 2.3-2.6 1.4-3.4.4M15 14v5"/>',
@@ -1907,7 +1907,7 @@ function smeHashPassword(password,salt){
  return crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']).then(key=>crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:210000,hash:'SHA-256'},key,256)).then(bits=>Array.from(new Uint8Array(bits),b=>b.toString(16).padStart(2,'0')).join(''));
 }
 function smeNewSalt(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('')}
-function smeModuleKey(value){return ({movimientos:'caja',eventos:'agenda'})[value]||value}
+function smeModuleKey(value){return ({movimientos:'caja',eventos:'agenda',repuestosHub:'pedidosRepuestos',repuestosPedidos:'pedidosRepuestos',repuestosReposicion:'pedidosRepuestos',repuestosListas:'pedidosRepuestos'})[value]||value}
 
 const SME_FAATRA_REFERENCE_KEY='sme_faatra_hourly_reference_v1';
 const SME_FAATRA_SOURCE_URL='https://www.faatra.org.ar/servicios/costo-hora/';
