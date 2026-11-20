@@ -36,7 +36,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn("function smeRepuestosQuickPage()", self.html)
         self.assertIn("data-parts-share", self.html)
         self.assertIn("target==='pedidosRepuestos'?'partsRequest'", self.html)
-        self.assertIn("partsRequest:'<rect", self.html)
+        self.assertIn("partsRequest:'<path", self.html)
         self.assertIn("function smeEnsurePartsStyles()", self.html)
         self.assertIn(".parts-edit-row{display:grid", self.html)
         self.assertIn("smeWorkshopRestockForm", self.html)
