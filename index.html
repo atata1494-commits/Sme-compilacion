@@ -46,7 +46,7 @@ main .panel{overflow:hidden}
 main .cards{width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
 main .cards .tile{min-width:0;width:100%;overflow:hidden}
 main textarea{display:block;resize:vertical;overflow-wrap:anywhere}
-@media(max-width:520px){main .cards{grid-template-columns:minmax(0,1fr)}main .tile{width:100%;max-width:100%}}
+@media(max-width:520px){main .cards{grid-template-columns:repeat(2,minmax(0,1fr))}main .tile{width:100%;max-width:100%}}
 /* Responsive containment: prevent card grids and form controls from widening the viewport. */
 main,.panel,.tile,.cards,.list,form,form>*{min-width:0;max-width:100%}
 .cards>*{min-width:0;max-width:100%}
@@ -55,7 +55,7 @@ form label{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere}
 form textarea,form input,form select{width:100%;min-width:0;max-width:100%;box-sizing:border-box;display:block}
 .parts-priority-group label{min-width:0;width:100%;max-width:100%}
 .parts-priority-group textarea,.parts-restock-create textarea,.parts-order-card textarea,.parts-restock-card textarea{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
-@media(max-width:520px){.cards{grid-template-columns:minmax(0,1fr)}.tile{width:100%;min-width:0}.panel{overflow:hidden}}
+@media(max-width:520px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.tile{width:100%;min-width:0}.panel{overflow:hidden}}
 .tile,.panel{background:rgba(39,43,38,.94);border:1px solid #514a3e;border-radius:13px;padding:16px;box-shadow:0 4px 14px #0002}
 .tile{min-height:104px;text-align:left;color:var(--ink);cursor:pointer;transition:border-color .15s,transform .15s}
 .tile:hover{border-color:var(--ochre);transform:translateY(-1px)}
