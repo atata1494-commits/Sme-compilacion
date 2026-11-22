@@ -476,7 +476,7 @@ function smeShowBackExitPrompt(){
 }
 const SME_BACK_PARENT_BY_PAGE=Object.freeze({
  inicio:'inicio',registros:'inicio',taller:'inicio',gestion:'inicio',mas:'inicio',
- clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',
+ clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',repuestosPedidos:'repuestosHub',repuestosReposicion:'repuestosHub',repuestosListas:'repuestosHub',
  recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',
  presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',
  usuarios:'mas',respaldos:'mas'
@@ -864,7 +864,7 @@ function smeRepuestosQuickPage(view='pedidos'){
   itemsOf(p).map((it,i)=>'<p class="parts-saved-line">• '+esc(it.nombre)+(it.estado!=='pendiente'?' <small class="parts-item-status">'+esc(status[it.estado]||it.estado)+'</small>':'')+'</p>').join('')+
   listEditor(p,'taller')+'<div class="quick parts-order-actions"><button type="button" data-parts-share="'+esc(p.id)+'">Compartir</button><button type="button" class="secondary" data-parts-print="'+esc(p.id)+'">Imprimir / PDF</button><button type="button" class="secondary" data-parts-close="'+esc(p.id)+'">'+(p.estado==='cerrado'?'Reabrir':'Finalizar pedido')+'</button></div></article>';
  };
- app.innerHTML='<h2 class="section-title">'+(view==='reposicion'?'Reposición del taller':view==='listas'?'Listas guardadas':'Pedidos de repuestos')+'</h2><p class="muted">'+(view==='reposicion'?'Insumos y materiales de uso propio, sin cliente ni OT.':view==='listas'?'Consulta y seguimiento de pedidos y reposiciones guardadas.':'Pedidos vinculados opcionalmente a cliente, vehículo y orden de trabajo.')+'</p><button type="button" class="secondary" data-go="repuestosHub">← Volver a Repuestos</button>'+
+ app.innerHTML='<h2 class="section-title">'+(view==='reposicion'?'Reposición del taller':view==='listas'?'Listas guardadas':'Pedidos de repuestos')+'</h2><p class="muted">'+(view==='reposicion'?'Insumos y materiales de uso propio, sin cliente ni OT.':view==='listas'?'Consulta y seguimiento de pedidos y reposiciones guardadas.':'Pedidos vinculados opcionalmente a cliente, vehículo y orden de trabajo.')+'</p>'+
  (view==='pedidos'?'<section class="panel"><form id="smeQuickPartsForm">'+
  '<label>Cliente (opcional)<select name="clienteId">'+customerOpts+'</select></label>'+
  '<label>Vehículo (opcional)<select name="vehiculoId">'+vehicleOpts+'</select></label>'+
