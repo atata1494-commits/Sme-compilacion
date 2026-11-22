@@ -658,7 +658,7 @@ export async function openSMEStorage(storageKey) {
   async function prepareSyncPackage() {
     const deviceId = await getDeviceId();
     const pending = await connection.query(
-      "SELECT change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, version_vector_json FROM cambios_sync WHERE estado = 'pendiente' ORDER BY fecha_utc, change_id"
+      "SELECT change_id, entidad_tipo, entidad_id, operacion, revision_base, revision, dispositivo_id, fecha_utc, payload_json, version_vector_json FROM cambios_sync WHERE estado = 'pendiente' ORDER BY rowid"
     );
     const rows = pending.values || [];
     const packageId = globalThis.crypto?.randomUUID
