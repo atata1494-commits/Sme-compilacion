@@ -168,7 +168,7 @@ class SmeHomeNavigationTests(unittest.TestCase):
         self.assertIn(".home-shift p{margin:5px 0 2px", self.html)
         self.assertIn("Ver todos los avisos", self.html)
         self.assertIn("const items=(db.avisos||[]).slice().sort", self.html)
-        self.assertIn("noticesWidget+'<div class=\"home-layout\">", self.html)
+        self.assertIn("noticesWidget+smeActivityWidget()+'<div class=\"home-layout\">", self.html)
 
     def test_notice_widget_has_a_dedicated_bell_icon(self):
         self.assertIn("bell:'<path", self.html)
