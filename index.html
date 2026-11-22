@@ -475,7 +475,7 @@ function smeShowBackExitPrompt(){
  },2200);
 }
 const SME_BACK_PARENT_BY_PAGE=Object.freeze({
- inicio:'inicio',registros:'inicio',taller:'inicio',gestion:'inicio',mas:'inicio',
+ inicio:'inicio',registros:'inicio',taller:'inicio',gestion:'inicio',mas:'inicio',repuestosHub:'taller',
  clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',repuestosPedidos:'repuestosHub',repuestosReposicion:'repuestosHub',repuestosListas:'repuestosHub',
  recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',
  presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',
@@ -939,7 +939,7 @@ function smeBackupPage(){
 function render(){
  smeRememberCurrentPage();
  if(page!=='inicio'&&!smeCan(page,'view')){page='inicio';}
- const navGroupByPage={clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas',conflictos:'mas'};
+ const navGroupByPage={repuestosHub:'taller',clientes:'registros',vehiculos:'registros',trabajos:'registros',pedidosRepuestos:'taller',recepciones:'taller',diagnosticos:'taller',asistencias:'taller',terceros:'taller',tareas:'taller',avisos:'taller',gastos:'taller',presupuestos:'gestion',tiempos:'gestion',caja:'gestion',cuentas:'gestion',agenda:'gestion',usuarios:'mas',respaldos:'mas',conflictos:'mas'};
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page||navGroupByPage[page]===b.dataset.page));
  if(page==='inicio'){renderDashboard()}
  else if(page==='clientes') listPage('Clientes','clientes',[['nombre','Nombre y apellido','text'],['telefono','Teléfono / WhatsApp','tel'],['documento','DNI / CUIT (opcional)','text'],['empresa','Empresa (opcional)','text'],['notas','Notas','textarea']],'Agregar cliente');
