@@ -51,7 +51,7 @@ class SQLiteSyncPackageTests(unittest.TestCase):
         self.assertIn("version_formato: 1", self.source)
         self.assertIn("sha256_hex: hash", self.source)
         self.assertIn("WHERE estado = 'pendiente'", self.source)
-        self.assertIn("ORDER BY fecha_utc, change_id", self.source)
+        self.assertIn("ORDER BY rowid", self.source)
 
     def test_package_persists_hash_and_metadata_before_returning(self):
         start = self.source.index("async function prepareSyncPackage()")
