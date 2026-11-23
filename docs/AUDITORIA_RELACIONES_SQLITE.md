@@ -59,3 +59,13 @@ python scripts/audit_sqlite_financial.py /ruta/a/sme_tallerSQLite.db
 ```
 
 En modo solo lectura revisa integridad SQLite, referencias declaradas, sumas de presupuestos (mano de obra + repuestos frente al total), neto de movimientos (importe menos comisión) y valores negativos. Son alertas aritméticas para revisión; no asume que todo caso especial sea un error y no modifica datos.
+
+
+## Validación previa de respaldos (cuarta herramienta)
+
+Uso:
+```bash
+python scripts/validate_sme_backup.py /ruta/al/respaldo.zip
+```
+
+Valida JSON, SQLite y ZIP en controles estructurales, CRC, rutas inseguras, JSON/SQLite embebidos y calcula SHA-256. No extrae ni restaura. Un resultado limpio solo confirma las comprobaciones realizadas, no que el backup esté completo o que una restauración real vaya a funcionar.
