@@ -20,6 +20,7 @@ La herramienta abre la base en modo SQLite `ro` (read-only). No realiza UPDATE, 
 - Eventos, recepciones y diagnósticos → trabajos, clientes y vehículos
 - Cuentas → trabajos y clientes
 - Pagos de cuenta → cuentas y movimientos
+- Pedidos de repuestos → clientes, vehículos y trabajos
 - Trabajos externos → terceros
 
 Las relaciones polimórficas de adjuntos y los vínculos de sincronización no se auditan aún. Referencias nulas o vacías se consideran opcionales y no se reportan.
