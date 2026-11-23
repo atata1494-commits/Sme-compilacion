@@ -256,3 +256,10 @@ if __name__ == "__main__":
             with self.subTest(table=table):
                 self.assertIn('"' + table + '"', worker)
                 self.assertIn('"' + table + '"', plugin)
+
+
+    def test_restore_safety_copy_names_are_collision_resistant(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn('new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT)', plugin)
+        self.assertIn('UUID.randomUUID().toString().substring(0, 8)', plugin)
+        self.assertIn('SME-pre-restauracion-', plugin)
