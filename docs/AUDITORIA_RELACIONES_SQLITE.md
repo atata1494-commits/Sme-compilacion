@@ -49,3 +49,13 @@ La auditoría complementaria ordena resultados por gravedad:
 - **Media:** números de trabajo o presupuesto duplicados y campos vacíos revisados.
 
 Cada alerta incluye una recomendación de revisión manual. La clasificación es orientativa: no significa que el dato esté definitivamente mal ni autoriza cambios automáticos. El reporte muestra primero el resumen de cantidades y luego las alertas ordenadas por gravedad.
+
+
+## Auditoría financiera (tercera herramienta)
+
+Ejecutar:
+```bash
+python scripts/audit_sqlite_financial.py /ruta/a/sme_tallerSQLite.db
+```
+
+En modo solo lectura revisa integridad SQLite, referencias declaradas, sumas de presupuestos (mano de obra + repuestos frente al total), neto de movimientos (importe menos comisión) y valores negativos. Son alertas aritméticas para revisión; no asume que todo caso especial sea un error y no modifica datos.
