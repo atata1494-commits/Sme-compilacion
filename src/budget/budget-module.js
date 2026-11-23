@@ -1,7 +1,7 @@
 import './budget-module.css';
 
 export function renderBudgetModule(ctx) {
-  const root = ctx.root, db = ctx.db, can = ctx.can;
+  const root = ctx.root, db = ctx.db, can = ctx.can, activity = typeof ctx.activity==='function' ? ctx.activity : ()=>{};
   const canEdit = can('presupuestos', 'edit');
   const canReadCosts = can('presupuestos', 'costs');
   const canEditCosts = can('presupuestos', 'costs-edit');
@@ -295,6 +295,7 @@ export function renderBudgetModule(ctx) {
       const ok=await ctx.save();
       if(!ok){db.presupuestos.splice(0,db.presupuestos.length,...old);if(errorBox)errorBox.textContent='No se confirmó el guardado. Los datos del formulario siguen disponibles; revisá el mensaje de almacenamiento e intentá nuevamente.';return false}
       try{localStorage.removeItem('sme_form_draft_v1:presupuestos:'+form.id)}catch(_){}
+      const orientative=quote.tipo==='Orientativo',label=orientative?'Consulta rápida':'Presupuesto formal',title=quoteTitle(quote),detail=title+(quote.clienteId?' · Cliente: '+customerName(quote.clienteId):'')+(quote.vehiculoId?' · Vehículo: '+vehicleName(quote.vehiculoId):quote.vehiculoReferencia?' · Vehículo: '+quote.vehiculoReferencia:'')+' · Importe: '+amount(quote.importe||quote.estimacionMinima||0);activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label,detail,{severity:'important',category:'presupuestos',recordId:quote.id,status:'informativo'});
       return true;
     }catch(error){
       db.presupuestos.splice(0,db.presupuestos.length,...old);if(errorBox)errorBox.textContent='No se pudo guardar el registro: '+String(error?.message||error);console.error('Error guardando presupuesto:',error);return false;
