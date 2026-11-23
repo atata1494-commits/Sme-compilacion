@@ -86,5 +86,11 @@ class BusinessActivitySummaryTests(unittest.TestCase):
     def test_activity_filtered_results_are_sorted_newest_first(self):
         self.assertIn(".sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')))", SOURCE)
 
+    def test_core_records_and_budgets_emit_business_activity_after_save(self):
+        self.assertIn("smeBusinessActivity(businessAction,eventTitle", SOURCE)
+        self.assertIn("smeActivityPageLabel(key)", SOURCE)
+        self.assertIn("activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label", BUDGET)
+        self.assertIn("category:'presupuestos',recordId:quote.id,status:'informativo'", BUDGET)
+
 if __name__ == "__main__":
     unittest.main()
