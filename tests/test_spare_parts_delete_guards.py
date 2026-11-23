@@ -24,3 +24,18 @@ class SparePartsDeleteGuardTests(unittest.TestCase):
         guard = self.linked_guard()
         self.assertIn("key==='trabajos'", guard)
         self.assertIn("String(x.trabajoId||'')===id", guard)
+
+
+class ActivityLocalDateTests(unittest.TestCase):
+    def test_activity_uses_local_date_helper(self):
+        self.assertIn("function smeActivityLocalDate(value)", SOURCE)
+        self.assertIn("smeActivityLocalDate(x.time)===today", SOURCE)
+        self.assertIn("smeActivityLocalDate(x.time)===d", SOURCE)
+
+    def test_local_date_helper_uses_local_calendar_fields(self):
+        start = SOURCE.index("function smeActivityLocalDate(value)")
+        helper = SOURCE[start:SOURCE.index("function smeActivityRead()", start)]
+        self.assertIn("d.getFullYear()", helper)
+        self.assertIn("d.getMonth()+1", helper)
+        self.assertIn("d.getDate()", helper)
+        self.assertNotIn("toISOString", helper)
