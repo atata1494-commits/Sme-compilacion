@@ -73,5 +73,9 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("sme-activity-preview-item", SOURCE)
         self.assertIn("Todavía no hay movimientos importantes registrados hoy", SOURCE)
 
+
+    def test_html_file_ends_cleanly_after_document_closing(self):
+        self.assertTrue(SOURCE.rstrip().endswith("</html>"), "HTML debe terminar en el cierre del documento, sin código sobrante")
+
 if __name__ == "__main__":
     unittest.main()
