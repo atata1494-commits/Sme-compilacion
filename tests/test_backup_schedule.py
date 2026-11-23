@@ -226,9 +226,6 @@ class BackupScheduleSourceTests(unittest.TestCase):
         worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
         self.assertIn('if (!names.contains(required)) throw new IllegalStateException("Falta la tabla requerida en el respaldo: " + required);\n                }\n            }\n            String[] jsonTables', worker)
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
-
 
     def test_native_worker_uses_the_same_sqlite_filename_as_restore_plugin(self):
         worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
@@ -263,3 +260,7 @@ if __name__ == "__main__":
         self.assertIn('new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT)', plugin)
         self.assertIn('UUID.randomUUID().toString().substring(0, 8)', plugin)
         self.assertIn('SME-pre-restauracion-', plugin)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
