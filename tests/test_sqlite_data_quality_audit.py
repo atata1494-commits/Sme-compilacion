@@ -23,7 +23,11 @@ class DataQualityTests(unittest.TestCase):
         findings=AUDIT.audit_quality(self.db)
         duplicate_cols={(f["table"],f["column"]) for f in findings if f["type"]=="duplicate_value"}
         self.assertIn(("clientes","documento"),duplicate_cols)
+        doc_alert=next(x for x in findings if x["table"]=="clientes" and x["type"]=="duplicate_value")
+        self.assertEqual(doc_alert["severity"],"alta")
         self.assertIn(("vehiculos","patente"),duplicate_cols)
+        plate_alert=next(x for x in findings if x["table"]=="vehiculos" and x["type"]=="duplicate_value")
+        self.assertEqual(plate_alert["severity"],"alta")
     def test_empty_required_fields_are_warnings(self):
         self.db.execute("INSERT INTO clientes(id,nombre,payload_json) VALUES('c-empty','','{}')")
         self.db.execute("INSERT INTO vehiculos(id,patente,payload_json) VALUES('v-empty','','{}')")
