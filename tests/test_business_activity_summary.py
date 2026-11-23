@@ -83,5 +83,8 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn('(!m||(x.category||x.page||\'General\')===m)', SOURCE)
         self.assertIn("'smeActivityModule'", SOURCE)
 
+    def test_activity_filtered_results_are_sorted_newest_first(self):
+        self.assertIn(".sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')))", SOURCE)
+
 if __name__ == "__main__":
     unittest.main()
