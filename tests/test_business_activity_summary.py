@@ -42,6 +42,10 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("Rendición verificada", SOURCE)
         self.assertIn("recordId:g.id,status:'pendiente'", SOURCE)
 
+    def test_cash_income_and_expense_events_are_distinguished(self):
+        self.assertIn("Caja · '+(obj.tipo==='Ingreso'?'Ingreso registrado':'Egreso registrado')", SOURCE)
+        self.assertIn("key==='movimientos'&&String(obj.tipo||'')==='Egreso'", SOURCE)
+
     def test_parts_orders_and_workshop_restock_are_logged(self):
         self.assertIn("Pedido de repuestos creado", SOURCE)
         self.assertIn("Reposición del taller solicitada", SOURCE)
