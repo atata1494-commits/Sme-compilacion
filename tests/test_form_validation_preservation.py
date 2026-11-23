@@ -31,7 +31,9 @@ class FormValidationPreservationTests(unittest.TestCase):
         self.assertIn("smeFormError(form,'Ya existe un usuario con ese nombre.','username');return", SOURCE)
 
     def test_save_failure_keeps_visible_error_instead_of_rebuilding_form(self):
-        self.assertIn("async function save(){const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);if(smeAuthenticated&&smeCurrentUser)smeActivityWrite(", SOURCE)
+        self.assertIn("async function save(){const resumeIdleTimer=!!smeAuthenticated;smeSaveInProgressCount++;if(resumeIdleTimer)smeClearIdleTimer();try{await storage.save(db);return true}catch(e){console.error('Error guardando datos:',e);alert('No se pudieron guardar los datos. Conservá tu respaldo. Detalle técnico: '+String(e?.message||e||'Error sin detalle'));return false}finally{smeSaveInProgressCount=Math.max(0,smeSaveInProgressCount-1);if(resumeIdleTimer&&smeAuthenticated)smeResetIdleTimer()}}", SOURCE)
+        self.assertNotIn("action:'Guardado de datos',detail:'La base de datos local confirmó el guardado.'", SOURCE)
+        self.assertIn("function smeBusinessActivity(action,detail,options={})", SOURCE)
         self.assertIn("return false}finally{smeSaveInProgressCount=Math.max(0,smeSaveInProgressCount-1);", SOURCE)
         self.assertIn("if(!(await save())){db=JSON.parse(before);return}render()", SOURCE)
 
