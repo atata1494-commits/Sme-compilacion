@@ -30,7 +30,7 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("smeBusinessActivity('Tarea · '+smeTaskStateLabel(next)", SOURCE)
 
     def test_attendance_actions_are_logged_for_admin_summary(self):
-        self.assertIn("Control horario · "+ "punchLabel", SOURCE)
+        self.assertIn("smeBusinessActivity(\'Control horario · \'+punchLabel", SOURCE)
         self.assertIn("Horario laboral actualizado", SOURCE)
         self.assertIn("Excepción de horario configurada", SOURCE)
         self.assertIn("Registro horario corregido", SOURCE)
