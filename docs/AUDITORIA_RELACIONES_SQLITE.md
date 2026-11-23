@@ -30,3 +30,13 @@ Las relaciones polimórficas de adjuntos y los vínculos de sincronización no s
 - Con hallazgos: tabla/ID de origen, columna, destino e ID faltante; código de salida 1.
 
 **No repara automáticamente.** Revisar cada hallazgo antes de cualquier corrección.
+
+
+## Auditoría de calidad de datos (segunda herramienta)
+
+Ejecutar:
+```bash
+python scripts/audit_sqlite_data_quality.py /ruta/a/sme_tallerSQLite.db
+```
+
+Esta herramienta de solo lectura marca duplicados normalizados en documentos de clientes, patentes, números de trabajo y presupuestos, y campos vacíos de nombre de cliente, patente o estado de trabajo. Son alertas para revisión manual, no errores definitivos ni correcciones automáticas.
