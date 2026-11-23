@@ -2,7 +2,7 @@ name: Build SME Android APK
 
 on:
   push:
-    branches: [main, fixes-caja-tareas-teclado-horario]
+    branches: [main, fixes-caja-tareas-teclado-horario, fixes-budget-rebuild-validation-20261019]
   workflow_dispatch:
 
 permissions:
