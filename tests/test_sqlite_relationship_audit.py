@@ -37,6 +37,14 @@ class RelationshipAuditTests(unittest.TestCase):
         self.assertIn(("trabajos","w-orphan","cliente_id","missing-client"), pairs)
         self.assertIn(("trabajos","w-orphan","vehiculo_id","missing-vehicle"), pairs)
 
+    def test_missing_payment_account_and_movement_refs_are_reported(self):
+        self.db.execute("""INSERT INTO pagos_cuenta(id,cuenta_id,movimiento_id,payload_json)
+                          VALUES('p-orphan','missing-account','missing-movement','{}')""")
+        findings = AUDIT.audit_connection(self.db)
+        pairs = {(f["source_table"],f["source_id"],f["column"],f["missing_target_id"]) for f in findings}
+        self.assertIn(("pagos_cuenta","p-orphan","cuenta_id","missing-account"), pairs)
+        self.assertIn(("pagos_cuenta","p-orphan","movimiento_id","missing-movement"), pairs)
+
     def test_blank_and_null_optional_references_are_ignored(self):
         self.db.execute("INSERT INTO vehiculos(id,cliente_id,payload_json) VALUES('v-free',NULL,'{}')")
         self.db.execute("INSERT INTO trabajos(id,cliente_id,vehiculo_id,payload_json) VALUES('w-free','','','{}')")
