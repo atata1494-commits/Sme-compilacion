@@ -31,11 +31,11 @@ class SparePartsDeleteGuardTests(unittest.TestCase):
         vehicle_block = guard[guard.index("key==='vehiculos'"):guard.index("key==='trabajos'")]
         work_block = guard[guard.index("key==='trabajos'"):]
         for collection in ("vehiculos", "trabajos", "presupuestos", "eventos", "recepciones", "diagnosticos", "cuentas", "pedidosRepuestos"):
-            self.assertIn(f"db.{collection}.some", client_block, f"client guard missing {collection}")
+            self.assertIn((f"(db.{collection}||[]).some" if collection == "pedidosRepuestos" else f"db.{collection}.some"), client_block, f"client guard missing {collection}")
         for collection in ("trabajos", "presupuestos", "eventos", "recepciones", "diagnosticos", "pedidosRepuestos"):
-            self.assertIn(f"db.{collection}.some", vehicle_block, f"vehicle guard missing {collection}")
+            self.assertIn((f"(db.{collection}||[]).some" if collection == "pedidosRepuestos" else f"db.{collection}.some"), vehicle_block, f"vehicle guard missing {collection}")
         for collection in ("movimientos", "recepciones", "diagnosticos", "presupuestos", "cuentas", "pedidosRepuestos"):
-            self.assertIn(f"db.{collection}.some", work_block, f"work-order guard missing {collection}")
+            self.assertIn((f"(db.{collection}||[]).some" if collection == "pedidosRepuestos" else f"db.{collection}.some"), work_block, f"work-order guard missing {collection}")
 
 
 class ActivityLocalDateTests(unittest.TestCase):
