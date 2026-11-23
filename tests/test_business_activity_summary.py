@@ -42,6 +42,13 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("Rendición verificada", SOURCE)
         self.assertIn("recordId:g.id,status:'pendiente'", SOURCE)
 
+    def test_external_vendor_and_work_events_are_logged(self):
+        self.assertIn("Proveedor/tercero registrado", SOURCE)
+        self.assertIn("Proveedor/tercero actualizado", SOURCE)
+        self.assertIn("Trabajo externo registrado", SOURCE)
+        self.assertIn("category:'trabajosExternos'", SOURCE)
+        self.assertIn("requiresAttention:rec.estadoPago==='Pendiente'", SOURCE)
+
     def test_cash_income_and_expense_events_are_distinguished(self):
         self.assertIn("Caja · '+(obj.tipo==='Ingreso'?'Ingreso registrado':'Egreso registrado')", SOURCE)
         self.assertIn("key==='movimientos'&&String(obj.tipo||'')==='Egreso'", SOURCE)
