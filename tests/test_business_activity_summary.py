@@ -66,5 +66,12 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("if(!ok){db.presupuestos.splice(0,db.presupuestos.length,...old)", BUDGET)
 
 
+
+    def test_dashboard_activity_widget_shows_two_recent_important_events(self):
+        self.assertIn(".sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')))", SOURCE)
+        self.assertIn("recent=items.slice(0,2)", SOURCE)
+        self.assertIn("sme-activity-preview-item", SOURCE)
+        self.assertIn("Todavía no hay movimientos importantes registrados hoy", SOURCE)
+
 if __name__ == "__main__":
     unittest.main()
