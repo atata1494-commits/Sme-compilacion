@@ -45,6 +45,15 @@ class RelationshipAuditTests(unittest.TestCase):
         self.assertIn(("pagos_cuenta","p-orphan","cuenta_id","missing-account"), pairs)
         self.assertIn(("pagos_cuenta","p-orphan","movimiento_id","missing-movement"), pairs)
 
+    def test_missing_spare_parts_request_links_are_reported(self):
+        self.db.execute("""INSERT INTO sme_pedidos_repuestos(id,titulo,cliente_id,vehiculo_id,trabajo_id,created_at_utc,payload_json)
+                          VALUES('pedido-orphan','Pedido','bad-client','bad-vehicle','bad-job','now','{}' )""")
+        findings = AUDIT.audit_connection(self.db)
+        pairs = {(f["source_table"],f["source_id"],f["column"],f["missing_target_id"]) for f in findings}
+        self.assertIn(("sme_pedidos_repuestos","pedido-orphan","cliente_id","bad-client"), pairs)
+        self.assertIn(("sme_pedidos_repuestos","pedido-orphan","vehiculo_id","bad-vehicle"), pairs)
+        self.assertIn(("sme_pedidos_repuestos","pedido-orphan","trabajo_id","bad-job"), pairs)
+
     def test_blank_and_null_optional_references_are_ignored(self):
         self.db.execute("INSERT INTO vehiculos(id,cliente_id,payload_json) VALUES('v-free',NULL,'{}')")
         self.db.execute("INSERT INTO trabajos(id,cliente_id,vehiculo_id,payload_json) VALUES('w-free','','','{}')")
