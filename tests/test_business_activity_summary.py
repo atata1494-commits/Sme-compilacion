@@ -29,6 +29,12 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("smeBusinessActivity('Tarea creada',t.titulo+", SOURCE)
         self.assertIn("smeBusinessActivity('Tarea · '+smeTaskStateLabel(next)", SOURCE)
 
+    def test_attendance_actions_are_logged_for_admin_summary(self):
+        self.assertIn("Control horario · "+ "punchLabel", SOURCE)
+        self.assertIn("Horario laboral actualizado", SOURCE)
+        self.assertIn("Excepción de horario configurada", SOURCE)
+        self.assertIn("Registro horario corregido", SOURCE)
+
     def test_budget_module_reports_successful_create_or_update(self):
         self.assertIn("activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label", BUDGET)
         self.assertIn("if(!ok){db.presupuestos.splice(0,db.presupuestos.length,...old)", BUDGET)
