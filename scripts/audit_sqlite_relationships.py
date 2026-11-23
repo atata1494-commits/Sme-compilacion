@@ -30,6 +30,9 @@ RELATIONS = (
     ("pagos_cuenta", "cuenta_id", "cuentas", "id"),
     ("pagos_cuenta", "movimiento_id", "movimientos", "id"),
     ("trabajos_externos", "tercero_id", "terceros", "id"),
+    ("sme_pedidos_repuestos", "cliente_id", "clientes", "id"),
+    ("sme_pedidos_repuestos", "vehiculo_id", "vehiculos", "id"),
+    ("sme_pedidos_repuestos", "trabajo_id", "trabajos", "id"),
 )
 
 def audit_connection(connection: sqlite3.Connection) -> list[dict]:
