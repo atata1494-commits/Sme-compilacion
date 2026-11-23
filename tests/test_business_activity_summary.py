@@ -42,6 +42,14 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("Rendición verificada", SOURCE)
         self.assertIn("recordId:g.id,status:'pendiente'", SOURCE)
 
+    def test_parts_orders_and_workshop_restock_are_logged(self):
+        self.assertIn("Pedido de repuestos creado", SOURCE)
+        self.assertIn("Reposición del taller solicitada", SOURCE)
+        self.assertIn("Pedido de repuestos actualizado", SOURCE)
+        self.assertIn("Reposición actualizada", SOURCE)
+        self.assertIn("Pedido de repuestos finalizado", SOURCE)
+        self.assertIn("Reposición finalizada", SOURCE)
+
     def test_budget_module_reports_successful_create_or_update(self):
         self.assertIn("activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label", BUDGET)
         self.assertIn("if(!ok){db.presupuestos.splice(0,db.presupuestos.length,...old)", BUDGET)
