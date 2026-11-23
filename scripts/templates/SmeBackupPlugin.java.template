@@ -327,7 +327,7 @@ public final class SmeBackupPlugin extends Plugin {
         File incoming = new File(parent, DATABASE_FILE + ".restore");
         File previous = new File(parent, DATABASE_FILE + ".pre-restore");
         File safety = new File(new File(getContext().getFilesDir(), "SME/restore-safety"),
-            "SME-pre-restauracion-" + new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + ".db");
+            "SME-pre-restauracion-" + new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT).format(new Date()) + "-" + UUID.randomUUID().toString().substring(0, 8) + ".db");
         boolean movedOriginal = false;
         try {
             validateDatabase(staged);
