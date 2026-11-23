@@ -833,7 +833,7 @@ function gastoPage(){
   if(taskId&&!tasks.some(t=>String(t.id)===taskId)){smeFormError(form,'Elegí una tarea válida.','tareaId');return}
   const before=JSON.stringify(db),now=new Date().toISOString(),g={id:newRecordId(),avisoId:noticeId||'',tareaId:taskId||'',solicitanteUsuarioId:uid,concepto,proveedor:String(fd.get('proveedor')||'').trim(),importeEstimado:amount,importeFinal:null,estado:'pendiente',autorizadorUsuarioId:'',autorizacionAt:'',limiteAutorizado:null,condicionesAutorizacion:'',ejecutorUsuarioId:'',ejecutadaAt:'',comprobanteRef:'',verificadorUsuarioId:'',verificadaAt:'',motivoDecision:'',createdAt:now,updatedAt:now,historial:[]};
   smePushHistory(g,'solicitada','',g.estado,'Importe estimado: $ '+money(amount));db.solicitudesGasto.push(g);
-  if(!(await save())){db=JSON.parse(before);smeFormError(form,'No se pudo guardar. El formulario quedó abierto para corregir o reintentar.');return}gastoPage();
+  if(!(await save())){db=JSON.parse(before);smeFormError(form,'No se pudo guardar. El formulario quedó abierto para corregir o reintentar.');return}smeBusinessActivity('Solicitud de gasto enviada · Pendiente de autorización',g.concepto+' · Solicitó: '+smeUserLabel(g.solicitanteUsuarioId)+' · Estimado: $ '+money(g.importeEstimado)+(g.proveedor?' · Proveedor: '+g.proveedor:''),{severity:'attention',requiresAttention:true,category:'gastos',recordId:g.id,status:'pendiente'});gastoPage();
  });
  app.querySelectorAll('[data-gasto-action]').forEach(btn=>btn.addEventListener('click',async()=>{
   const g=(db.solicitudesGasto||[]).find(x=>String(x.id)===String(btn.dataset.id));if(!g||!smeCan('gastos','edit'))return;
@@ -851,7 +851,7 @@ function gastoPage(){
   }else if(action==='verify'&&previous==='ejecutada'&&admin){
    reason=String(await smeStyledPrompt('Observación de la rendición (opcional):')||'').trim();g.estado='rendida';g.verificadorUsuarioId=uid;g.verificadaAt=now;g.motivoDecision=reason||g.motivoDecision;
   }else return;
-  smePushHistory(g,action,previous,g.estado,reason);if(!(await save())){db=JSON.parse(before);return}gastoPage();
+  smePushHistory(g,action,previous,g.estado,reason);if(!(await save())){db=JSON.parse(before);return}const actionLabels={approve:'Gasto autorizado',reject:'Solicitud de gasto rechazada',execute:'Compra realizada · Pendiente de rendición',verify:'Rendición verificada'};const needsAttention=['aprobada','ejecutada'].includes(g.estado);smeBusinessActivity(actionLabels[action]||'Gasto actualizado',g.concepto+' · Estado: '+smeSpendStateLabel(g.estado)+' · Solicitante: '+smeUserLabel(g.solicitanteUsuarioId)+(g.importeFinal!==null&&g.importeFinal!==undefined?' · Final: $ '+money(g.importeFinal):g.limiteAutorizado?' · Autorizado hasta: $ '+money(g.limiteAutorizado):'')+(reason?' · '+reason:''),{severity:needsAttention?'attention':'important',requiresAttention:needsAttention,category:'gastos',recordId:g.id,status:needsAttention?'pendiente':'informativo',previous:smeSpendStateLabel(previous),current:smeSpendStateLabel(g.estado)});gastoPage();
  }));
 }
 
