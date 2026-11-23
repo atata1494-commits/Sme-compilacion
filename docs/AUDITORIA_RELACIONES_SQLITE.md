@@ -40,3 +40,12 @@ python scripts/audit_sqlite_data_quality.py /ruta/a/sme_tallerSQLite.db
 ```
 
 Esta herramienta de solo lectura marca duplicados normalizados en documentos de clientes, patentes, números de trabajo y presupuestos, y campos vacíos de nombre de cliente, patente o estado de trabajo. Son alertas para revisión manual, no errores definitivos ni correcciones automáticas.
+
+
+## Clasificación de alertas de calidad
+
+La auditoría complementaria ordena resultados por gravedad:
+- **Alta:** documentos de clientes duplicados y patentes duplicadas (pueden afectar identidad/relaciones).
+- **Media:** números de trabajo o presupuesto duplicados y campos vacíos revisados.
+
+Cada alerta incluye una recomendación de revisión manual. La clasificación es orientativa: no significa que el dato esté definitivamente mal ni autoriza cambios automáticos. El reporte muestra primero el resumen de cantidades y luego las alertas ordenadas por gravedad.
