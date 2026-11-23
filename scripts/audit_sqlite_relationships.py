@@ -15,6 +15,7 @@ RELATIONS = (
     ("movimientos", "trabajo_id", "trabajos", "id"),
     ("movimientos", "cliente_id", "clientes", "id"),
     ("movimientos", "cuenta_id", "cuentas", "id"),
+    ("movimientos", "pago_id", "pagos_cuenta", "id"),
     ("eventos", "trabajo_id", "trabajos", "id"),
     ("eventos", "cliente_id", "clientes", "id"),
     ("eventos", "vehiculo_id", "vehiculos", "id"),
@@ -26,6 +27,8 @@ RELATIONS = (
     ("diagnosticos", "vehiculo_id", "vehiculos", "id"),
     ("cuentas", "trabajo_id", "trabajos", "id"),
     ("cuentas", "cliente_id", "clientes", "id"),
+    ("pagos_cuenta", "cuenta_id", "cuentas", "id"),
+    ("pagos_cuenta", "movimiento_id", "movimientos", "id"),
     ("trabajos_externos", "tercero_id", "terceros", "id"),
 )
 
