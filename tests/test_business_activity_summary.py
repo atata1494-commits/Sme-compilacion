@@ -77,5 +77,11 @@ class BusinessActivitySummaryTests(unittest.TestCase):
     def test_html_file_ends_cleanly_after_document_closing(self):
         self.assertTrue(SOURCE.rstrip().endswith("</html>"), "HTML debe terminar en el cierre del documento, sin código sobrante")
 
+    def test_activity_page_supports_filtering_by_module(self):
+        self.assertIn('modules=[...new Set(logs.map(x=>x.category||x.page||\'General\').filter(Boolean))].sort()', SOURCE)
+        self.assertIn('id="smeActivityModule"', SOURCE)
+        self.assertIn('(!m||(x.category||x.page||\'General\')===m)', SOURCE)
+        self.assertIn("'smeActivityModule'", SOURCE)
+
 if __name__ == "__main__":
     unittest.main()
