@@ -15,7 +15,7 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("status:options.status||(options.requiresAttention?'pendiente':'informativo')", SOURCE)
 
     def test_activity_widget_excludes_generic_save_and_navigation_noise(self):
-        self.assertIn("x.kind==='business'&&String(x.time||'').slice(0,10)===today", SOURCE)
+        self.assertIn("x.kind==='business'&&smeActivityLocalDate(x.time)===today", SOURCE)
         self.assertNotIn("action:'Guardado de datos',detail:'La base de datos local confirmó el guardado.'", SOURCE)
         self.assertNotIn("smeActivityWrite({id:newRecordId(),time:new Date().toISOString(),userId:", SOURCE)
 
