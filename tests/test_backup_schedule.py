@@ -228,3 +228,31 @@ class BackupScheduleSourceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+    def test_native_worker_uses_the_same_sqlite_filename_as_restore_plugin(self):
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        storage = (ROOT / "src/storage/sqlite-store.js").read_text(encoding="utf-8")
+        database_name = "sme_tallerSQLite.db"
+        self.assertIn('getDatabasePath("' + database_name + '")', worker)
+        self.assertIn('DATABASE_FILE = "' + database_name + '"', plugin)
+        self.assertIn("const DATABASE_NAME = 'sme_taller';", storage)
+        self.assertIn(database_name, worker)
+        self.assertIn(database_name, plugin)
+
+    def test_native_worker_and_manual_restore_validate_same_required_tables(self):
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        required = ["schema_migrations", "app_metadata", "clientes", "vehiculos", "trabajos",
+                    "presupuestos", "movimientos", "eventos", "recepciones", "diagnosticos",
+                    "cuentas", "pagos_cuenta", "adjuntos", "cambios_sync", "cambios_recibidos",
+                    "paquetes_intercambio", "conflictos_sync", "asistencias", "terceros",
+                    "trabajos_externos", "config_horarios", "sme_tareas", "sme_avisos",
+                    "sme_solicitudes_gasto", "sme_pedidos_repuestos", "sme_auditoria",
+                    "sme_tarea_eventos", "sme_aviso_derivaciones", "sme_tarea_dependencias",
+                    "sme_permisos_usuario"]
+        for table in required:
+            with self.subTest(table=table):
+                self.assertIn('"' + table + '"', worker)
+                self.assertIn('"' + table + '"', plugin)
