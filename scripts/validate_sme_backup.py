@@ -90,7 +90,7 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 def main()->int:
-    ap=argparse.Argument_parser(description=__doc__)
+    ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("backup",type=Path)
     args=ap.parse_args()
     issues=validate_backup(args.backup)
