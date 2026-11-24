@@ -57,5 +57,5 @@ def main():
         print(json.dumps({"status":"BLOCKED","error":str(e)},ensure_ascii=False,indent=2)); return 1
     out=json.dumps(report,ensure_ascii=False,indent=2); print(out)
     if a.report: a.report.write_text(out,encoding="utf-8")
-    return 0
+    return 2 if report["status"]=="BLOCKED" else 0
 if __name__=="__main__": raise SystemExit(main())
