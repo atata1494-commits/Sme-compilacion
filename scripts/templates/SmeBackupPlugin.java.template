@@ -315,6 +315,57 @@ public final class SmeBackupPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void recoverInterruptedRestore(PluginCall call) {
+        File database = getContext().getDatabasePath(DATABASE_FILE);
+        File parent = database.getParentFile();
+        File previous = new File(parent, DATABASE_FILE + ".pre-restore");
+        try {
+            if (!previous.isFile()) {
+                if (database.isFile()) validateDatabase(database);
+                JSObject unchanged = new JSObject();
+                unchanged.put("recovered", false);
+                unchanged.put("status", database.isFile() ? "database_valid" : "no_interrupted_restore");
+                call.resolve(unchanged);
+                return;
+            }
+            boolean currentValid = false;
+            if (database.isFile()) {
+                try {
+                    validateDatabase(database);
+                    currentValid = true;
+                } catch (Exception invalidCurrent) {
+                    android.util.Log.w("SMEBackup", "La base activa quedó inválida durante una restauración interrumpida.", invalidCurrent);
+                }
+            }
+            if (currentValid) {
+                if (!previous.delete()) android.util.Log.w("SMEBackup", "Se conserva la base anterior temporal para revisión.");
+                JSObject kept = new JSObject();
+                kept.put("recovered", false);
+                kept.put("status", "new_database_valid_previous_retained");
+                call.resolve(kept);
+                return;
+            }
+            validateDatabase(previous);
+            if (database.exists() && !database.delete()) {
+                throw new IllegalStateException("No se pudo apartar la base incompleta para recuperar la anterior.");
+            }
+            if (!previous.renameTo(database)) {
+                throw new IllegalStateException("No se pudo recuperar la base anterior después de una interrupción.");
+            }
+            JSObject recovered = new JSObject();
+            JSObject stats = validateDatabase(database);
+            recovered.put("recovered", true);
+            recovered.put("status", "previous_database_restored");
+            recovered.put("clientCount", stats.getInt("clientCount"));
+            recovered.put("vehicleCount", stats.getInt("vehicleCount"));
+            recovered.put("workCount", stats.getInt("workCount"));
+            call.resolve(recovered);
+        } catch (Exception error) {
+            call.reject("SME detectó una restauración interrumpida y no pudo completar la recuperación automática. Conservá los archivos internos y no inicialices una base nueva. Detalle: " + error.getMessage(), error);
+        }
+    }
+
+    @PluginMethod
     public void commitRestore(PluginCall call) {
         String token = call.getString("token", "");
         File staged = stagedFile(token);
