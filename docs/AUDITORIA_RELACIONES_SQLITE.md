@@ -125,3 +125,20 @@ python scripts/diagnose_sme.py /ruta/a/sme_tallerSQLite.db --backup /ruta/al/res
 ```
 
 Consolida resultados y resumen JSON. Es una herramienta de solo lectura; no repara, migra ni restaura. Si falta la base, falla una auditoría o la validación del respaldo informa alertas, el estado general queda `BLOCKED`. Las alertas encontradas se cuentan en el resumen y requieren revisión. Un diagnóstico sin alertas tampoco certifica integridad funcional completa.
+
+
+## Historial de diagnósticos (octava herramienta)
+
+Guarda una revisión JSON por ejecución y compara con la última revisión de la misma base (por nombre de archivo):
+
+```bash
+python scripts/snapshot_sme_audit.py /ruta/a/sme_tallerSQLite.db --history-dir ./sme_audit_history
+```
+
+Opcionalmente, incluye validación del respaldo:
+
+```bash
+python scripts/snapshot_sme_audit.py /ruta/a/sme_tallerSQLite.db --backup /ruta/al/respaldo.zip
+```
+
+Cada snapshot conserva fecha UTC, tamaño, SHA-256, estado, resumen, hallazgos, advertencias y validación del respaldo. La comparación indica si cambió el hash, la cantidad de hallazgos y el estado respecto del snapshot anterior de esa misma base. No compara datos fila por fila ni confirma si los cambios son buenos o malos. Los archivos JSON son acumulativos y no se sobrescriben; si se comparte un directorio entre distintas bases, se aíslan por nombre de archivo. Los tests añadidos aún no están ejecutados en CI.
