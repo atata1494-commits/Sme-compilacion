@@ -23,7 +23,7 @@ class BackupComparisonTests(unittest.TestCase):
             report=mod.compare(old,new)
             self.assertEqual(report["status"],"REQUIRES_MANUAL_REVIEW")
             self.assertEqual(report["row_count_changes"],[{"table":"sample","older_rows":2,"newer_rows":1,"delta":-1}])
-            self.assertFalse(report["tables_missing_in_new"])
+            self.assertFalse(report["tables_missing_in_new"])\n            self.assertFalse(report["tables_empty_in_new"])
     def test_detects_removed_and_added_tables(self):
         with tempfile.TemporaryDirectory() as td:
             old=Path(td)/"old.db"; new=Path(td)/"new.db"
