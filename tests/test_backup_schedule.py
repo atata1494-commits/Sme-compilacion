@@ -255,6 +255,12 @@ class BackupScheduleSourceTests(unittest.TestCase):
                 self.assertIn('"' + table + '"', plugin)
 
 
+    def test_restore_safety_copy_is_verified_byte_for_byte_with_sha256(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("sha256File(safety).equals(sha256File(database))", plugin)
+        self.assertIn("private static String sha256File(File file)", plugin)
+        self.assertIn("digest.update(buffer, 0, count)", plugin)
+
     def test_restore_safety_copy_names_are_collision_resistant(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         self.assertIn('new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT)', plugin)
