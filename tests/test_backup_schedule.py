@@ -315,5 +315,30 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("if(storageClosed)location.reload();", SOURCE)
 
 
+    def test_manual_restore_retention_is_isolated_from_automatic_daily_and_monthly_backups(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        worker = (ROOT / "scripts/templates/SmeBackupWorker.java.template").read_text(encoding="utf-8")
+        restore_start = plugin.index("public void commitRestore(PluginCall call)")
+        restore_end = plugin.index("private File stagedFile(String token)", restore_start)
+        restore = plugin[restore_start:restore_end]
+        safety_start = plugin.index("private static void pruneSafetyCopies(")
+        safety_end = plugin.index("private static String sha256File(", safety_start)
+        safety_prune = plugin[safety_start:safety_end]
+
+        # La restauración manual solo administra la base SQLite y sus copias internas;
+        # no debe borrar ni podar los archivos publicados en Documents/SME/Respaldos.
+        self.assertIn('"SME/restore-safety"', restore)
+        self.assertNotIn("RELATIVE_FOLDER", restore)
+        self.assertNotIn("DAILY_PREFIX", restore)
+        self.assertNotIn("MONTHLY_PREFIX", restore)
+        self.assertNotIn("MediaStore", restore)
+        self.assertIn('name.startsWith("SME-pre-restauracion-")', safety_prune)
+        self.assertIn('name.endsWith(".db")', safety_prune)
+        self.assertIn('"SME-auto-diario-"', worker)
+        self.assertIn('"SME-historico-mensual-"', worker)
+        self.assertIn("prune(DAILY_PREFIX, 7)", worker)
+        self.assertIn("prune(MONTHLY_PREFIX, 60)", worker)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
