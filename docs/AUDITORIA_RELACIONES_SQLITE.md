@@ -73,3 +73,14 @@ Valida JSON, SQLite y ZIP en controles estructurales, CRC, rutas inseguras, JSON
 
 ### Límites preventivos ZIP (actualización)
 Antes de leer el contenido de un ZIP, el validador inspecciona sus metadatos y aplica límites: máximo 1000 entradas, 128 MiB por entrada y 256 MiB de tamaño total descomprimido. Si alguno se excede, detiene la inspección del ZIP sin inflarlo. También rechaza rutas de traversal y tipos de archivo especiales (como symlinks). Estos límites reducen riesgos de archivos comprimidos maliciosos o desproporcionados; no reemplazan una revisión del origen del respaldo.
+
+
+## Vista previa de recuperación (quinta herramienta)
+
+Ejecutar:
+```bash
+python scripts/preview_sme_recovery.py /ruta/al/respaldo.zip
+```
+
+Genera un inventario sin extracción: archivos incluidos, claves/estructura básica de JSON y, cuando Python lo permite, tablas SQLite con cantidad de registros y esquema. Para ZIP usa límites preventivos de entrada/total, rechaza rutas inseguras y tipos especiales, y verifica CRC antes de inspeccionar contenidos. Es una vista previa de diagnóstico; no escribe archivos, no restaura y no se conecta a la base activa. Aún no está integrada al flujo de restauración de Android.
+
