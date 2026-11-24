@@ -34,11 +34,13 @@ def compare(old_path: Path, new_path: Path):
         before=old["tables"][name]["rows"]; after=new["tables"][name]["rows"]
         if before != after:
             row_changes.append({"table":name,"older_rows":before,"newer_rows":after,"delta":after-before})
+    tables_empty_in_new=sorted(n for n in new_names if new["tables"][n]["rows"]==0)
     issues=[]
     if old["integrity"]!="ok": issues.append(f"Integridad del respaldo anterior: {old['integrity']}")
     if new["integrity"]!="ok": issues.append(f"Integridad del respaldo nuevo: {new['integrity']}")
     if missing: issues.append("Hay tablas que estaban en el respaldo anterior y faltan en el nuevo.")
     if schema_changed: issues.append("Hay cambios de esquema que requieren revisión.")
+    if tables_empty_in_new: issues.append("Hay tablas vacías en el respaldo nuevo; revisar si es esperado.")
     status="BLOCKED" if old["integrity"]!="ok" or new["integrity"]!="ok" else "REQUIRES_MANUAL_REVIEW"
     return {"status":status,"older_backup":str(old_path),"newer_backup":str(new_path),
       "older_integrity":old["integrity"],"newer_integrity":new["integrity"],
