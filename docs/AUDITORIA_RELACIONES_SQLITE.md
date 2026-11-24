@@ -108,3 +108,20 @@ Compara dos SQLite en modo solo lectura: integridad, tablas presentes/ausentes, 
 **Control adicional:** si alguna de las dos bases no supera `PRAGMA integrity_check`, el comparador ahora informa `BLOCKED` y devuelve código de salida 2; no debe considerarse apta para revisión normal hasta resolver el problema de integridad. El resultado `REQUIRES_MANUAL_REVIEW` sigue sin certificar que el respaldo esté completo.
 
 **Alerta específica de tablas vacías:** el comparador ahora lista `tables_empty_in_new` cuando una tabla tenía registros en la copia anterior y aparece con cero registros en la nueva. Es una señal para investigar (no prueba pérdida: puede ser una limpieza legítima).
+
+
+## Diagnóstico unificado (séptima herramienta)
+
+Para ejecutar en una sola pasada las auditorías de relaciones, calidad de datos y finanzas:
+
+```bash
+python scripts/diagnose_sme.py /ruta/a/sme_tallerSQLite.db
+```
+
+Opcionalmente, validar también un respaldo:
+
+```bash
+python scripts/diagnose_sme.py /ruta/a/sme_tallerSQLite.db --backup /ruta/al/respaldo.zip --report diagnostico.json
+```
+
+Consolida resultados y resumen JSON. Es una herramienta de solo lectura; no repara, migra ni restaura. Si falta la base, falla una auditoría o la validación del respaldo informa alertas, el estado general queda `BLOCKED`. Las alertas encontradas se cuentan en el resumen y requieren revisión. Un diagnóstico sin alertas tampoco certifica integridad funcional completa.
