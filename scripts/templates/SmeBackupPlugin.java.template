@@ -319,9 +319,13 @@ public final class SmeBackupPlugin extends Plugin {
         File database = getContext().getDatabasePath(DATABASE_FILE);
         File parent = database.getParentFile();
         File previous = new File(parent, DATABASE_FILE + ".pre-restore");
+        File incoming = new File(parent, DATABASE_FILE + ".restore");
         try {
             if (!previous.isFile()) {
-                if (database.isFile()) validateDatabase(database);
+                if (database.isFile()) {
+                    validateDatabase(database);
+                    deleteOrphanIncoming(incoming);
+                }
                 JSObject unchanged = new JSObject();
                 unchanged.put("recovered", false);
                 unchanged.put("status", database.isFile() ? "database_valid" : "no_interrupted_restore");
@@ -339,6 +343,7 @@ public final class SmeBackupPlugin extends Plugin {
             }
             if (currentValid) {
                 if (!previous.delete()) android.util.Log.w("SMEBackup", "Se conserva la base anterior temporal para revisión.");
+                deleteOrphanIncoming(incoming);
                 JSObject kept = new JSObject();
                 kept.put("recovered", false);
                 kept.put("status", "new_database_valid_previous_retained");
@@ -354,6 +359,7 @@ public final class SmeBackupPlugin extends Plugin {
             }
             JSObject recovered = new JSObject();
             JSObject stats = validateDatabase(database);
+            deleteOrphanIncoming(incoming);
             recovered.put("recovered", true);
             recovered.put("status", "previous_database_restored");
             recovered.put("clientCount", stats.getInt("clientCount"));
@@ -362,6 +368,13 @@ public final class SmeBackupPlugin extends Plugin {
             call.resolve(recovered);
         } catch (Exception error) {
             call.reject("SME detectó una restauración interrumpida y no pudo completar la recuperación automática. Conservá los archivos internos y no inicialices una base nueva. Detalle: " + error.getMessage(), error);
+        }
+    }
+
+
+    private static void deleteOrphanIncoming(File incoming) {
+        if (incoming != null && incoming.isFile() && !incoming.delete()) {
+            android.util.Log.w("SMEBackup", "No se pudo limpiar el archivo temporal de una restauración interrumpida.");
         }
     }
 
