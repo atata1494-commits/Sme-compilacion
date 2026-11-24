@@ -377,6 +377,9 @@ public final class SmeBackupPlugin extends Plugin {
             if (previous.exists() && !previous.delete()) {
                 android.util.Log.w("SMEBackup", "Se conservó la base anterior temporal en " + previous.getAbsolutePath());
             }
+            // Mantener las cinco copias internas más recientes. La limpieza ocurre
+            // únicamente después de validar la base restaurada; nunca en un fallo.
+            pruneSafetyCopies(safety.getParentFile(), safety, 5);
             if (staged.exists()) staged.delete();
             JSObject response = new JSObject();
             response.put("success", true);
@@ -498,6 +501,20 @@ public final class SmeBackupPlugin extends Plugin {
         while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
     }
 
+
+
+    private static void pruneSafetyCopies(File directory, File current, int keep) {
+        if (directory == null || !directory.isDirectory() || keep < 1) return;
+        File[] files = directory.listFiles((dir, name) ->
+            name.startsWith("SME-pre-restauracion-") && name.endsWith(".db") && !name.equals(current.getName()));
+        if (files == null || files.length <= keep - 1) return;
+        java.util.Arrays.sort(files, (left, right) -> Long.compare(right.lastModified(), left.lastModified()));
+        for (int i = keep - 1; i < files.length; i++) {
+            if (files[i].isFile() && !files[i].delete()) {
+                android.util.Log.w("SMEBackup", "No se pudo limpiar una copia interna antigua: " + files[i].getName());
+            }
+        }
+    }
 
     private static String sha256File(File file) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
