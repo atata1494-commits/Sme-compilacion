@@ -44,7 +44,7 @@ def compare(old_path: Path, new_path: Path):
       "older_integrity":old["integrity"],"newer_integrity":new["integrity"],
       "older_schema_sha256":old["schema_sha256"],"newer_schema_sha256":new["schema_sha256"],
       "tables_missing_in_new":missing,"tables_added_in_new":added,"schema_changed":schema_changed,
-      "row_count_changes":row_changes,"warnings":issues,
+      "row_count_changes":row_changes,"tables_empty_in_new":tables_empty_in_new,"warnings":issues,
       "notice":"Comparación de inventario solamente: no compara contenido fila por fila, no determina cuál respaldo es correcto y no modifica/restaura bases."}
 
 def main():
