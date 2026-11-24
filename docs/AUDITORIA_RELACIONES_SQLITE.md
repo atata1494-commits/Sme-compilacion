@@ -142,3 +142,7 @@ python scripts/snapshot_sme_audit.py /ruta/a/sme_tallerSQLite.db --backup /ruta/
 ```
 
 Cada snapshot conserva fecha UTC, tamaño, SHA-256, estado, resumen, hallazgos, advertencias y validación del respaldo. La comparación indica si cambió el hash, la cantidad de hallazgos y el estado respecto del snapshot anterior de esa misma base. No compara datos fila por fila ni confirma si los cambios son buenos o malos. Los archivos JSON son acumulativos y no se sobrescriben; si se comparte un directorio entre distintas bases, se aíslan por nombre de archivo. Los tests añadidos aún no están ejecutados en CI.
+
+
+### Diferencias detalladas entre alertas (mejora)
+Además de los conteos globales, los snapshots ahora intentan comparar cada alerta por su contenido normalizado y clasificarla como `new` (apareció), `resolved` (ya no aparece) o `persistent` (continúa). La comparación es textual/estructural de los objetos de alerta: cambios en campos o mensajes pueden hacer que una alerta se clasifique como nueva y otra como resuelta. Esto es una ayuda de seguimiento, no una identificación semántica infalible.
