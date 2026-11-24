@@ -106,3 +106,5 @@ python scripts/compare_sme_backups.py respaldo_anterior.db respaldo_nuevo.db
 Compara dos SQLite en modo solo lectura: integridad, tablas presentes/ausentes, cambios de esquema y cantidades de filas por tabla. Puede guardar el JSON con `--report informe.json`. No compara los datos fila por fila ni determina cuál copia es la correcta; cualquier diferencia requiere revisión manual. Nunca modifica ni restaura bases.
 
 **Control adicional:** si alguna de las dos bases no supera `PRAGMA integrity_check`, el comparador ahora informa `BLOCKED` y devuelve código de salida 2; no debe considerarse apta para revisión normal hasta resolver el problema de integridad. El resultado `REQUIRES_MANUAL_REVIEW` sigue sin certificar que el respaldo esté completo.
+
+**Alerta específica de tablas vacías:** el comparador ahora lista `tables_empty_in_new` cuando una tabla tenía registros en la copia anterior y aparece con cero registros en la nueva. Es una señal para investigar (no prueba pérdida: puede ser una limpieza legítima).
