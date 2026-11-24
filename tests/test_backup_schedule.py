@@ -261,6 +261,16 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("private static String sha256File(File file)", plugin)
         self.assertIn("digest.update(buffer, 0, count)", plugin)
 
+    def test_restore_safety_copy_retention_keeps_five_and_runs_only_after_success(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("pruneSafetyCopies(safety.getParentFile(), safety, 5)", plugin)
+        self.assertIn('name.startsWith("SME-pre-restauracion-")', plugin)
+        self.assertIn('name.endsWith(".db")', plugin)
+        self.assertIn("Long.compare(right.lastModified(), left.lastModified())", plugin)
+        self.assertLess(plugin.index("finalStats = validateDatabase(database)"),
+                        plugin.index("pruneSafetyCopies(safety.getParentFile(), safety, 5)"))
+        self.assertIn("i = keep - 1", plugin)
+
     def test_restore_safety_copy_names_are_collision_resistant(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         self.assertIn('new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT)', plugin)
