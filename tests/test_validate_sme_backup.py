@@ -1,5 +1,5 @@
 """Tests for the non-destructive backup validator."""
-import importlib.util,json,sqlite3,tempfile,zipfile
+import importlib.util,json,sqlite3,tempfile,zipfile\nfrom types import SimpleNamespace
 from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
@@ -22,6 +22,14 @@ class BackupValidatorTests(unittest.TestCase):
   p=self.dir/"unsafe.zip"
   with zipfile.ZipFile(p,"w") as z: z.writestr("../escape.json",'{"x":1}')
   self.assertTrue(any("Ruta insegura" in x for x in MOD.validate_backup(p)))
+ def test_zip_preflight_limits_entry_size(self):
+  info=SimpleNamespace(filename="huge.json",file_size=MOD.MAX_ZIP_MEMBER_BYTES+1,
+   is_dir=lambda:False,external_attr=0,flag_bits=0)
+  self.assertTrue(any("Entrada demasiado grande" in x for x in MOD.zip_preflight([info])))
+ def test_zip_preflight_limits_entry_count(self):
+  infos=[SimpleNamespace(filename=f"f{i}.txt",file_size=0,is_dir=lambda:False,external_attr=0,flag_bits=0)
+   for i in range(MOD.MAX_ZIP_ENTRIES+1)]
+  self.assertTrue(any("máximo de entradas" in x for x in MOD.zip_preflight(infos)))
  def test_sqlite_integrity(self):
   p=self.dir/"snapshot.db"; con=sqlite3.connect(p); con.execute("CREATE TABLE demo(id)"); con.close()
   self.assertEqual(MOD.validate_backup(p),[])
