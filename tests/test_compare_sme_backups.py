@@ -47,7 +47,20 @@ class BackupComparisonTests(unittest.TestCase):
             before=old.read_bytes()
             mod.compare(old,new)
             self.assertEqual(old.read_bytes(),before)
-    def test_missing_path_raises(self):
+
+    def test_integrity_failure_blocks_review(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as td:
+            old=Path(td)/"old.db"; new=Path(td)/"new.db"
+            for p in (old,new):
+                c=sqlite3.connect(p); c.execute("CREATE TABLE t (id INTEGER)"); c.close()
+            normal=mod.inspect_db(new)
+            damaged=dict(normal); damaged["integrity"]="corrupt"
+            with patch.object(mod,"inspect_db",side_effect=[damaged,normal]):
+                report=mod.compare(old,new)
+            self.assertEqual(report["status"],"BLOCKED")
+            self.assertTrue(any("Integridad" in warning for warning in report["warnings"]))
+\n    def test_missing_path_raises(self):
         with tempfile.TemporaryDirectory() as td:
             with self.assertRaises(FileNotFoundError): mod.inspect_db(Path(td)/"missing.db")
 
