@@ -146,3 +146,14 @@ Cada snapshot conserva fecha UTC, tamaño, SHA-256, estado, resumen, hallazgos, 
 
 ### Diferencias detalladas entre alertas (mejora)
 Además de los conteos globales, los snapshots ahora intentan comparar cada alerta por su contenido normalizado y clasificarla como `new` (apareció), `resolved` (ya no aparece) o `persistent` (continúa). La comparación es textual/estructural de los objetos de alerta: cambios en campos o mensajes pueden hacer que una alerta se clasifique como nueva y otra como resuelta. Esto es una ayuda de seguimiento, no una identificación semántica infalible.
+
+
+## Checklist preventivo de operaciones sensibles (novena herramienta)
+
+Genera una revisión para operaciones de importación, sobrescritura, eliminación o restauración. No ejecuta ni autoriza cambios:
+
+```bash
+python scripts/operation_safety_review.py restore --backup-validated --preview-done --report revision_operacion.json
+```
+
+Las banderas registran controles declarados por quien ejecuta el checklist; no verifican por sí solas que dichos pasos realmente se hayan cumplido. La salida siempre es `REVIEW_ONLY`, y quedan controles pendientes que requieren evaluación humana. La herramienta no accede ni modifica SQLite ni archivos de respaldo.
