@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarda snapshots históricos de diagnósticos SME, sin alterar la base examinada."""
+"""Guarda snapshots históricos de diagnósticos SME y compara alertas, sin alterar la base."""
 from __future__ import annotations
 import argparse, hashlib, importlib.util, json
 from datetime import datetime, timezone
@@ -17,8 +17,24 @@ def load_diagnostics():
     if spec is None or spec.loader is None: raise RuntimeError("No se pudo cargar diagnose_sme.py")
     mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); return mod
 
-def count_findings(report):
-    return sum(len(v) for v in report.get("audits",{}).values() if isinstance(v,list))
+def flatten_findings(audits):
+    items=[]
+    for audit_name, findings in audits.items():
+        if isinstance(findings,list):
+            for finding in findings: items.append({"audit":audit_name,"finding":finding})
+    return items
+
+def finding_signature(item):
+    return json.dumps(item,ensure_ascii=False,sort_keys=True,separators=(",",":"))
+
+def compare_findings(previous_audits,current_audits):
+    old={finding_signature(x) for x in flatten_findings(previous_audits)}
+    new={finding_signature(x) for x in flatten_findings(current_audits)}
+    return {"new":[json.loads(x) for x in sorted(new-old)],
+            "resolved":[json.loads(x) for x in sorted(old-new)],
+            "persistent":[json.loads(x) for x in sorted(old&new)],
+            "new_count":len(new-old),"resolved_count":len(old-new),
+            "persistent_count":len(old&new)}
 
 def history_snapshot(database:Path,history_dir:Path,backup:Path|None=None):
     if not database.is_file(): raise FileNotFoundError(f"No existe la base: {database}")
@@ -27,10 +43,11 @@ def history_snapshot(database:Path,history_dir:Path,backup:Path|None=None):
     snapshot={"schema_version":1,"timestamp_utc":now.isoformat(timespec="seconds"),
               "database_name":database.name,"database_size_bytes":database.stat().st_size,
               "database_sha256":sha256(database),"status":report.get("status"),
-              "summary":report.get("summary",{}),"finding_count":count_findings(report),
+              "summary":report.get("summary",{}),
               "audit_findings":report.get("audits",{}),"warnings":report.get("warnings",[]),
               "backup_validation":report.get("backup_validation"),
               "notice":"Snapshot de diagnóstico. No certifica integridad funcional ni autoriza restauración."}
+    snapshot["finding_count"]=len(flatten_findings(snapshot["audit_findings"]))
     history_dir.mkdir(parents=True,exist_ok=True)
     previous=sorted(history_dir.glob(f"{database.stem}_*.json"))
     previous_data=None
@@ -38,14 +55,16 @@ def history_snapshot(database:Path,history_dir:Path,backup:Path|None=None):
         try: previous_data=json.loads(previous[-1].read_text(encoding="utf-8"))
         except (OSError,json.JSONDecodeError): previous_data=None
     snapshot["comparison"]=None
+    snapshot["finding_changes"]=None
     if previous_data:
+        old_count=int(previous_data.get("finding_count",len(flatten_findings(previous_data.get("audit_findings",{})))))
         snapshot["comparison"]={"previous_file":previous[-1].name,
             "previous_sha256":previous_data.get("database_sha256"),
             "sha_changed":previous_data.get("database_sha256")!=snapshot["database_sha256"],
-            "finding_delta":snapshot["finding_count"]-int(previous_data.get("finding_count",0)),
-            "previous_findings":int(previous_data.get("finding_count",0)),
-            "current_findings":snapshot["finding_count"],
+            "finding_delta":snapshot["finding_count"]-old_count,
+            "previous_findings":old_count,"current_findings":snapshot["finding_count"],
             "status_changed":previous_data.get("status")!=snapshot["status"]}
+        snapshot["finding_changes"]=compare_findings(previous_data.get("audit_findings",{}),snapshot["audit_findings"])
     stamp=now.strftime("%Y%m%dT%H%M%SZ")
     output=history_dir/f"{database.stem}_{stamp}.json"
     counter=1
