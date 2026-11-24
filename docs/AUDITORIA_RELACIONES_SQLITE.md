@@ -84,3 +84,13 @@ python scripts/preview_sme_recovery.py /ruta/al/respaldo.zip
 
 Genera un inventario sin extracción: archivos incluidos, claves/estructura básica de JSON y, cuando Python lo permite, tablas SQLite con cantidad de registros y esquema. Para ZIP usa límites preventivos de entrada/total, rechaza rutas inseguras y tipos especiales, y verifica CRC antes de inspeccionar contenidos. Es una vista previa de diagnóstico; no escribe archivos, no restaura y no se conecta a la base activa. Aún no está integrada al flujo de restauración de Android.
 
+
+
+## Expediente previo a recuperación
+
+El script `scripts/recovery_review_gate.py` genera un expediente JSON con SHA-256 y tamaño de la base actual y del respaldo, validación del respaldo y vista previa. Ejemplo:
+```bash
+python scripts/recovery_review_gate.py base_actual.db respaldo.zip --report revision_previa.json
+```
+
+Los estados son `BLOCKED` cuando hay problemas detectados y `REQUIRES_MANUAL_REVIEW` cuando las comprobaciones automáticas no reportan alertas. **Ninguno de los estados autoriza ni ejecuta una restauración.** No reemplaza ni escribe en la base activa. Los tests añadidos aún requieren ejecución en CI o entorno local antes de considerarse aprobados.
