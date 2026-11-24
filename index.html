@@ -261,6 +261,9 @@ function getWorkOrderDeviceCode(){
 }
 let workOrderDeviceCode;
 try {
+  // Antes de abrir SQLite, recuperar una sustitución que Android pudiera haber
+  // interrumpido entre apartar la base anterior e instalar la nueva.
+  if(Capacitor.isNativePlatform()) await SmeBackup.recoverInterruptedRestore();
   storage=await openSMEStorage(KEY);
   workOrderDeviceCode=getWorkOrderDeviceCode();
   db=await storage.load(emptyDB);
