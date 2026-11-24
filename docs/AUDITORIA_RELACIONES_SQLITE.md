@@ -94,3 +94,13 @@ python scripts/recovery_review_gate.py base_actual.db respaldo.zip --report revi
 ```
 
 Los estados son `BLOCKED` cuando hay problemas detectados y `REQUIRES_MANUAL_REVIEW` cuando las comprobaciones automáticas no reportan alertas. **Ninguno de los estados autoriza ni ejecuta una restauración.** No reemplaza ni escribe en la base activa. Los tests añadidos aún requieren ejecución en CI o entorno local antes de considerarse aprobados.
+
+
+## Comparación de inventario entre respaldos (sexta herramienta)
+
+Ejecutar:
+```bash
+python scripts/compare_sme_backups.py respaldo_anterior.db respaldo_nuevo.db
+```
+
+Compara dos SQLite en modo solo lectura: integridad, tablas presentes/ausentes, cambios de esquema y cantidades de filas por tabla. Puede guardar el JSON con `--report informe.json`. No compara los datos fila por fila ni determina cuál copia es la correcta; cualquier diferencia requiere revisión manual. Nunca modifica ni restaura bases.
