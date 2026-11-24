@@ -342,8 +342,9 @@ public final class SmeBackupPlugin extends Plugin {
                 // No iniciar una restauración si la copia previa no supera las mismas
                 // validaciones que el respaldo entrante.
                 validateDatabase(safety);
-                if (safety.length() != database.length()) {
-                    throw new IllegalStateException("La copia interna previa no coincide en tamaño con la base actual.");
+                if (safety.length() != database.length()
+                    || !sha256File(safety).equals(sha256File(database))) {
+                    throw new IllegalStateException("La copia interna previa no coincide exactamente con la base actual.");
                 }
             }
             if (incoming.exists() && !incoming.delete()) throw new IllegalStateException("No se pudo limpiar un archivo temporal anterior.");
@@ -495,6 +496,20 @@ public final class SmeBackupPlugin extends Plugin {
         byte[] buffer = new byte[64 * 1024];
         int count;
         while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+    }
+
+
+    private static String sha256File(File file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream input = new FileInputStream(file)) {
+            byte[] buffer = new byte[64 * 1024];
+            int count;
+            while ((count = input.read(buffer)) != -1) digest.update(buffer, 0, count);
+        }
+        byte[] hash = digest.digest();
+        StringBuilder out = new StringBuilder(hash.length * 2);
+        for (byte value : hash) out.append(String.format(Locale.ROOT, "%02x", value & 0xff));
+        return out.toString();
     }
 
     private static void copyFile(File source, File destination) throws Exception {
