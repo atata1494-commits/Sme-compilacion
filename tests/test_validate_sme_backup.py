@@ -1,5 +1,6 @@
 """Tests for the non-destructive backup validator."""
-import importlib.util,json,sqlite3,tempfile,zipfile\nfrom types import SimpleNamespace
+import importlib.util,json,sqlite3,tempfile,zipfile
+from types import SimpleNamespace
 from pathlib import Path
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
