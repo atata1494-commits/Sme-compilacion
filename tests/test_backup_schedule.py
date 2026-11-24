@@ -271,6 +271,23 @@ class BackupScheduleSourceTests(unittest.TestCase):
                         plugin.index("pruneSafetyCopies(safety.getParentFile(), safety, 5)"))
         self.assertIn("i = keep - 1", plugin)
 
+    def test_interrupted_restore_recovery_runs_before_sqlite_open(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("public void recoverInterruptedRestore(PluginCall call)", plugin)
+        self.assertIn('DATABASE_FILE + ".pre-restore"', plugin)
+        self.assertIn("validateDatabase(previous)", plugin)
+        self.assertIn("previous.renameTo(database)", plugin)
+        startup = SOURCE.index("await SmeBackup.recoverInterruptedRestore();")
+        open_storage = SOURCE.index("storage=await openSMEStorage(KEY);")
+        self.assertLess(startup, open_storage)
+
+    def test_interrupted_restore_recovery_does_not_replace_a_valid_new_database(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn("if (currentValid)", plugin)
+        self.assertIn('"new_database_valid_previous_retained"', plugin)
+        self.assertIn('"previous_database_restored"', plugin)
+        self.assertIn("SME detectó una restauración interrumpida", plugin)
+
     def test_restore_safety_copy_names_are_collision_resistant(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         self.assertIn('new SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.ROOT)', plugin)
