@@ -15,7 +15,7 @@ def create_db(path):
     con.execute("CREATE TABLE pagos_cuenta (id INTEGER PRIMARY KEY, cuenta_id INTEGER, movimiento_id INTEGER)")
     con.commit(); con.close()
 
-class AuditSnapshotTests(unittest.TestCase):
+class AuditSnapshotTests(unittest.TestCase):\n    def test_finding_diff_detects_new_resolved_and_persistent(self):\n        old={"relaciones":[{"id":1},{"id":2}]}; new={"relaciones":[{"id":2},{"id":3}]}\n        diff=mod.compare_findings(old,new)\n        self.assertEqual(diff["new_count"],1)\n        self.assertEqual(diff["resolved_count"],1)\n        self.assertEqual(diff["persistent_count"],1)\n        self.assertEqual(diff["new"][0]["finding"]["id"],3)\n        self.assertEqual(diff["resolved"][0]["finding"]["id"],1)\n
     def test_two_snapshots_compare_and_database_unchanged(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td); db=root/"sme.db"; history=root/"history"
