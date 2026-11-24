@@ -281,6 +281,14 @@ class BackupScheduleSourceTests(unittest.TestCase):
         open_storage = SOURCE.index("storage=await openSMEStorage(KEY);")
         self.assertLess(startup, open_storage)
 
+    def test_interrupted_restore_cleans_orphaned_staging_file_only_after_database_is_safe(self):
+        plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
+        self.assertIn('DATABASE_FILE + ".restore"', plugin)
+        self.assertIn("deleteOrphanIncoming(incoming)", plugin)
+        self.assertIn("private static void deleteOrphanIncoming(File incoming)", plugin)
+        self.assertIn("if (database.isFile()) {\n                    validateDatabase(database);\n                    deleteOrphanIncoming(incoming);", plugin)
+        self.assertIn("JSObject stats = validateDatabase(database);\n            deleteOrphanIncoming(incoming);", plugin)
+
     def test_interrupted_restore_recovery_does_not_replace_a_valid_new_database(self):
         plugin = (ROOT / "scripts/templates/SmeBackupPlugin.java.template").read_text(encoding="utf-8")
         self.assertIn("if (currentValid)", plugin)
