@@ -262,5 +262,17 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn('SME-pre-restauracion-', plugin)
 
 
+    def test_restore_closes_sqlite_before_swap_and_reloads_afterward(self):
+        close_at = SOURCE.index("await storage.close();", SOURCE.index("const restoreResult=await SmeBackup.commitRestore") - 1200)
+        commit_at = SOURCE.index("SmeBackup.commitRestore({token:selected.token})")
+        success_reload_at = SOURCE.index("location.reload();", commit_at)
+        failure_reload_at = SOURCE.index("if(storageClosed)location.reload();", commit_at)
+        self.assertLess(close_at, commit_at)
+        self.assertLess(commit_at, success_reload_at)
+        self.assertLess(success_reload_at, failure_reload_at)
+        self.assertIn("let selected=null,storageClosed=false;", SOURCE)
+        self.assertIn("if(storageClosed)location.reload();", SOURCE)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
