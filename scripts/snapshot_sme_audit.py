@@ -32,7 +32,7 @@ def history_snapshot(database:Path,history_dir:Path,backup:Path|None=None):
               "backup_validation":report.get("backup_validation"),
               "notice":"Snapshot de diagnóstico. No certifica integridad funcional ni autoriza restauración."}
     history_dir.mkdir(parents=True,exist_ok=True)
-    previous=sorted(history_dir.glob("*.json"))
+    previous=sorted(history_dir.glob(f"{database.stem}_*.json"))
     previous_data=None
     if previous:
         try: previous_data=json.loads(previous[-1].read_text(encoding="utf-8"))
