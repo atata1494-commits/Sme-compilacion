@@ -39,7 +39,8 @@ def compare(old_path: Path, new_path: Path):
     if new["integrity"]!="ok": issues.append(f"Integridad del respaldo nuevo: {new['integrity']}")
     if missing: issues.append("Hay tablas que estaban en el respaldo anterior y faltan en el nuevo.")
     if schema_changed: issues.append("Hay cambios de esquema que requieren revisión.")
-    return {"status":"REQUIRES_MANUAL_REVIEW","older_backup":str(old_path),"newer_backup":str(new_path),
+    status="BLOCKED" if old["integrity"]!="ok" or new["integrity"]!="ok" else "REQUIRES_MANUAL_REVIEW"
+    return {"status":status,"older_backup":str(old_path),"newer_backup":str(new_path),
       "older_integrity":old["integrity"],"newer_integrity":new["integrity"],
       "older_schema_sha256":old["schema_sha256"],"newer_schema_sha256":new["schema_sha256"],
       "tables_missing_in_new":missing,"tables_added_in_new":added,"schema_changed":schema_changed,
