@@ -187,6 +187,40 @@ export async function openSMEStorage(storageKey) {
       },
       async save(snapshot) {
         localStorage.setItem(storageKey, JSON.stringify(snapshot));
+      },
+      async importLegacyActivityEvents(events = []) {
+        const key = 'sme_private_activity_v1';
+        let current = [];
+        try { current = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) {}
+        const byId = new Map((Array.isArray(current) ? current : []).map(item => [String(item.id), item]));
+        for (const event of events) {
+          if (event && event.id != null) byId.set(String(event.id), event);
+        }
+        localStorage.setItem(key, JSON.stringify([...byId.values()].slice(-5000)));
+        return { imported: events.length };
+      },
+      async appendActivityEvent(event) {
+        const key = 'sme_private_activity_v1';
+        let current = [];
+        try { current = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) {}
+        const rows = Array.isArray(current) ? current : [];
+        const now = event.time || new Date().toISOString();
+        if (event.recordId) {
+          for (const item of rows) {
+            if (item.kind === 'business' && String(item.recordId || '') === String(event.recordId) && item.requiresAttention && item.status === 'pendiente') {
+              item.status = 'resuelto'; item.resolvedAt = now;
+            }
+          }
+        }
+        if (!rows.some(item => String(item.id) === String(event.id))) rows.unshift(event);
+        localStorage.setItem(key, JSON.stringify(rows.slice(0, 5000)));
+        return true;
+      },
+      async listActivityEvents() {
+        try {
+          const rows = JSON.parse(localStorage.getItem('sme_private_activity_v1') || '[]');
+          return Array.isArray(rows) ? rows.filter(item => item && item.kind === 'business') : [];
+        } catch (_) { return []; }
       }
     };
   }
@@ -271,6 +305,112 @@ export async function openSMEStorage(storageKey) {
     const result = await connection.run(statement, values, false);
     sqlError(result, 'No se pudo guardar la información');
     return result;
+  }
+
+  function activityRow(event) {
+    const id = ref(event?.id);
+    if (!id) return null;
+    const at = event.time || event.fecha || new Date().toISOString();
+    return [
+      id, 'actividad', String(event.recordId || id),
+      String(event.action || 'Movimiento importante'),
+      String(event.userId || 'sme-legacy'),
+      null, event.previous || null, event.current || null,
+      event.detail || null, JSON.stringify({ ...event, kind: 'business' }), at
+    ];
+  }
+
+  async function insertActivityEvents(events = []) {
+    let imported = 0;
+    for (const event of events) {
+      const values = activityRow(event);
+      if (!values) continue;
+      const result = await run(
+        'INSERT OR IGNORE INTO sme_auditoria (id, entidad_tipo, entidad_id, accion, usuario_id, dispositivo_id, estado_anterior, estado_nuevo, motivo, datos_json, created_at_utc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        values
+      );
+      if (Number(result?.changes?.changes || 0) > 0) imported++;
+    }
+    return imported;
+  }
+
+  async function importLegacyActivityEvents(events = []) {
+    await saveQueue;
+    await connection.beginTransaction();
+    try {
+      const imported = await insertActivityEvents(events);
+      await connection.commitTransaction();
+      return { imported, checked: events.length };
+    } catch (error) {
+      try { await connection.rollbackTransaction(); } catch (_) {}
+      throw error;
+    }
+  }
+
+  async function appendActivityEvent(event) {
+    if (!event || !ref(event.id)) throw new Error('El movimiento de actividad no tiene identificador.');
+    const operation = saveQueue.then(async () => {
+      await connection.beginTransaction();
+      try {
+        const now = event.time || new Date().toISOString();
+        const recordId = ref(event.recordId);
+        if (recordId) {
+          const previousRows = await connection.query(
+            "SELECT id, datos_json FROM sme_auditoria WHERE entidad_tipo = 'actividad' AND entidad_id = ?",
+            [recordId]
+          );
+          for (const row of (previousRows.values || [])) {
+            let previous;
+            try { previous = JSON.parse(row.datos_json || '{}'); } catch (_) { continue; }
+            if (!previous.requiresAttention || previous.status !== 'pendiente') continue;
+            const resolutionId = 'activity-resolved:' + String(row.id) + ':' + String(event.id);
+            const resolution = {
+              id: resolutionId, kind: 'activity_resolution', targetEventId: String(row.id),
+              userId: String(event.userId || 'sme-legacy'),
+              userName: String(event.userName || 'Usuario'), time: now,
+              action: 'Atención resuelta', detail: 'Resuelto por un movimiento posterior del mismo registro.'
+            };
+            await run(
+              'INSERT OR IGNORE INTO sme_auditoria (id, entidad_tipo, entidad_id, accion, usuario_id, dispositivo_id, motivo, datos_json, created_at_utc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+              [resolutionId, 'actividad_resolucion', String(row.id), 'atencion_resuelta', resolution.userId, null, resolution.detail, JSON.stringify(resolution), now]
+            );
+          }
+        }
+        const values = activityRow(event);
+        await run(
+          'INSERT OR IGNORE INTO sme_auditoria (id, entidad_tipo, entidad_id, accion, usuario_id, dispositivo_id, estado_anterior, estado_nuevo, motivo, datos_json, created_at_utc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          values
+        );
+        await connection.commitTransaction();
+        return true;
+      } catch (error) {
+        try { await connection.rollbackTransaction(); } catch (_) {}
+        throw error;
+      }
+    });
+    saveQueue = operation.catch(() => {});
+    return operation;
+  }
+
+  async function listActivityEvents() {
+    await saveQueue;
+    const result = await connection.query(
+      "SELECT id, datos_json FROM sme_auditoria WHERE entidad_tipo IN ('actividad', 'actividad_resolucion') ORDER BY created_at_utc DESC, rowid DESC"
+    );
+    const resolved = new Set();
+    const events = [];
+    for (const row of (result.values || [])) {
+      let data;
+      try { data = JSON.parse(row.datos_json || '{}'); } catch (_) { continue; }
+      if (data.kind === 'activity_resolution' || data.targetEventId) {
+        if (data.targetEventId) resolved.add(String(data.targetEventId));
+      } else if (data.kind === 'business') {
+        events.push({ ...data, id: String(row.id) });
+      }
+    }
+    return events.map(event => resolved.has(String(event.id)) && event.requiresAttention
+      ? { ...event, status: 'resuelto', resolvedAt: event.resolvedAt || null }
+      : event);
   }
 
   async function getDeviceId() {
@@ -992,6 +1132,15 @@ export async function openSMEStorage(storageKey) {
     async prepareSyncPackage() {
       await saveQueue;
       return prepareSyncPackage();
+    },
+    async importLegacyActivityEvents(events = []) {
+      return importLegacyActivityEvents(events);
+    },
+    async appendActivityEvent(event) {
+      return appendActivityEvent(event);
+    },
+    async listActivityEvents() {
+      return listActivityEvents();
     },
     async save(snapshot) {
       const captured = normalizeSnapshot(clone(snapshot), () => Object.fromEntries(COLLECTIONS.map(k => [k, []])));
