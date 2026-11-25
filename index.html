@@ -570,7 +570,7 @@ async function smeActivityEnsureLoaded(){
  if(smeActivityLoadPromise)return smeActivityLoadPromise;
  smeActivityLoadPromise=(async()=>{
   const legacy=smeActivityReadLegacy();
-  if(typeof storage?.importLegacyActivityEvents==='function')await storage.importLegacyActivityEvents(legacy);
+  if(typeof storage?.importLegacyActivityEvents==='function')await storage.importLegacyActivityEvents(legacy.filter(x=>x&&x.kind==='business'));
   smeActivityCache=typeof storage?.listActivityEvents==='function'?await storage.listActivityEvents():legacy.filter(x=>x&&x.kind==='business');
   if(!Array.isArray(smeActivityCache))smeActivityCache=[];
   return smeActivityCache;
