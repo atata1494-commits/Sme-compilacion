@@ -308,6 +308,7 @@ export async function openSMEStorage(storageKey) {
   }
 
   function activityRow(event) {
+    if (event?.kind !== 'business') return null;
     const id = ref(event?.id);
     if (!id) return null;
     const at = event.time || event.fecha || new Date().toISOString();
