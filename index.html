@@ -1648,7 +1648,7 @@ function smeCreatePortableBackup(){
  const owner=smeOwnerAccount();
  const isOwner=!!(smeAuthenticated&&smeCurrentUser&&owner&&smeCurrentUser.isPrimary===true&&String(owner.id)===String(smeCurrentUser.id));
  const users=isOwner&&Array.isArray(smeUsers)?JSON.parse(JSON.stringify(smeUsers)):[];
- return {...db,_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:2,exportedAt:new Date().toISOString(),ownerId:isOwner?String(owner.id):'',users}};
+ return {...db,_smeAuditHistory:smeActivityRead(),_smeBackupMetadata:{appId:'servicios-mecanicos-enzo',formatVersion:3,exportedAt:new Date().toISOString(),ownerId:isOwner?String(owner.id):'',users}};
 }
 function canonicalJSON(value){if(Array.isArray(value))return '['+value.map(canonicalJSON).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonicalJSON(value[k])).join(',')+'}';return JSON.stringify(value)}
 function smeLaborCatalogCanonical(value){if(Array.isArray(value))return '['+value.map(smeLaborCatalogCanonical).join(',')+']';if(value&&typeof value==='object')return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+smeLaborCatalogCanonical(value[k])).join(',')+'}';return JSON.stringify(value)}
