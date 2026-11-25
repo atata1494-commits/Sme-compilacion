@@ -359,10 +359,14 @@ export async function openSMEStorage(storageKey) {
             "SELECT id, datos_json FROM sme_auditoria WHERE entidad_tipo = 'actividad' AND entidad_id = ?",
             [recordId]
           );
+          const resolvedRows = await connection.query(
+            "SELECT entidad_id FROM sme_auditoria WHERE entidad_tipo = 'actividad_resolucion'"
+          );
+          const alreadyResolved = new Set((resolvedRows.values || []).map(row => String(row.entidad_id)));
           for (const row of (previousRows.values || [])) {
             let previous;
             try { previous = JSON.parse(row.datos_json || '{}'); } catch (_) { continue; }
-            if (!previous.requiresAttention || previous.status !== 'pendiente') continue;
+            if (alreadyResolved.has(String(row.id)) || !previous.requiresAttention || previous.status !== 'pendiente') continue;
             const resolutionId = 'activity-resolved:' + String(row.id) + ':' + String(event.id);
             const resolution = {
               id: resolutionId, kind: 'activity_resolution', targetEventId: String(row.id),
@@ -397,19 +401,19 @@ export async function openSMEStorage(storageKey) {
     const result = await connection.query(
       "SELECT id, datos_json FROM sme_auditoria WHERE entidad_tipo IN ('actividad', 'actividad_resolucion') ORDER BY created_at_utc DESC, rowid DESC"
     );
-    const resolved = new Set();
+    const resolved = new Map();
     const events = [];
     for (const row of (result.values || [])) {
       let data;
       try { data = JSON.parse(row.datos_json || '{}'); } catch (_) { continue; }
       if (data.kind === 'activity_resolution' || data.targetEventId) {
-        if (data.targetEventId) resolved.add(String(data.targetEventId));
+        if (data.targetEventId) resolved.set(String(data.targetEventId), data.time || null);
       } else if (data.kind === 'business') {
         events.push({ ...data, id: String(row.id) });
       }
     }
     return events.map(event => resolved.has(String(event.id)) && event.requiresAttention
-      ? { ...event, status: 'resuelto', resolvedAt: event.resolvedAt || null }
+      ? { ...event, status: 'resuelto', resolvedAt: resolved.get(String(event.id)) || event.resolvedAt || null }
       : event);
   }
 
