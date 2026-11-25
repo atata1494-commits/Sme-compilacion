@@ -21,7 +21,10 @@ class BusinessActivitySummaryTests(unittest.TestCase):
 
     def test_pending_attention_panel_uses_unresolved_events_only(self):
         self.assertIn("logs.filter(x=>x.requiresAttention&&x.status==='pendiente')", SOURCE)
-        self.assertIn("x.status='resuelto';x.resolvedAt=now", SOURCE)
+        self.assertIn("await storage.appendActivityEvent(event)", SOURCE)
+        STORE = (ROOT / "src" / "storage" / "sqlite-store.js").read_text(encoding="utf-8")
+        self.assertIn("activity-resolved:", STORE)
+        self.assertIn("INSERT OR IGNORE INTO sme_auditoria", STORE)
         self.assertIn("Requiere atención", SOURCE)
         self.assertIn("Pendiente resuelto", SOURCE)
 
