@@ -61,6 +61,11 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn("Pedido de repuestos finalizado", SOURCE)
         self.assertIn("Reposición finalizada", SOURCE)
 
+    def test_work_order_activity_identifies_status_transition(self):
+        self.assertIn("'Orden de trabajo actualizada · ':'Orden de trabajo creada · ')+(obj.estado||'Pendiente')", SOURCE)
+        self.assertIn("const activityDetail=key==='trabajos'?eventTitle+' · Estado: '+(savedRecord.estado||'Pendiente'):eventTitle", SOURCE)
+        self.assertIn("smeBusinessActivity(businessAction,activityDetail", SOURCE)
+
     def test_budget_module_reports_successful_create_or_update(self):
         self.assertIn("activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label", BUDGET)
         self.assertIn("if(!ok){db.presupuestos.splice(0,db.presupuestos.length,...old)", BUDGET)
