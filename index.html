@@ -559,12 +559,38 @@ function options(items,labelFn,selected){return '<option value="">— Selecciona
 function friendlyDate(value){if(!value)return 'Sin fecha';const m=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(value)}
 function dashboardMetric(icon,label,value,target){const symbol=label.startsWith('Vehículos')?'vehiclesAtWork':label.startsWith('Órdenes')?'activeOrders':label.startsWith('Presupuestos')?'budgetFollowUp':'upcomingAppointment';return '<button class="dashboard-stat" data-go="'+target+'"><span class="stat-icon">'+iconSvg(symbol,29)+'</span><span class="stat-value">'+esc(value)+'</span><span class="stat-label">'+esc(label)+'</span></button>'}
 
-// Registro local de actividad: se limita al dispositivo y queda visible solo para administrador principal.
+// Actividad de negocio: SQLite nativo en Android; localStorage solo como compatibilidad web y origen de migración.
 const SME_ACTIVITY_KEY='sme_private_activity_v1';
+let smeActivityCache=null,smeActivityLoadPromise=null;
 function smeActivityLocalDate(value){const d=new Date(value);if(!value||Number.isNaN(d.getTime()))return '';return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function smeActivityRead(){try{const a=JSON.parse(localStorage.getItem(SME_ACTIVITY_KEY)||'[]');return Array.isArray(a)?a:[]}catch(_){return[]}}
-function smeActivityWrite(entry){try{const a=smeActivityRead();a.unshift(entry);localStorage.setItem(SME_ACTIVITY_KEY,JSON.stringify(a.slice(0,1500)))}catch(error){console.warn('No se pudo guardar el registro local de actividad:',error)}}
-function smeBusinessActivity(action,detail,options={}){if(!smeAuthenticated||!smeCurrentUser)return;const now=new Date().toISOString(),recordId=String(options.recordId||'');if(recordId){const history=smeActivityRead();history.forEach(x=>{if(x.kind==='business'&&String(x.recordId||'')===recordId&&x.requiresAttention&&x.status==='pendiente'){x.status='resuelto';x.resolvedAt=now}});try{localStorage.setItem(SME_ACTIVITY_KEY,JSON.stringify(history.slice(0,1500)))}catch(error){console.warn('No se pudo actualizar el estado del evento:',error)}}smeActivityWrite({id:newRecordId(),time:now,userId:String(smeCurrentUser.id||''),userName:String(smeCurrentUser.name||smeCurrentUser.nombre||smeCurrentUser.username||'Usuario'),page,action:String(action||'Movimiento importante'),detail:String(detail||''),kind:'business',severity:options.severity||'important',requiresAttention:!!options.requiresAttention,status:options.status||(options.requiresAttention?'pendiente':'informativo'),category:options.category||page,recordId,previous:options.previous||'',current:options.current||''})}
+function smeActivityReadLegacy(){try{const a=JSON.parse(localStorage.getItem(SME_ACTIVITY_KEY)||'[]');return Array.isArray(a)?a:[]}catch(_){return[]}}
+function smeActivityRead(){return Array.isArray(smeActivityCache)?smeActivityCache:smeActivityReadLegacy()}
+async function smeActivityEnsureLoaded(){
+ if(Array.isArray(smeActivityCache))return smeActivityCache;
+ if(smeActivityLoadPromise)return smeActivityLoadPromise;
+ smeActivityLoadPromise=(async()=>{
+  const legacy=smeActivityReadLegacy();
+  if(typeof storage?.importLegacyActivityEvents==='function')await storage.importLegacyActivityEvents(legacy);
+  smeActivityCache=typeof storage?.listActivityEvents==='function'?await storage.listActivityEvents():legacy.filter(x=>x&&x.kind==='business');
+  if(!Array.isArray(smeActivityCache))smeActivityCache=[];
+  return smeActivityCache;
+ })().catch(error=>{smeActivityLoadPromise=null;throw error});
+ return smeActivityLoadPromise;
+}
+function smeBusinessActivity(action,detail,options={}){
+ if(!smeAuthenticated||!smeCurrentUser)return;
+ const now=new Date().toISOString(),recordId=String(options.recordId||'');
+ const event={id:newRecordId(),time:now,userId:String(smeCurrentUser.id||''),userName:String(smeCurrentUser.name||smeCurrentUser.nombre||smeCurrentUser.username||'Usuario'),page,action:String(action||'Movimiento importante'),detail:String(detail||''),kind:'business',severity:options.severity||'important',requiresAttention:!!options.requiresAttention,status:options.status||(options.requiresAttention?'pendiente':'informativo'),category:options.category||page,recordId,previous:options.previous||'',current:options.current||''};
+ void (async()=>{
+  try{
+   await smeActivityEnsureLoaded();
+   if(typeof storage?.appendActivityEvent!=='function')throw new Error('El almacenamiento no dispone del registro persistente de actividad.');
+   await storage.appendActivityEvent(event);
+   smeActivityCache=await storage.listActivityEvents();
+   if(page==='inicio'||page==='actividad')render();
+  }catch(error){console.error('No se pudo guardar el movimiento en la auditoría SQLite:',error)}
+ })();
+}
 function smeActivityLabel(target){const el=target.closest('button,[role=button]');if(!el)return '';return String(el.getAttribute('aria-label')||el.innerText||el.textContent||el.dataset.go||el.dataset.page||'Acción').replace(/\\s+/g,' ').trim().slice(0,140)}
 function smeActivityPageLabel(p){return ({inicio:'Inicio',taller:'Taller',gestion:'Gestión',mas:'Más',clientes:'Clientes',vehiculos:'Vehículos',trabajos:'Órdenes de trabajo',presupuestos:'Presupuestos',pedidosRepuestos:'Pedidos de repuestos',repuestosHub:'Repuestos',repuestosPedidos:'Pedidos de repuestos',repuestosReposicion:'Reposición del taller',repuestosListas:'Listas de repuestos',recepciones:'Recepción',diagnosticos:'Diagnósticos',asistencias:'Control horario',terceros:'Trabajos externos',tareas:'Tareas',avisos:'Avisos',gastos:'Autorizaciones de gastos',agenda:'Agenda',caja:'Caja',cuentas:'Cuentas corrientes',usuarios:'Usuarios',respaldos:'Respaldos',conflictos:'Conflictos de sincronización',actividad:'Actividad diaria'})[p]||p}
 function smeActivityWidget(){
@@ -2281,7 +2307,7 @@ let SME_IDLE_TIMEOUT_MS=SME_IDLE_TIMEOUT_SECONDS*1000;
    smeCurrentUser=user;smeSelectedLoginUsername=null;smePrimarySessionUser=null;smeAdminOverride=false;smeAuthenticated=true;
    localStorage.setItem(SME_LAST_ACCOUNT_KEY,user.username);smeRequirePasswordForSwitch(false);
    if(smeAuthOverlay){smeAuthOverlay.remove();smeAuthOverlay=null}
-   page=smeGetResumePage();smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();
+   page=smeGetResumePage();smeResetNavigation();smeUpdateSessionBar();render();smeApplyPermissions();smeResetIdleTimer();smeShowWelcomeIfNeeded();void smeActivityEnsureLoaded().then(()=>{if(page==='inicio'||page==='actividad')render()}).catch(error=>console.error('No se pudo cargar el historial de actividad:',error));
   if(smeCanSeeFaatraReference()){smeRenderFaatraUpdateNotice();void smeCheckFaatraReference()}
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){console.info('Autenticación biométrica cancelada o fallida:',error);const code=error&&error.code;if(code&&/userCancel|systemCancel/i.test(String(code)))return;smeAuthShowInlineError('No se pudo validar la huella. Podés ingresar la contraseña de esta cuenta.','password')}
@@ -2557,7 +2583,7 @@ function smeAuthInlineError(form,message,fieldName='',clearFieldName=''){
    smeUpdateSessionBar();
    render();
    smeResetIdleTimer();
-   smeShowWelcomeIfNeeded();
+   smeShowWelcomeIfNeeded();void smeActivityEnsureLoaded().then(()=>{if(page==='inicio'||page==='actividad')render()}).catch(error=>console.error('No se pudo cargar el historial de actividad:',error));
   if(smeCanSeeFaatraReference()){smeRenderFaatraUpdateNotice();void smeCheckFaatraReference()}
   if(storage?.isNative){void smeRunAutomaticBackups()}
   }catch(error){
