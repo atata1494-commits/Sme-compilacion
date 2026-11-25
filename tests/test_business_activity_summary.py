@@ -92,7 +92,8 @@ class BusinessActivitySummaryTests(unittest.TestCase):
         self.assertIn(".sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')))", SOURCE)
 
     def test_core_records_and_budgets_emit_business_activity_after_save(self):
-        self.assertIn("smeBusinessActivity(businessAction,eventTitle", SOURCE)
+        self.assertIn("smeBusinessActivity(businessAction,activityDetail", SOURCE)
+        self.assertIn("const activityDetail=key==='trabajos'?eventTitle+' · Estado: '", SOURCE)
         self.assertIn("smeActivityPageLabel(key)", SOURCE)
         self.assertIn("activity((editingQuote?'Presupuesto actualizado · ':'Presupuesto creado · ')+label", BUDGET)
         self.assertIn("category:'presupuestos',recordId:quote.id,status:'informativo'", BUDGET)
