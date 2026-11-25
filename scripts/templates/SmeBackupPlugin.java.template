@@ -342,11 +342,14 @@ public final class SmeBackupPlugin extends Plugin {
                 }
             }
             if (currentValid) {
-                if (!previous.delete()) android.util.Log.w("SMEBackup", "Se conserva la base anterior temporal para revisión.");
+                // La base nueva pasó la validación: conservar también la anterior
+                // como red de seguridad. El siguiente restore la apartará de forma
+                // controlada; no borrar esta copia durante la recuperación de inicio.
                 deleteOrphanIncoming(incoming);
                 JSObject kept = new JSObject();
                 kept.put("recovered", false);
                 kept.put("status", "new_database_valid_previous_retained");
+                kept.put("previousDatabaseRetained", true);
                 call.resolve(kept);
                 return;
             }
