@@ -294,6 +294,14 @@ class BackupScheduleSourceTests(unittest.TestCase):
         self.assertIn("if (currentValid)", plugin)
         self.assertIn('"new_database_valid_previous_retained"', plugin)
         self.assertIn('"previous_database_restored"', plugin)
+        recovery_start = plugin.index("public void recoverInterruptedRestore(PluginCall call)")
+        recovery_end = plugin.index("@PluginMethod", recovery_start + 20)
+        recovery = plugin[recovery_start:recovery_end]
+        valid_branch_start = recovery.index("if (currentValid)")
+        valid_branch_end = recovery.index("validateDatabase(previous)", valid_branch_start)
+        valid_branch = recovery[valid_branch_start:valid_branch_end]
+        self.assertIn("previousDatabaseRetained", valid_branch)
+        self.assertNotIn("previous.delete()", valid_branch)
         self.assertIn("SME detectó una restauración interrumpida", plugin)
 
     def test_restore_safety_copy_names_are_collision_resistant(self):
