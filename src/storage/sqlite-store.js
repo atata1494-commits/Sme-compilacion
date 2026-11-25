@@ -336,16 +336,19 @@ export async function openSMEStorage(storageKey) {
   }
 
   async function importLegacyActivityEvents(events = []) {
-    await saveQueue;
-    await connection.beginTransaction();
-    try {
-      const imported = await insertActivityEvents(events);
-      await connection.commitTransaction();
-      return { imported, checked: events.length };
-    } catch (error) {
-      try { await connection.rollbackTransaction(); } catch (_) {}
-      throw error;
-    }
+    const operation = saveQueue.then(async () => {
+      await connection.beginTransaction();
+      try {
+        const imported = await insertActivityEvents(events);
+        await connection.commitTransaction();
+        return { imported, checked: events.length };
+      } catch (error) {
+        try { await connection.rollbackTransaction(); } catch (_) {}
+        throw error;
+      }
+    });
+    saveQueue = operation.catch(() => {});
+    return operation;
   }
 
   async function appendActivityEvent(event) {
